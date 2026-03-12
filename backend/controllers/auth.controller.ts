@@ -22,7 +22,7 @@ export const register = async (req: any, res: any) => {
     const user = await UserModel.create({
       email,
       passwordHash,
-      name: name || '',
+      name: name || email.split('@')[0],
       age: 25,
       isVerified: false,
       isPremium: false,
@@ -35,8 +35,9 @@ export const register = async (req: any, res: any) => {
 
     const token = signToken(user.id);
     res.status(201).json({ token, user, isNew: true });
-  } catch (error) {
-    res.status(500).json({ error: 'Registration failed' });
+  } catch (error: any) {
+    console.error('Registration error:', error.message || error);
+    res.status(500).json({ error: error.message || 'Registration failed' });
   }
 };
 
@@ -57,8 +58,9 @@ export const login = async (req: any, res: any) => {
 
     const token = signToken(user.id);
     res.json({ token, user, isNew: false });
-  } catch (error) {
-    res.status(500).json({ error: 'Login failed' });
+  } catch (error: any) {
+    console.error('Login error:', error.message || error);
+    res.status(500).json({ error: error.message || 'Login failed' });
   }
 };
 
@@ -74,7 +76,7 @@ export const socialLogin = async (req: any, res: any) => {
     if (!user) {
       user = await UserModel.create({
         email,
-        name: name || '',
+        name: name || email.split('@')[0],
         age: 25,
         isVerified: false,
         isPremium: false,
@@ -88,7 +90,8 @@ export const socialLogin = async (req: any, res: any) => {
 
     const token = signToken(user.id);
     res.json({ token, user, isNew });
-  } catch (error) {
-    res.status(500).json({ error: 'Social login failed' });
+  } catch (error: any) {
+    console.error('Social login error:', error.message || error);
+    res.status(500).json({ error: error.message || 'Social login failed' });
   }
 };

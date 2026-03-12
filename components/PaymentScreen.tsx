@@ -40,7 +40,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({ onBack, onSubscribe, user
         setIsProcessing(true);
 
         const handler = window.PaystackPop.setup({
-            key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 
+            key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string,
             email: user.email || "customer@knot.ai",
             amount: Math.round(localTotalAmount * 100), 
             currency: currencyInfo.code, 
