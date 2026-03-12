@@ -1,0 +1,53 @@
+{
+  "name": "knot",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "tsx backend/server.ts",
+    "server:watch": "tsx watch backend/server.ts",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios",
+    "build:android": "vite build && npx cap sync android",
+    "build:ios": "vite build && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/camera": "^7.0.1",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/haptics": "^7.0.1",
+    "@capacitor/keyboard": "^7.0.1",
+    "@capacitor/push-notifications": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
+    "@google/genai": "^1.25.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.9.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
