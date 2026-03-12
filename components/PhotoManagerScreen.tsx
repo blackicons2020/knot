@@ -28,16 +28,17 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
       try {
         setIsProcessing(true);
         const image = await Camera.getPhoto({
-          quality: 90,
+          quality: 80,
           allowEditing: false,
           resultType: CameraResultType.DataUrl,
-          source: CameraSource.Prompt,
+          source: CameraSource.Photos,
         });
         if (image.dataUrl) {
           setPhotos(prev => [...prev, image.dataUrl!]);
         }
-      } catch {
-        // User cancelled the picker — do nothing
+      } catch (err: any) {
+        console.warn('Camera failed, falling back to file picker:', err?.message);
+        fileInputRef.current?.click();
       } finally {
         setIsProcessing(false);
       }

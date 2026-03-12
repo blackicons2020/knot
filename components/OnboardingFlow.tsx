@@ -99,16 +99,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
       try {
         setIsProcessing(true);
         const image = await Camera.getPhoto({
-          quality: 90,
+          quality: 80,
           allowEditing: false,
           resultType: CameraResultType.DataUrl,
-          source: CameraSource.Prompt,
+          source: CameraSource.Photos,
         });
         if (image.dataUrl) {
           setFormData(prev => ({ ...prev, profileImageUrls: [image.dataUrl!] }));
         }
-      } catch {
-        // User cancelled
+      } catch (err: any) {
+        console.warn('Camera failed, falling back to file picker:', err?.message);
+        fileInputRef.current?.click();
       } finally {
         setIsProcessing(false);
       }

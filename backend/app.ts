@@ -24,9 +24,15 @@ app.use('/api/messages', messageRoutes);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Error Handling
-app.use((err: any, req: express.Request, res: any, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send({ error: 'Something went wrong!' });
+app.use((err: any, _req: express.Request, res: any, _next: express.NextFunction) => {
+  console.error('=== GLOBAL ERROR ===');
+  console.error('Name:', err.name);
+  console.error('Message:', err.message);
+  console.error('Type:', typeof err);
+  console.error('Keys:', Object.keys(err));
+  console.error('Full:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
+  console.error('Stack:', err.stack);
+  res.status(500).json({ error: err.message || err.name || String(err) || 'Something went wrong!' });
 });
 
 export default app;
