@@ -1,7 +1,5 @@
 
 import React, { useState, useRef } from 'react';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
 import { User, SmokingHabits, DrinkingHabits, MaritalStatus, WillingToRelocate, ChildrenPreference } from '../types';
 import { PlusIcon } from './icons/PlusIcon';
 import { SparklesIcon } from './icons/SparklesIcon';
@@ -94,28 +92,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
     reader.readAsDataURL(file);
   };
 
-  const handleAddPhotoClick = async () => {
-    if (Capacitor.isNativePlatform()) {
-      try {
-        setIsProcessing(true);
-        const image = await Camera.getPhoto({
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Photos,
-        });
-        if (image.dataUrl) {
-          setFormData(prev => ({ ...prev, profileImageUrls: [image.dataUrl!] }));
-        }
-      } catch (err: any) {
-        console.warn('Camera failed, falling back to file picker:', err?.message);
-        fileInputRef.current?.click();
-      } finally {
-        setIsProcessing(false);
-      }
-    } else {
-      fileInputRef.current?.click();
-    }
+  const handleAddPhotoClick = () => {
+    fileInputRef.current?.click();
   };
 
   const inputClass = "w-full p-4 border border-gray-200 rounded-2xl bg-white text-black focus:ring-2 focus:ring-brand-primary focus:border-transparent focus:outline-none shadow-sm transition-all text-sm";

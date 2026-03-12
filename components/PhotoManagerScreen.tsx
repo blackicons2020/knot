@@ -1,7 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
+
 import { PlusIcon } from './icons/PlusIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { CloseIcon } from './icons/CloseIcon';
@@ -24,27 +23,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
       return;
     }
 
-    if (Capacitor.isNativePlatform()) {
-      try {
-        setIsProcessing(true);
-        const image = await Camera.getPhoto({
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Photos,
-        });
-        if (image.dataUrl) {
-          setPhotos(prev => [...prev, image.dataUrl!]);
-        }
-      } catch (err: any) {
-        console.warn('Camera failed, falling back to file picker:', err?.message);
-        fileInputRef.current?.click();
-      } finally {
-        setIsProcessing(false);
-      }
-    } else {
-      fileInputRef.current?.click();
-    }
+    fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +82,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
           type="file" 
           ref={fileInputRef} 
           onChange={handleFileChange} 
-          accept="image/*" 
+          accept="image/*"
           className="hidden" 
         />
 
