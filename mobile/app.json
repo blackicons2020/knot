@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Knot",
+    "slug": "knot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A0D67"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.knot.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Knot needs camera access to let you take profile photos.",
+        "NSPhotoLibraryUsageDescription": "Knot needs photo library access so you can pick profile photos.",
+        "NSMicrophoneUsageDescription": "Knot needs microphone access for video calls."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4A0D67"
+      },
+      "package": "com.knot.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Knot to access your camera."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Knot to access your photos."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
