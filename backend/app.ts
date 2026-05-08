@@ -40,9 +40,20 @@ app.use('/api/matching', matchingRoutes);
 app.use('/api/paystack', paystackRoutes);
 app.use('/api/verify', verificationRoutes);
 
-// Health check
-app.get('/', (_req, res) => {
-  res.json({ status: 'Knot API is running' });
+import mongoose from 'mongoose';
+
+// Detailed Health check for debugging
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'Knot API is running',
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    env: {
+      hasMongoUri: !!process.env.MONGODB_URI,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      nodeEnv: process.env.NODE_ENV
+    }
+  });
 });
 
 // Error Handling

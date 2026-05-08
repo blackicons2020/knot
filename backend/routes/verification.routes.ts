@@ -9,7 +9,18 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+// Lazy-loaded Gemini AI instance
+let aiInstance: any = null;
+const getAI = () => {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured on the server');
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+};
 
 // POST /api/verify/selfie
 // Receives a selfie, compares it with profile photo using Gemini AI
@@ -54,7 +65,7 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
       Answer with only one word: "MATCH" or "NO_MATCH".
     `;
 
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-1.5-flash",
       contents: [
         { role: 'user', parts: [{ text: prompt }] },
