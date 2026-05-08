@@ -7,8 +7,10 @@ import usersRoutes from './routes/users.routes';
 import matchesRoutes from './routes/matches.routes';
 import messagesRoutes from './routes/messages.routes';
 import uploadRoutes from './routes/upload.routes';
+import imageRoutes from './routes/image.routes';
 import matchingRoutes from './routes/matching.routes';
 import paystackRoutes from './routes/paystack.routes';
+import verificationRoutes from './routes/verification.routes';
 
 const app = express();
 
@@ -32,8 +34,7 @@ app.use('/api/paystack/webhook', (express as any).raw({ type: 'application/json'
 
 app.use(express.json() as any);
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -41,8 +42,10 @@ app.use('/api/users', usersRoutes);
 app.use('/api/matches', matchesRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/images', imageRoutes);
 app.use('/api/matching', matchingRoutes);
 app.use('/api/paystack', paystackRoutes);
+app.use('/api/verify', verificationRoutes);
 
 // Health check
 app.get('/', (_req, res) => {

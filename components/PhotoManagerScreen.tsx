@@ -1,9 +1,9 @@
-
 import React, { useState, useRef } from 'react';
 import { PlusIcon } from './icons/PlusIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { CloseIcon } from './icons/CloseIcon';
 import { User } from '../types';
+import api from '../src/api';
 
 interface PhotoManagerScreenProps {
   user: User;
@@ -20,7 +20,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -30,21 +30,28 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
     }
 
     setIsProcessing(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        setPhotos([...photos, result]);
+    
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      // Upload to our new MongoDB-backed upload endpoint
+      const response = await api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.url) {
+        setPhotos([...photos, response.data.url]);
       }
+    } catch (error: any) {
+      console.error("Photo upload failed:", error);
+      alert("Failed to upload photo to registry.");
+    } finally {
       setIsProcessing(false);
-      // Reset input so the same file can be picked again if deleted
       if (fileInputRef.current) fileInputRef.current.value = '';
-    };
-    reader.onerror = () => {
-      alert("Failed to read image file.");
-      setIsProcessing(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleRemovePhoto = (indexToRemove: number) => {
@@ -60,10 +67,10 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
   };
 
   return (
-    <div className="w-full h-screen bg-gray-50 flex flex-col font-sans">
-      <header className="flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-10">
-        <h1 className="text-xl font-black text-brand-dark uppercase tracking-tight">Manage Photos</h1>
-        <button onClick={onBack} className="p-1 rounded-full text-gray-400 hover:bg-gray-100">
+    <div className="w-full h-screen bg-gray-50 dark:bg-brand-dark flex flex-col font-sans">
+      <header className="flex items-center justify-between p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
+        <h1 className="text-xl font-black text-brand-dark dark:text-white uppercase tracking-tight">Manage Photos</h1>
+        <button onClick={onBack} className="p-1 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
           <CloseIcon className="w-6 h-6" />
         </button>
       </header>
@@ -71,7 +78,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
       <main className="flex-1 p-6">
         <div className="mb-6">
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Your Registry Photos</h2>
-            <p className="text-xs text-gray-500 leading-relaxed">The first photo is shown to potential matches. You can have up to 6 high-quality images.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">The first photo is shown to potential matches. You can have up to 6 high-quality images.</p>
         </div>
 
         {/* Hidden File Input */}
@@ -86,7 +93,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
         <div className="grid grid-cols-3 gap-4">
           {photos.map((photo, index) => (
             <div key={index} className="relative aspect-square group shadow-sm">
-              <img src={photo} alt={`User photo ${index + 1}`} className="w-full h-full object-cover rounded-2xl" />
+              <img src={photo.startsWith('/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000'}${photo}` : photo} alt={`User photo ${index + 1}`} className="w-full h-full object-cover rounded-2xl" />
               {index === 0 && (
                   <div className="absolute top-2 left-2 bg-brand-primary text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Main</div>
               )}
@@ -105,7 +112,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
             <button
               onClick={handleAddPhotoClick}
               disabled={isProcessing}
-              className={`aspect-square bg-white border-2 border-dashed ${isProcessing ? 'border-gray-200' : 'border-brand-light'} rounded-2xl flex flex-col items-center justify-center text-brand-primary hover:bg-brand-light transition-all active:scale-95 shadow-sm`}
+              className={`aspect-square bg-white dark:bg-gray-900 border-2 border-dashed ${isProcessing ? 'border-gray-200 dark:border-gray-800' : 'border-brand-light'} rounded-2xl flex flex-col items-center justify-center text-brand-primary hover:bg-brand-light dark:hover:bg-gray-800 transition-all active:scale-95 shadow-sm`}
             >
               {isProcessing ? (
                   <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
@@ -120,7 +127,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
         </div>
       </main>
 
-      <footer className="p-6 bg-white border-t border-gray-200">
+      <footer className="p-6 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
         <button 
             onClick={handleDone} 
             className="w-full bg-brand-primary text-white font-black py-4 rounded-2xl text-lg shadow-xl shadow-brand-primary/20 hover:bg-brand-secondary transition-all active:scale-[0.98]"

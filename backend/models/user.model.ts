@@ -39,6 +39,7 @@ export interface IUser extends Document {
   subscriptionDate?: string;
   subscriptionAmount?: number;
   subscriptionPeriod?: string;
+  selfieUrl?: string;
   passwordHash?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -83,6 +84,7 @@ const UserSchema = new Schema<IUser>(
     subscriptionDate: { type: String },
     subscriptionAmount: { type: Number },
     subscriptionPeriod: { type: String },
+    selfieUrl: { type: String },
     passwordHash: { type: String },
   },
   { timestamps: true }

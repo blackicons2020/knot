@@ -1,39 +1,40 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { authenticateToken } from '../middleware/auth';
+import { ImageModel } from '../models/image.model';
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-// On Vercel (serverless), use /tmp which is the only writable directory
-const uploadsDir = process.env.VERCEL
-  ? '/tmp/uploads'
-  : path.join(__dirname, '..', 'uploads');
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname) || '.jpg';
-    cb(null, `photo-${uniqueSuffix}${ext}`);
-  },
+// Use memory storage instead of disk storage for serverless compatibility
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage, 
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB max
 });
 
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB max
-
-router.post('/', authenticateToken, upload.single('photo'), (req: any, res: any) => {
+// POST /api/upload
+// Uploads an image and stores it in MongoDB
+router.post('/', authenticateToken, upload.single('photo'), async (req: any, res: any) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-  // Return the relative URL path — frontend prepends the base URL
-  const url = `/uploads/${req.file.filename}`;
-  res.json({ url });
+
+  try {
+    const userId = req.user?.id || req.user?.uid;
+    
+    const newImage = await ImageModel.create({
+      data: req.file.buffer,
+      contentType: req.file.mimetype,
+      userId: userId || 'anonymous'
+    });
+
+    // Return the URL that points to our new image server route
+    const url = `/api/images/${newImage.id}`;
+    res.json({ url, id: newImage.id });
+  } catch (error: any) {
+    console.error('Upload error:', error.message);
+    res.status(500).json({ error: 'Failed to save image to database' });
+  }
 });
 
 export default router;
