@@ -9,7 +9,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY || '');
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 // POST /api/verify/selfie
 // Receives a selfie, compares it with profile photo using Gemini AI
@@ -45,8 +45,7 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
     await UserModel.findByIdAndUpdate(userId, { selfieUrl });
 
     // Use Gemini to compare the two images
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
+    // Note: using the style compatible with @google/genai ^1.0.0
     const prompt = `
       Compare these two photos. 
       Photo 1 is a profile picture. 
@@ -55,23 +54,31 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
       Answer with only one word: "MATCH" or "NO_MATCH".
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: profilePhoto.data.toString('base64'),
-          mimeType: profilePhoto.contentType
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        { role: 'user', parts: [{ text: prompt }] },
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                data: profilePhoto.data.toString('base64'),
+                mimeType: profilePhoto.contentType
+              }
+            },
+            {
+              inlineData: {
+                data: req.file.buffer.toString('base64'),
+                mimeType: req.file.mimetype
+              }
+            }
+          ]
         }
-      },
-      {
-        inlineData: {
-          data: req.file.buffer.toString('base64'),
-          mimeType: req.file.mimetype
-        }
-      }
-    ]);
+      ]
+    });
 
-    const text = result.response.text().trim().toUpperCase();
+    const text = (response.text || "").trim().toUpperCase();
     const isVerified = text.includes('MATCH') && !text.includes('NO_MATCH');
 
     if (isVerified) {
