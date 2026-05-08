@@ -11,14 +11,23 @@ const signToken = (userId: string, email: string) =>
 // POST /api/auth/register
 export const register = async (req: any, res: any) => {
   const { email, password, name } = req.body;
+  console.log(`Registration attempt for: ${email}`);
+
   if (!email || !password)
     return res.status(400).json({ error: 'Email and password are required' });
 
   try {
+    console.log('Checking for existing user...');
     const existing = await UserModel.findOne({ email });
-    if (existing) return res.status(409).json({ error: 'Email already registered' });
+    if (existing) {
+      console.log('User already exists.');
+      return res.status(409).json({ error: 'Email already registered' });
+    }
 
+    console.log('Hashing password...');
     const passwordHash = await bcrypt.hash(password, 12);
+
+    console.log('Creating user in database...');
     const user = await UserModel.create({
       email,
       passwordHash,
@@ -33,11 +42,18 @@ export const register = async (req: any, res: any) => {
       idealPartnerTraits: [],
     });
 
+    console.log(`User created successfully with ID: ${user.id}. Signing token...`);
     const token = signToken(user.id, user.email || '');
+    
+    console.log('Registration complete.');
     res.status(201).json({ token, user, isNew: true });
   } catch (error: any) {
-    console.error('Registration error:', error.message || error);
-    res.status(500).json({ error: error.message || 'Registration failed' });
+    console.error('DETAILED REGISTRATION ERROR:', error);
+    res.status(500).json({ 
+      error: 'Registration failed', 
+      details: error.message,
+      code: error.code || 'UNKNOWN'
+    });
   }
 };
 

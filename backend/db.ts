@@ -16,17 +16,23 @@ export const connectDB = async (): Promise<void> => {
     return;
   }
 
+  if (!MONGODB_URI) {
+    console.error('CRITICAL ERROR: MONGODB_URI is missing from Environment Variables!');
+    return;
+  }
+
   try {
-    console.log('Attempting to connect to MongoDB...');
+    console.log('Connecting to MongoDB Atlas...');
     const db = await mongoose.connect(MONGODB_URI, {
-      bufferCommands: true, // Allow commands to buffer while connecting
-      serverSelectionTimeoutMS: 15000, // Increase timeout for Vercel cold starts
+      bufferCommands: true,
+      serverSelectionTimeoutMS: 20000, // Slightly longer for Vercel
     });
     isConnected = db.connections[0].readyState === 1;
-    console.log('MongoDB connected successfully');
+    console.log('SUCCESS: MongoDB connected correctly.');
   } catch (error: any) {
-    console.error('MongoDB connection error:', error.message || error);
+    console.error('FAILED: MongoDB connection error:', error.message || error);
     isConnected = false;
+    // Don't re-throw, let ensureDbConnected handle the 503
   }
 };
 
