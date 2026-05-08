@@ -11,14 +11,12 @@ import imageRoutes from './routes/image.routes';
 import matchingRoutes from './routes/matching.routes';
 import paystackRoutes from './routes/paystack.routes';
 import verificationRoutes from './routes/verification.routes';
-import { connectDB } from './db';
+import { connectDB, ensureDbConnected } from './db';
 
 const app = express();
 
-// Connect to DB immediately
-connectDB();
-
 // Middleware
+app.use(ensureDbConnected as any);
 app.use(cors({
   origin: true, // Allow all origins to resolve Network Errors during initial deployment
   credentials: true,
