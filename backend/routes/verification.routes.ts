@@ -3,7 +3,7 @@ import multer from 'multer';
 import { authenticateToken } from '../middleware/auth';
 import { UserModel } from '../models/user.model';
 import { ImageModel } from '../models/image.model';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -17,7 +17,7 @@ const getAI = () => {
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not configured on the server');
     }
-    aiInstance = new GoogleGenAI({ apiKey });
+    aiInstance = new GoogleGenerativeAI(apiKey);
   }
   return aiInstance;
 };
@@ -54,9 +54,6 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
 
     const selfieUrl = `/api/images/${selfieImage.id}`;
     await UserModel.findByIdAndUpdate(userId, { selfieUrl });
-
-    // Use Gemini to compare the two images
-    // Note: using the style compatible with @google/genai ^1.0.0
     const prompt = `
       Compare these two photos. 
       Photo 1 is a profile picture. 
@@ -65,31 +62,24 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
       Answer with only one word: "MATCH" or "NO_MATCH".
     `;
 
-    const response = await getAI().models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [
-        { role: 'user', parts: [{ text: prompt }] },
-        {
-          role: 'user',
-          parts: [
-            {
-              inlineData: {
-                data: profilePhoto.data.toString('base64'),
-                mimeType: profilePhoto.contentType
-              }
-            },
-            {
-              inlineData: {
-                data: req.file.buffer.toString('base64'),
-                mimeType: req.file.mimetype
-              }
-            }
-          ]
+    const model = getAI().getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: profilePhoto.data.toString('base64'),
+          mimeType: profilePhoto.contentType
         }
-      ]
-    });
-
-    const text = (response.text || "").trim().toUpperCase();
+      },
+      {
+        inlineData: {
+          data: req.file.buffer.toString('base64'),
+          mimeType: req.file.mimetype
+        }
+      }
+    ]);
+    const response = await result.response;
+    const text = response.text().trim().toUpperCase();
     const isVerified = text.includes('MATCH') && !text.includes('NO_MATCH');
 
     if (isVerified) {

@@ -24,9 +24,6 @@ app.use(cors({
 app.use('/api/paystack/webhook', (express as any).raw({ type: 'application/json' }));
 app.use(express.json() as any);
 
-// Safety Shield: Try to connect but don't crash if it fails
-connectDB().catch(err => console.error('Initial DB connection failed:', err));
-
 // Detailed Health check for debugging
 app.get('/api/health', async (req, res) => {
   let dbStatus = 'Disconnected';
