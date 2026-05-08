@@ -93,7 +93,7 @@ const PhotoManagerScreen: React.FC<PhotoManagerScreenProps> = ({ user, onBack, o
         <div className="grid grid-cols-3 gap-4">
           {photos.map((photo, index) => (
             <div key={index} className="relative aspect-square group shadow-sm">
-              <img src={photo.startsWith('/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000'}${photo}` : photo} alt={`User photo ${index + 1}`} className="w-full h-full object-cover rounded-2xl" />
+              <img src={photo} alt={`User photo ${index + 1}`} className="w-full h-full object-cover rounded-2xl" />
               {index === 0 && (
                   <div className="absolute top-2 left-2 bg-brand-primary text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">Main</div>
               )}
