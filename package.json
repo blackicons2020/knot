@@ -23,6 +23,9 @@
     "react-dom": "^18.3.1",
     "react-paystack": "^5.0.0"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
