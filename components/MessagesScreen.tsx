@@ -100,7 +100,7 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ onChatSelect, user, onU
                     {matches.map((match) => {
                         return (
                              <div key={match.id} onClick={() => onChatSelect(match)} className="flex items-center p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-                                <img src={match.photos?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-14 h-14 rounded-full object-cover" />
+                                <img src={match.profileImageUrls?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-14 h-14 rounded-full object-cover" />
                                 <div className="ml-4 flex-1 overflow-hidden">
                                     <div className="flex justify-between items-center">
                                       <h2 className="font-bold text-brand-dark">{match.name}</h2>

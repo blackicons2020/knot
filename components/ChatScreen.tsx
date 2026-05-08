@@ -50,7 +50,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ match, user, onBack }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <img src={match.photos?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-10 h-10 rounded-full object-cover" />
+        <img src={match.profileImageUrls?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-10 h-10 rounded-full object-cover" />
         <div className="ml-3 flex-1">
           <h2 className="font-bold text-lg text-brand-dark">{match.name}</h2>
           <p className="text-xs text-gray-500">Online</p>
@@ -67,7 +67,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ match, user, onBack }) => {
           )}
           {messages.map((msg) => (
             <div key={msg.id} className={`flex items-end gap-2 ${msg.senderId === user.id ? 'justify-end' : 'justify-start'}`}>
-              {msg.senderId !== user.id && <img src={match.photos?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-6 h-6 rounded-full self-start" />}
+              {msg.senderId !== user.id && <img src={match.profileImageUrls?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-6 h-6 rounded-full self-start" />}
               <div
                 className={`max-w-[75%] px-4 py-2 rounded-2xl ${
                   msg.senderId === user.id

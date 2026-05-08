@@ -347,7 +347,7 @@ const AppContent: React.FC = () => {
             )}
 
             <FilterModal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} currentFilters={filters} onApplyFilters={(newFilters) => { setFilters(newFilters); addToast('Filters Applied', 'info'); }} initialFilters={INITIAL_FILTERS} />
-            <PremiumModal isOpen={isPremiumModalOpen} onClose={() => setIsPremiumModalOpen(false)} onUpgrade={handleUpgradeClick} user={userProfile} />
+            <PremiumModal isOpen={isPremiumModalOpen} onClose={() => setIsPremiumModalOpen(false)} onUpgrade={handleUpgradeClick} user={userProfile!} />
             
             <style>{`
                 @keyframes progress-ind { 0% { left: -100%; width: 100%; } 100% { left: 100%; width: 100%; } }
