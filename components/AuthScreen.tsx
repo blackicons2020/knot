@@ -40,7 +40,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
             }
         } catch (error: any) {
             console.error("Auth Error:", error);
-            addToast(error.response?.data?.error || error.message || "Authentication failed.", "error");
+            const errorData = error.response?.data?.error;
+            const errorMessage = typeof errorData === 'string' 
+                ? errorData 
+                : (errorData?.message || error.message || "Authentication failed.");
+            addToast(errorMessage, "error");
         } finally {
             setIsProcessing(false);
         }
