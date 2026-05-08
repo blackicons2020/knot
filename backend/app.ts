@@ -30,13 +30,24 @@ connectDB().catch(err => console.error('Initial DB connection failed:', err));
 // Detailed Health check for debugging
 app.get('/api/health', async (req, res) => {
   let dbStatus = 'Disconnected';
+  let queryStatus = 'Pending';
+  
   try {
     if (mongoose.connection.readyState !== 1) {
       await connectDB();
     }
     dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
-  } catch (e) {
+    
+    // Try a real query to verify schema/model
+    if (dbStatus === 'Connected') {
+      // Import UserModel inside to avoid circular deps if any
+      const { UserModel } = await import('./models/user.model');
+      await UserModel.findOne().limit(1);
+      queryStatus = 'Success';
+    }
+  } catch (e: any) {
     dbStatus = 'Error';
+    queryStatus = `Failed: ${e.message}`;
   }
 
   res.json({
@@ -44,6 +55,7 @@ app.get('/api/health', async (req, res) => {
     timestamp: new Date().toISOString(),
     database: {
       status: dbStatus,
+      query: queryStatus,
       readyState: mongoose.connection.readyState,
       dbName: mongoose.connection.name
     },
