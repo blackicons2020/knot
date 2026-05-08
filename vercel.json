@@ -1,24 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+  "experimentalServices": {
+    "frontend": {
+      "root": ".",
+      "framework": "vite"
     },
-    {
-      "src": "backend/server.ts",
-      "use": "@vercel/node"
+    "backend": {
+      "root": "backend",
+      "framework": "express"
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "backend/server.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  }
 }
