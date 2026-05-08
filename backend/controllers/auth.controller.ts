@@ -11,23 +11,24 @@ const signToken = (userId: string, email: string) =>
 // POST /api/auth/register
 export const register = async (req: any, res: any) => {
   const { email, password, name } = req.body;
-  console.log(`Registration attempt for: ${email}`);
+  console.log(`[AUTH] Registration attempt for: ${email}`);
 
-  if (!email || !password)
+  if (!email || !password) {
+    console.warn(`[AUTH] Registration failed: Missing email or password for ${email}`);
     return res.status(400).json({ error: 'Email and password are required' });
+  }
 
   try {
-    console.log('Checking for existing user...');
+    console.log('[AUTH] Checking for existing user in MongoDB...');
     const existing = await UserModel.findOne({ email });
     if (existing) {
-      console.log('User already exists.');
+      console.log(`[AUTH] Registration conflict: User ${email} already exists.`);
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    console.log('Hashing password...');
+    console.log('[AUTH] Hashing password and creating record...');
     const passwordHash = await bcrypt.hash(password, 12);
 
-    console.log('Creating user in database...');
     const user = await UserModel.create({
       email,
       passwordHash,
@@ -42,15 +43,14 @@ export const register = async (req: any, res: any) => {
       idealPartnerTraits: [],
     });
 
-    console.log(`User created successfully with ID: ${user.id}. Signing token...`);
+    console.log(`[AUTH] SUCCESS: User ${user.id} created. Signing token...`);
     const token = signToken(user.id, user.email || '');
     
-    console.log('Registration complete.');
     res.status(201).json({ token, user, isNew: true });
   } catch (error: any) {
-    console.error('DETAILED REGISTRATION ERROR:', error);
+    console.error('[AUTH] CRITICAL REGISTRATION ERROR:', error);
     res.status(500).json({ 
-      error: 'Registration failed', 
+      error: 'Registration failed at database level', 
       details: error.message,
       code: error.code || 'UNKNOWN'
     });
@@ -60,21 +60,33 @@ export const register = async (req: any, res: any) => {
 // POST /api/auth/login
 export const login = async (req: any, res: any) => {
   const { email, password } = req.body;
+  console.log(`[AUTH] Login attempt for: ${email}`);
+
   if (!email || !password)
     return res.status(400).json({ error: 'Email and password are required' });
 
   try {
+    console.log('[AUTH] Finding user...');
     const user = await UserModel.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      console.warn(`[AUTH] Login failed: User ${email} not found.`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
+    console.log('[AUTH] Verifying password...');
     const raw = await UserModel.findOne({ email }).select('+passwordHash').lean();
     const isValid = await bcrypt.compare(password, (raw as any)?.passwordHash || '');
-    if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+    
+    if (!isValid) {
+      console.warn(`[AUTH] Login failed: Incorrect password for ${email}.`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
+    console.log(`[AUTH] SUCCESS: User ${user.id} logged in.`);
     const token = signToken(user.id, user.email || '');
     res.json({ token, user, isNew: false });
   } catch (error: any) {
-    console.error('Login error:', error.message || error);
+    console.error('[AUTH] Login error:', error.message || error);
     res.status(500).json({ error: error.message || 'Login failed' });
   }
 };

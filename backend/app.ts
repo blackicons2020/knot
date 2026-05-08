@@ -28,15 +28,30 @@ app.use(express.json() as any);
 connectDB().catch(err => console.error('Initial DB connection failed:', err));
 
 // Detailed Health check for debugging
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'Disconnected';
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+    dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
+  } catch (e) {
+    dbStatus = 'Error';
+  }
+
   res.json({
     status: 'Knot API is running',
-    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
-    readyState: mongoose.connection.readyState,
+    timestamp: new Date().toISOString(),
+    database: {
+      status: dbStatus,
+      readyState: mongoose.connection.readyState,
+      dbName: mongoose.connection.name
+    },
     env: {
       hasMongoUri: !!process.env.MONGODB_URI,
       hasJwtSecret: !!process.env.JWT_SECRET,
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      nodeEnv: process.env.NODE_ENV
     }
   });
 });

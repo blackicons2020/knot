@@ -22,29 +22,38 @@ export const connectDB = async (): Promise<void> => {
   }
 
   try {
-    console.log('Connecting to MongoDB Atlas...');
+    console.log(`[MONGODB] Connecting to Atlas (URI defined: ${!!MONGODB_URI})`);
     const db = await mongoose.connect(MONGODB_URI, {
       bufferCommands: true,
-      serverSelectionTimeoutMS: 20000, // Slightly longer for Vercel
+      serverSelectionTimeoutMS: 20000, 
     });
     isConnected = db.connections[0].readyState === 1;
-    console.log('SUCCESS: MongoDB connected correctly.');
+    console.log(`[MONGODB] SUCCESS: Connected to ${db.connection.name}`);
   } catch (error: any) {
-    console.error('FAILED: MongoDB connection error:', error.message || error);
+    console.error('[MONGODB] FAILED: Connection error details:');
+    console.error('- Message:', error.message);
+    console.error('- Code:', error.code);
+    console.error('- Full Error:', error);
     isConnected = false;
-    // Don't re-throw, let ensureDbConnected handle the 503
   }
 };
 
 // Middleware to ensure DB is connected before processing requests
 export const ensureDbConnected = async (req: any, res: any, next: any) => {
-  if (mongoose.connection.readyState !== 1) {
-    console.log('DB not connected, attempting to connect before request...');
+  const { readyState } = mongoose.connection;
+  
+  if (readyState !== 1) {
+    console.log(`[DB GUARD] Current readyState: ${readyState}. Attempting to reconnect...`);
     await connectDB();
   }
   
   if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ error: 'Database is starting up. Please try again in a few seconds.' });
+    console.error(`[DB GUARD] Connection failed. Blocking request to ${req.originalUrl}`);
+    return res.status(503).json({ 
+      error: 'Database is starting up or unreachable.', 
+      readyState: mongoose.connection.readyState,
+      message: 'Please check backend logs for connection errors.'
+    });
   }
   
   next();

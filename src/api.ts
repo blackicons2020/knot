@@ -18,4 +18,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Add response interceptor for better error logging
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('--- API ERROR ---');
+    console.error('URL:', error.config?.url);
+    console.error('Method:', error.config?.method);
+    console.error('Status:', error.response?.status);
+    console.error('Data:', error.response?.data);
+    console.error('Message:', error.message);
+    console.error('-----------------');
+    return Promise.reject(error);
+  }
+);
+
 export default api;
