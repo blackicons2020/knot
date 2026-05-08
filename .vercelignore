@@ -1,0 +1,9 @@
+# .vercelignore
+mobile/
+node_modules/
+.idea/
+.git/
+*.log
+.env
+backend/.env
+mobile/.env
