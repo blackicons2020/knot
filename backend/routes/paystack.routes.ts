@@ -1,7 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
-import { adminDb } from '../firebase-admin';
+import { UserModel } from '../models/user.model';
 
 const router = express.Router();
 
@@ -27,27 +27,16 @@ router.post('/verify', async (req, res) => {
       const amount = paymentData.amount / 100; // Convert from kobo/cents
       const currency = paymentData.currency;
 
-      // Update user in Firestore
-      const userRef = adminDb.collection('users').doc(userId);
+      // Update user in MongoDB
       const expiryDate = new Date();
       expiryDate.setMonth(expiryDate.getMonth() + parseInt(months, 10));
 
-      await userRef.update({
+      await UserModel.findByIdAndUpdate(userId, {
         isPremium: true,
-        premiumExpiry: expiryDate.toISOString(),
-        updatedAt: new Date().toISOString(),
+        premiumExpiry: expiryDate,
       });
 
-      // Log payment record
-      await adminDb.collection('payments').add({
-        userId,
-        paystackReference: reference,
-        amount,
-        currency,
-        status: 'success',
-        createdAt: new Date().toISOString(),
-      });
-
+      // Log payment record (You could create a PaymentModel for this)
       console.log(`User ${userId} upgraded via Paystack verification. Amount: ${amount} ${currency}. Expiry: ${expiryDate.toISOString()}`);
       return res.json({ success: true });
     } else {
@@ -62,8 +51,6 @@ router.post('/verify', async (req, res) => {
 // Paystack Webhook handler
 router.post('/webhook', async (req, res) => {
   try {
-    // NOTE: Paystack uses your Secret Key to sign webhooks. 
-    // You do not need a separate "Webhook Secret" like Stripe.
     const secret = process.env.PAYSTACK_WEBHOOK_SECRET || PAYSTACK_SECRET_KEY;
     
     if (!secret) {
@@ -71,7 +58,6 @@ router.post('/webhook', async (req, res) => {
       return res.status(500).send('Configuration error');
     }
 
-    // req.body is a Buffer because of the express.raw middleware in app.ts
     const body = req.body.toString();
     const hash = crypto.createHmac('sha512', secret).update(body).digest('hex');
 
@@ -83,7 +69,7 @@ router.post('/webhook', async (req, res) => {
     const event = JSON.parse(body);
 
     if (event.event === 'charge.success') {
-      const { metadata, customer, amount: rawAmount, currency, reference } = event.data;
+      const { metadata, amount: rawAmount, currency, reference } = event.data;
       const userId = metadata?.user_id;
       const months = parseInt(metadata?.months || '1', 10);
       const amount = rawAmount / 100;
@@ -91,24 +77,12 @@ router.post('/webhook', async (req, res) => {
       if (userId) {
         console.log(`Webhook: Payment successful for user: ${userId}, amount: ${amount} ${currency}`);
         
-        const userRef = adminDb.collection('users').doc(userId);
         const expiryDate = new Date();
         expiryDate.setMonth(expiryDate.getMonth() + months);
         
-        await userRef.update({
+        await UserModel.findByIdAndUpdate(userId, {
           isPremium: true,
-          premiumExpiry: expiryDate.toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-
-        // Log payment record
-        await adminDb.collection('payments').add({
-          userId,
-          paystackReference: reference,
-          amount,
-          currency,
-          status: 'success',
-          createdAt: new Date().toISOString(),
+          premiumExpiry: expiryDate,
         });
         
         console.log(`User ${userId} updated via webhook until ${expiryDate.toISOString()}`);

@@ -1,19 +1,11 @@
-import { adminDb } from '../firebase-admin';
+import { MessageModel } from '../models/message.model';
 
 export const getMessages = async (req: any, res: any) => {
   try {
     const { matchId } = req.params;
 
-    const snapshot = await adminDb
-      .collection('messages')
-      .where('matchId', '==', matchId)
-      .orderBy('createdAt', 'asc')
-      .get();
-
-    const messages = snapshot.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-    }));
+    const messages = await MessageModel.find({ matchId })
+      .sort({ timestamp: 1 });
 
     res.json(messages);
   } catch (error: any) {
@@ -25,20 +17,21 @@ export const getMessages = async (req: any, res: any) => {
 export const sendMessage = async (req: any, res: any) => {
   try {
     const { matchId } = req.params;
-    const uid = req.user?.uid;
-    const { text } = req.body;
+    const userId = req.user?.id || req.user?.uid;
+    const { text, receiverId } = req.body;
 
     if (!text) return res.status(400).json({ error: 'text required' });
 
-    const message = {
+    // In a real app, you'd verify if the users are actually matched
+    
+    const message = await MessageModel.create({
       matchId,
-      senderId: uid,
+      senderId: userId,
+      receiverId: receiverId || 'unknown', // receiverId should ideally be provided or looked up from matchId
       text,
-      createdAt: new Date().toISOString(),
-    };
+    });
 
-    const ref = await adminDb.collection('messages').add(message);
-    res.status(201).json({ ...message, id: ref.id });
+    res.status(201).json(message);
   } catch (error: any) {
     console.error('SendMessage error:', error.message);
     res.status(500).json({ error: 'Failed to send message' });

@@ -1,12 +1,8 @@
-import { adminDb } from '../firebase-admin';
+import { UserModel } from '../models/user.model';
 
 export const getAllUsers = async (req: any, res: any) => {
   try {
-    const snapshot = await adminDb.collection('users').get();
-    const users = snapshot.docs.map((doc) => {
-      const { password, ...data } = doc.data();
-      return { ...data, id: doc.id };
-    });
+    const users = await UserModel.find();
     res.json(users);
   } catch (error: any) {
     console.error('GetAllUsers error:', error.message);
@@ -16,10 +12,9 @@ export const getAllUsers = async (req: any, res: any) => {
 
 export const getUser = async (req: any, res: any) => {
   try {
-    const doc = await adminDb.collection('users').doc(req.params.id).get();
-    if (!doc.exists) return res.status(404).json({ error: 'User not found' });
-    const { password, ...user } = doc.data() as any;
-    res.json({ ...user, id: doc.id });
+    const user = await UserModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
   } catch (error: any) {
     console.error('GetUser error:', error.message);
     res.status(500).json({ error: 'Failed to get user' });
@@ -28,12 +23,13 @@ export const getUser = async (req: any, res: any) => {
 
 export const updateUser = async (req: any, res: any) => {
   try {
-    const userRef = adminDb.collection('users').doc(req.params.id);
-    const doc = await userRef.get();
-    if (!doc.exists) return res.status(404).json({ error: 'User not found' });
-
-    await userRef.update({ ...req.body, updatedAt: new Date().toISOString() });
-    res.json({ success: true });
+    const user = await UserModel.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
   } catch (error: any) {
     console.error('UpdateUser error:', error.message);
     res.status(500).json({ error: 'Failed to update user' });
@@ -42,7 +38,8 @@ export const updateUser = async (req: any, res: any) => {
 
 export const deleteUser = async (req: any, res: any) => {
   try {
-    await adminDb.collection('users').doc(req.params.id).delete();
+    const user = await UserModel.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true });
   } catch (error: any) {
     console.error('DeleteUser error:', error.message);
@@ -55,12 +52,15 @@ export const seedUsers = async (req: any, res: any) => {
     const { users } = req.body;
     if (!Array.isArray(users)) return res.status(400).json({ error: 'users array required' });
 
-    const batch = adminDb.batch();
-    for (const user of users) {
-      const ref = user.id ? adminDb.collection('users').doc(user.id) : adminDb.collection('users').doc();
-      batch.set(ref, { ...user, id: ref.id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    }
-    await batch.commit();
+    // Clear existing users if you want, or just insert
+    // await UserModel.deleteMany({});
+    
+    const preparedUsers = users.map(u => ({
+      ...u,
+      // Ensure we don't have conflicting IDs if seeding
+    }));
+
+    await UserModel.insertMany(preparedUsers);
     res.json({ success: true, count: users.length });
   } catch (error: any) {
     console.error('SeedUsers error:', error.message);

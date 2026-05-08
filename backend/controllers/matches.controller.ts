@@ -1,41 +1,49 @@
-import { adminDb } from '../firebase-admin';
+import { MatchModel } from '../models/match.model';
+import { UserModel } from '../models/user.model';
 
 export const swipe = async (req: any, res: any) => {
   try {
-    const uid = req.user?.uid;
+    const userId = req.user?.id || req.user?.uid;
     const { swipedId, type } = req.body;
 
-    if (!uid || !swipedId || !type) {
+    if (!userId || !swipedId || !type) {
       return res.status(400).json({ error: 'swipedId and type required' });
     }
 
-    // Record the swipe
-    await adminDb.collection('swipes').add({
-      swiperId: uid,
-      swipedId,
-      type, // 'like' or 'pass'
-      createdAt: new Date().toISOString(),
+    if (type === 'pass') {
+      // Just record the pass (optional, depend on if you want to store passes)
+      // Here we just return success
+      return res.json({ match: false });
+    }
+
+    // Record the like
+    const existingLike = await MatchModel.findOne({ userId, matchedUserId: swipedId });
+    if (!existingLike) {
+      await MatchModel.create({
+        userId,
+        matchedUserId: swipedId,
+        isMutual: false,
+      });
+    }
+
+    // Check for mutual match
+    const mutualLike = await MatchModel.findOne({
+      userId: swipedId,
+      matchedUserId: userId,
     });
 
-    // If it's a like, check if the other user also liked us (mutual match)
-    if (type === 'like') {
-      const mutual = await adminDb
-        .collection('swipes')
-        .where('swiperId', '==', swipedId)
-        .where('swipedId', '==', uid)
-        .where('type', '==', 'like')
-        .limit(1)
-        .get();
-
-      if (!mutual.empty) {
-        // Create a match document
-        const matchId = [uid, swipedId].sort().join('_');
-        await adminDb.collection('matches').doc(matchId).set({
-          users: [uid, swipedId],
-          createdAt: new Date().toISOString(),
-        });
-        return res.json({ match: true, matchId });
-      }
+    if (mutualLike) {
+      // Mark both as mutual
+      await MatchModel.updateMany(
+        {
+          $or: [
+            { userId: userId, matchedUserId: swipedId },
+            { userId: swipedId, matchedUserId: userId },
+          ],
+        },
+        { isMutual: true }
+      );
+      return res.json({ match: true, matchId: [userId, swipedId].sort().join('_') });
     }
 
     res.json({ match: false });
@@ -47,24 +55,22 @@ export const swipe = async (req: any, res: any) => {
 
 export const getMutualMatches = async (req: any, res: any) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) return res.status(401).json({ error: 'Unauthorized' });
+    const userId = req.user?.id || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
-    const snapshot = await adminDb
-      .collection('matches')
-      .where('users', 'array-contains', uid)
-      .get();
+    const mutualMatches = await MatchModel.find({
+      userId,
+      isMutual: true,
+    });
 
     const matches: any[] = [];
-    for (const doc of snapshot.docs) {
-      const matchData = doc.data();
-      const otherUserId = matchData.users.find((id: string) => id !== uid);
-      if (otherUserId) {
-        const userDoc = await adminDb.collection('users').doc(otherUserId).get();
-        if (userDoc.exists) {
-          const { password, ...userData } = userDoc.data() as any;
-          matches.push({ ...userData, id: userDoc.id, matchId: doc.id });
-        }
+    for (const m of mutualMatches) {
+      const otherUser = await UserModel.findById(m.matchedUserId);
+      if (otherUser) {
+        matches.push({
+          ...otherUser.toJSON(),
+          matchId: [userId, m.matchedUserId].sort().join('_'),
+        });
       }
     }
 

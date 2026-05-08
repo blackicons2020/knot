@@ -1,230 +1,130 @@
-
-import { 
-    collection, 
-    doc, 
-    getDoc, 
-    getDocs, 
-    setDoc, 
-    updateDoc, 
-    query, 
-    where, 
-    orderBy, 
-    limit, 
-    onSnapshot,
-    addDoc,
-    serverTimestamp,
-    Timestamp,
-    deleteDoc
-} from 'firebase/firestore';
-import { db as firestoreDb, auth, handleFirestoreError, OperationType } from '../src/firebase';
+import api from '../src/api';
 import { User, Match, Message } from '../types';
-
-// Helper to convert Firestore data to our types
-const convertDoc = <T>(doc: any): T => ({ id: doc.id, ...doc.data() } as T);
 
 class DatabaseService {
     // User Operations
     async getUser(uid: string): Promise<User | null> {
         try {
-            const docRef = doc(firestoreDb, 'users', uid);
-            const docSnap = await getDoc(docRef);
-            return docSnap.exists() ? convertDoc<User>(docSnap) : null;
+            const response = await api.get(`/users/${uid}`);
+            return response.data;
         } catch (error) {
-            handleFirestoreError(error, OperationType.GET, `users/${uid}`);
+            console.error('GetUser error:', error);
             return null;
         }
     }
 
     async saveUser(user: User): Promise<void> {
         try {
-            const docRef = doc(firestoreDb, 'users', user.id);
-            await setDoc(docRef, {
-                ...user,
-                updatedAt: serverTimestamp()
-            }, { merge: true });
+            await api.put(`/users/${user.id}`, user);
         } catch (error) {
-            handleFirestoreError(error, OperationType.WRITE, `users/${user.id}`);
+            console.error('SaveUser error:', error);
         }
     }
 
     async updatePremiumStatus(uid: string, isPremium: boolean): Promise<void> {
         try {
-            const docRef = doc(firestoreDb, 'users', uid);
-            await updateDoc(docRef, { 
-                isPremium,
-                updatedAt: serverTimestamp()
-            });
+            await api.put(`/users/${uid}`, { isPremium });
         } catch (error) {
-            handleFirestoreError(error, OperationType.UPDATE, `users/${uid}`);
+            console.error('UpdatePremiumStatus error:', error);
         }
     }
 
     // Matching Operations
     async getPotentialMatches(currentUser: User): Promise<Match[]> {
         try {
-            // Get all users
-            const q = query(
-                collection(firestoreDb, 'users'),
-                limit(100)
-            );
-            const querySnapshot = await getDocs(q);
-            return querySnapshot.docs
-                .map(doc => convertDoc<User>(doc))
-                .map(user => user as Match);
+            const response = await api.get('/users');
+            // Filter out current user and map to Match type
+            return response.data
+                .filter((u: User) => u.id !== currentUser.id)
+                .map((u: User) => u as Match);
         } catch (error) {
-            handleFirestoreError(error, OperationType.LIST, 'users');
+            console.error('GetPotentialMatches error:', error);
             return [];
         }
     }
 
     async getLikedMatches(uid: string): Promise<Match[]> {
         try {
-            const q = query(
-                collection(firestoreDb, 'matches'),
-                where('isMutual', '==', true),
-                where('userIds', 'array-contains', uid)
-            );
-            const querySnapshot = await getDocs(q);
-            
-            // For each mutual match, get the other user's profile
-            const matches: Match[] = [];
-            for (const matchDoc of querySnapshot.docs) {
-                const data = matchDoc.data();
-                const otherUserId = data.userIds.find((id: string) => id !== uid);
-                const otherUser = await this.getUser(otherUserId);
-                if (otherUser) {
-                    matches.push({
-                        ...otherUser,
-                        id: matchDoc.id // Use match ID for chat
-                    } as Match);
-                }
-            }
-            return matches;
+            const response = await api.get('/matches');
+            return response.data;
         } catch (error) {
-            handleFirestoreError(error, OperationType.LIST, 'matches');
+            console.error('GetLikedMatches error:', error);
             return [];
         }
     }
 
     async recordSwipe(swiperId: string, swipedId: string, type: 'like' | 'pass'): Promise<void> {
         try {
-            const matchId = [swiperId, swipedId].sort().join('_');
-            const matchRef = doc(firestoreDb, 'matches', matchId);
-            
-            const swipeData = {
-                userIds: [swiperId, swipedId],
-                [`swipes.${swiperId}`]: type,
-                updatedAt: serverTimestamp()
-            };
-
-            await setDoc(matchRef, swipeData, { merge: true });
-
-            // Check for mutual like
-            if (type === 'like') {
-                const matchSnap = await getDoc(matchRef);
-                const data = matchSnap.data();
-                if (data?.swipes?.[swipedId] === 'like') {
-                    await updateDoc(matchRef, { 
-                        isMutual: true,
-                        matchedAt: serverTimestamp()
-                    });
-                }
-            }
+            await api.post('/matches/swipe', { swipedId, type });
         } catch (error) {
-            handleFirestoreError(error, OperationType.WRITE, `matches`);
+            console.error('RecordSwipe error:', error);
         }
     }
 
     // Messaging Operations
     subscribeToMessages(matchId: string, callback: (messages: Message[]) => void) {
-        const q = query(
-            collection(firestoreDb, 'messages'),
-            where('matchId', '==', matchId),
-            orderBy('timestamp', 'asc')
-        );
+        // Since MongoDB doesn't have native subscriptions, we use polling as a fallback
+        // In production, you should use Socket.io or Server-Sent Events
+        const fetchMessages = async () => {
+            try {
+                const response = await api.get(`/messages/${matchId}`);
+                callback(response.data);
+            } catch (error) {
+                console.error('FetchMessages error:', error);
+            }
+        };
 
-        return onSnapshot(q, (snapshot) => {
-            const messages = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                timestamp: (doc.data().timestamp as Timestamp)?.toDate() || new Date()
-            } as Message));
-            callback(messages);
-        }, (error) => {
-            handleFirestoreError(error, OperationType.LIST, 'messages');
-        });
+        fetchMessages(); // Initial fetch
+        const interval = setInterval(fetchMessages, 3000); // Poll every 3 seconds
+
+        return () => clearInterval(interval);
     }
 
     async sendMessage(matchId: string, senderId: string, text: string): Promise<void> {
         try {
-            await addDoc(collection(firestoreDb, 'messages'), {
-                matchId,
-                senderId,
-                text,
-                timestamp: serverTimestamp(),
-                status: 'sent'
-            });
-            
-            // Update last message in match
-            const matchRef = doc(firestoreDb, 'matches', matchId);
-            await updateDoc(matchRef, {
-                lastMessage: text,
-                lastMessageAt: serverTimestamp()
-            });
+            await api.post(`/messages/${matchId}`, { text });
         } catch (error) {
-            handleFirestoreError(error, OperationType.WRITE, 'messages');
+            console.error('SendMessage error:', error);
         }
     }
 
     async getAllUsers(): Promise<User[]> {
         try {
-            const q = query(collection(firestoreDb, 'users'), limit(100));
-            const querySnapshot = await getDocs(q);
-            return querySnapshot.docs.map(doc => convertDoc<User>(doc));
+            const response = await api.get('/users');
+            return response.data;
         } catch (error) {
-            handleFirestoreError(error, OperationType.LIST, 'users');
+            console.error('GetAllUsers error:', error);
             return [];
         }
     }
 
     async seedMockData(mockMatches: Match[]): Promise<void> {
         try {
-            for (const match of mockMatches) {
-                const userRef = doc(firestoreDb, 'users', match.id);
-                await setDoc(userRef, {
-                    ...match,
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
-            }
+            await api.post('/users/seed', { users: mockMatches });
         } catch (error) {
-            handleFirestoreError(error, OperationType.WRITE, 'users/seed');
+            console.error('SeedMockData error:', error);
         }
     }
 
     async addGlobalMatches(newMatches: Match[]): Promise<void> {
         try {
+            // Reusing seed logic or just individual updates
             for (const match of newMatches) {
-                const userRef = doc(firestoreDb, 'users', match.id);
-                await setDoc(userRef, {
-                    ...match,
-                    isGlobal: true,
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
+                await api.put(`/users/${match.id}`, { ...match, isGlobal: true });
             }
         } catch (error) {
-            handleFirestoreError(error, OperationType.WRITE, 'users/global');
+            console.error('AddGlobalMatches error:', error);
         }
     }
 
     async deleteUser(uid: string): Promise<void> {
         try {
-            const docRef = doc(firestoreDb, 'users', uid);
-            await deleteDoc(docRef);
+            await api.delete(`/users/${uid}`);
         } catch (error) {
-            handleFirestoreError(error, OperationType.DELETE, `users/${uid}`);
+            console.error('DeleteUser error:', error);
         }
     }
 }
 
 export const databaseService = new DatabaseService();
-export const db = databaseService; // For backward compatibility
+export const db = databaseService;

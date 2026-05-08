@@ -1,18 +1,14 @@
-
 import React, { useState } from 'react';
 import { KnotLogo } from './KnotLogo';
 import { EnvelopeIcon } from './icons/EnvelopeIcon';
 import { GmailIcon } from './icons/GmailIcon';
 import { AppleIcon } from './icons/AppleIcon';
-import { CloseIcon } from './icons/CloseIcon';
 import { ShieldCheckIcon } from './icons/ShieldCheckIcon';
-import { auth } from '../src/firebase';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from './feedback/useToast';
 
 interface AuthScreenProps {
-    onLogin: (name?: string, email?: string) => void;
-    onSignUp: (name?: string, email?: string) => void;
+    onLogin: (email: string, password: string) => Promise<void>;
+    onSignUp: (email: string, password: string, name?: string) => Promise<void>;
 }
 
 const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
@@ -20,6 +16,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
     const [showEmailForm, setShowEmailForm] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const { addToast } = useToast();
 
@@ -32,39 +29,18 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
         setShowEmailForm(true);
     };
 
-    const handleGoogleSignIn = async () => {
-        setIsProcessing(true);
-        try {
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            if (isLogin) {
-                onLogin(user.displayName || undefined, user.email || undefined);
-            } else {
-                onSignUp(user.displayName || undefined, user.email || undefined);
-            }
-        } catch (error: any) {
-            console.error("Google Sign-In Error:", error);
-            addToast(error.message || "Google Sign-In failed.", "error");
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
         try {
             if (isLogin) {
-                await signInWithEmailAndPassword(auth, email, password);
-                onLogin(undefined, email);
+                await onLogin(email, password);
             } else {
-                await createUserWithEmailAndPassword(auth, email, password);
-                onSignUp(undefined, email);
+                await onSignUp(email, password, name);
             }
         } catch (error: any) {
-            console.error("Email Auth Error:", error);
-            addToast(error.message || "Authentication failed.", "error");
+            console.error("Auth Error:", error);
+            addToast(error.response?.data?.error || error.message || "Authentication failed.", "error");
         } finally {
             setIsProcessing(false);
         }
@@ -85,6 +61,20 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
 
                 {showEmailForm ? (
                     <form onSubmit={handleFormSubmit} className="space-y-4 animate-fade-in">
+                        {!isLogin && (
+                            <div>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block" htmlFor="name">Full Name</label>
+                                <input 
+                                    id="name"
+                                    type="text" 
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:bg-white text-brand-dark transition-all text-sm"
+                                    placeholder="John Doe"
+                                />
+                            </div>
+                        )}
                         <div>
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block" htmlFor="email">Email Address</label>
                             <input 
@@ -127,7 +117,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
                 ) : (
                     <div className="space-y-4">
                         <button 
-                            onClick={handleGoogleSignIn} 
                             disabled={isProcessing}
                             className="w-full flex items-center justify-center gap-3 bg-white border border-gray-100 text-brand-dark font-bold py-4 rounded-2xl hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
                         >
