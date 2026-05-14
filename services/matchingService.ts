@@ -3,7 +3,17 @@ import { User, Match, SmokingHabits, DrinkingHabits, MaritalStatus, WillingToRel
 import { MATCHES_DATA } from '../constants';
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+
+// Only initialize if API key is present to avoid console warnings
+let ai: any = null;
+if (GEMINI_API_KEY) {
+    ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+} else {
+    console.warn("[GEMINI] VITE_GEMINI_API_KEY is missing. AI features will use fallbacks.");
+}
+
+const DEFAULT_MODEL = "gemini-1.5-flash"; // Correct model name
 
 const callGeminiWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000): Promise<any> => {
     for (let i = 0; i < retries; i++) {
@@ -61,9 +71,11 @@ export const calculateMatchScore = (user: User, match: User): number => {
 export const getCompatibilityInsight = async (user: User, match: Match): Promise<{ score: number, insight: string }> => {
     const score = calculateMatchScore(user, match);
     
+    if (!ai) return { score, insight: "Compatible foundation with strong potential in shared values." };
+    
     try {
         const response = await callGeminiWithRetry(() => ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: DEFAULT_MODEL,
             contents: `Analyze compatibility between ${user.name} and ${match.name}. 
             User: ${user.bio}, ${user.religion}, ${user.personalValues.join(', ')}.
             Match: ${match.bio}, ${match.religion}, ${match.personalValues.join(', ')}.
@@ -88,10 +100,11 @@ export const searchRegistry = (query: string, matches: Match[]): Match[] => {
     );
 };
 
-export const queryGlobalRegistry = async (count: number = 3): Promise<Match[]> => {
+    if (!ai) return [...MATCHES_DATA].sort(() => 0.5 - Math.random()).slice(0, count);
+
     try {
         const response = await callGeminiWithRetry(() => ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: DEFAULT_MODEL,
             contents: `Generate ${count} unique, high-quality marriage-oriented user profiles for a global registry.
             Each profile must be a JSON object with these fields:
             id (unique string), name, age (22-45), bio, interests (array), profileImageUrls (array of 2 Unsplash URLs), 
@@ -126,9 +139,11 @@ export const queryGlobalRegistry = async (count: number = 3): Promise<Match[]> =
 };
 
 export const generateAIReply = async (user: User, match: Match, lastMessage: string): Promise<string> => {
+    if (!ai) return "I appreciate your message. Let's talk more soon.";
+
     try {
         const response = await callGeminiWithRetry(() => ai.models.generateContent({
-            model: "gemini-3-flash-preview",
+            model: DEFAULT_MODEL,
             contents: `Generate a polite, marriage-oriented reply from ${match.name} to ${user.name}.
             Context: ${match.name} is a ${match.occupation} from ${match.city}. 
             Last message from ${user.name}: "${lastMessage}".

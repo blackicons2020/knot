@@ -46,13 +46,20 @@ export const register = async (req: any, res: any) => {
     console.log(`[AUTH] SUCCESS: User ${user.id} created. Signing token...`);
     const token = signToken(user.id, user.email || '');
     
-    res.status(201).json({ token, user, isNew: true });
+    return res.status(201).json({ token, user, isNew: true });
   } catch (error: any) {
-    console.error('[AUTH] CRITICAL REGISTRATION ERROR:', error);
+    console.error('[AUTH] CRITICAL REGISTRATION ERROR:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      name: error.name
+    });
+
     res.status(500).json({ 
-      error: 'Registration failed at database level', 
+      error: 'Registration failed at database or server level', 
       details: error.message,
-      code: error.code || 'UNKNOWN'
+      code: error.code || 'UNKNOWN',
+      type: error.name
     });
   }
 };
@@ -86,8 +93,16 @@ export const login = async (req: any, res: any) => {
     const token = signToken(user.id, user.email || '');
     res.json({ token, user, isNew: false });
   } catch (error: any) {
-    console.error('[AUTH] Login error:', error.message || error);
-    res.status(500).json({ error: error.message || 'Login failed' });
+    console.error('[AUTH] Login error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({ 
+      error: 'Login failed', 
+      details: error.message,
+      type: error.name 
+    });
   }
 };
 

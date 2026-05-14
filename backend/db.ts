@@ -22,13 +22,15 @@ export const connectDB = async (): Promise<void> => {
   }
 
   try {
-    console.log(`[MONGODB] Connecting to Atlas (URI defined: ${!!MONGODB_URI})`);
+    const dbName = MONGODB_URI.split('/').pop()?.split('?')[0] || 'test (default)';
+    console.log(`[MONGODB] Attempting to connect to Atlas database: ${dbName}`);
+    
     const db = await mongoose.connect(MONGODB_URI, {
       bufferCommands: true,
       serverSelectionTimeoutMS: 20000, 
     });
     isConnected = db.connections[0].readyState === 1;
-    console.log(`[MONGODB] SUCCESS: Connected to ${db.connection.name}`);
+    console.log(`[MONGODB] SUCCESS: Connected to ${db.connection.name}. State: ${mongoose.connection.readyState}`);
   } catch (error: any) {
     console.error('[MONGODB] FAILED: Connection error details:');
     console.error('- Message:', error.message);
