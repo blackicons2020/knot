@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
-import { authenticateToken } from '../middleware/auth';
-import { ImageModel } from '../models/image.model';
+import { authenticateToken } from '../middleware/auth.js';
+import { ImageModel } from '../models/image.model.js';
 
 const router = express.Router();
 

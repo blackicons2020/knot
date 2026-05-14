@@ -1,15 +1,15 @@
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './routes/auth.routes';
-import usersRoutes from './routes/users.routes';
-import matchesRoutes from './routes/matches.routes';
-import messagesRoutes from './routes/messages.routes';
-import uploadRoutes from './routes/upload.routes';
-import imageRoutes from './routes/image.routes';
-import matchingRoutes from './routes/matching.routes';
-import paystackRoutes from './routes/paystack.routes';
-import verificationRoutes from './routes/verification.routes';
-import { connectDB, ensureDbConnected } from './db';
+import authRoutes from './routes/auth.routes.js';
+import usersRoutes from './routes/users.routes.js';
+import matchesRoutes from './routes/matches.routes.js';
+import messagesRoutes from './routes/messages.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
+import imageRoutes from './routes/image.routes.js';
+import matchingRoutes from './routes/matching.routes.js';
+import paystackRoutes from './routes/paystack.routes.js';
+import verificationRoutes from './routes/verification.routes.js';
+import { connectDB, ensureDbConnected } from './db.js';
 import mongoose from 'mongoose';
 
 const app = express();
@@ -38,7 +38,7 @@ app.get('/api/health', async (req, res) => {
     // Try a real query to verify schema/model
     if (dbStatus === 'Connected') {
       // Import UserModel inside to avoid circular deps if any
-      const { UserModel } = await import('./models/user.model');
+      const { UserModel } = await import('./models/user.model.js');
       await UserModel.findOne().limit(1);
       queryStatus = 'Success';
     }

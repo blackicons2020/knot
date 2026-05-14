@@ -1,6 +1,6 @@
 import express from 'express';
-import { swipe, getMutualMatches } from '../controllers/matches.controller';
-import { authenticateToken } from '../middleware/auth';
+import { swipe, getMutualMatches } from '../controllers/matches.controller.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 

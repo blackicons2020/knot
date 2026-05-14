@@ -1,5 +1,5 @@
-import { MatchModel } from '../models/match.model';
-import { UserModel } from '../models/user.model';
+import { MatchModel } from '../models/match.model.js';
+import { UserModel } from '../models/user.model.js';
 
 export const swipe = async (req: any, res: any) => {
   try {

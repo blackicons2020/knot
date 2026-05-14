@@ -1,5 +1,5 @@
-import { verifyTransaction } from '../services/paystack.service';
-import { UserModel } from '../models/user.model';
+import { verifyTransaction } from '../services/paystack.service.js';
+import { UserModel } from '../models/user.model.js';
 
 export const handleVerifyPayment = async (req: any, res: any) => {
   const { reference, userId } = req.body;

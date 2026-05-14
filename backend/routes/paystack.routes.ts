@@ -1,7 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
-import { UserModel } from '../models/user.model';
+import { UserModel } from '../models/user.model.js';
 
 const router = express.Router();
 

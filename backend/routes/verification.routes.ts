@@ -1,8 +1,8 @@
 import express from 'express';
 import multer from 'multer';
-import { authenticateToken } from '../middleware/auth';
-import { UserModel } from '../models/user.model';
-import { ImageModel } from '../models/image.model';
+import { authenticateToken } from '../middleware/auth.js';
+import { UserModel } from '../models/user.model.js';
+import { ImageModel } from '../models/image.model.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
