@@ -100,6 +100,7 @@ export const searchRegistry = (query: string, matches: Match[]): Match[] => {
     );
 };
 
+export const queryGlobalRegistry = async (count: number = 3): Promise<Match[]> => {
     if (!ai) return [...MATCHES_DATA].sort(() => 0.5 - Math.random()).slice(0, count);
 
     try {
