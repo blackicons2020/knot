@@ -51,15 +51,15 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin, onSignUp }) => {
     };
 
     return (
-        <div className="min-h-screen bg-brand-light flex flex-col justify-center items-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-brand-light dark:bg-brand-dark flex flex-col justify-center items-center p-6 relative overflow-hidden transition-colors">
             {/* Background Decorative Elements */}
-            <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-[-5%] left-[-5%] w-72 h-72 bg-brand-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-brand-primary/5 dark:bg-brand-accent/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-[-5%] left-[-5%] w-72 h-72 bg-brand-accent/10 dark:bg-brand-primary/10 rounded-full blur-3xl"></div>
 
-            <KnotLogo className="text-4xl mb-8 relative z-10" />
+            <KnotLogo className="text-4xl mb-8 relative z-10 dark:text-white" />
             
-            <div className="w-full max-w-sm bg-white p-8 rounded-[2.5rem] shadow-2xl relative z-10 border border-white/50">
-                <h1 className="text-2xl font-black text-center text-brand-dark mb-6 tracking-tight">
+            <div className="w-full max-w-sm bg-white dark:bg-gray-900 p-8 rounded-[2.5rem] shadow-2xl relative z-10 border border-white/50 dark:border-gray-800">
+                <h1 className="text-2xl font-black text-center text-brand-dark dark:text-white mb-6 tracking-tight">
                     {isLogin ? 'Welcome Back' : 'Join Registry'}
                 </h1>
 

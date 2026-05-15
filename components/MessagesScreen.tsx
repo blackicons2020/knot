@@ -52,14 +52,14 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ onChatSelect, user, onU
 
     if (isLoading) {
         return (
-            <div className="pb-24 p-4 space-y-4">
-                <h1 className="text-2xl font-bold text-brand-dark">Chats</h1>
+            <div className="pb-24 p-4 space-y-4 bg-white dark:bg-brand-dark min-h-screen">
+                <h1 className="text-2xl font-black text-brand-dark dark:text-white uppercase tracking-tight">Chats</h1>
                 {[1, 2, 3].map(i => (
                     <div key={i} className="flex items-center gap-4 animate-pulse">
-                        <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+                        <div className="w-14 h-14 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
                         <div className="flex-1 space-y-2">
-                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4"></div>
                         </div>
                     </div>
                 ))}
@@ -68,8 +68,8 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ onChatSelect, user, onU
     }
 
     return (
-        <div className="pb-24">
-            <h1 className="text-2xl font-bold text-brand-dark p-4 tracking-tight uppercase font-black">Chats</h1>
+        <div className="pb-24 bg-white dark:bg-brand-dark min-h-screen transition-colors">
+            <h1 className="text-2xl font-bold text-brand-dark dark:text-white p-4 tracking-tight uppercase font-black">Chats</h1>
             {!user.isPremium ? (
                 <div className="px-6 py-10">
                     <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 text-center border border-dashed border-gray-200 dark:border-gray-800 shadow-sm">
@@ -92,21 +92,21 @@ const MessagesScreen: React.FC<MessagesScreenProps> = ({ onChatSelect, user, onU
                 </div>
             ) : matches.length === 0 ? (
                 <div className="text-center py-20 px-6">
-                    <p className="text-gray-600 font-bold">No chats yet.</p>
-                    <p className="text-sm text-gray-500 mt-2">When you match with someone, you can start chatting here.</p>
+                    <p className="text-gray-600 dark:text-gray-400 font-bold">No chats yet.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">When you match with someone, you can start chatting here.</p>
                 </div>
             ) : (
-                <div>
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
                     {matches.map((match) => {
                         return (
-                             <div key={match.id} onClick={() => onChatSelect(match)} className="flex items-center p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors">
-                                <img src={match.profileImageUrls?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-14 h-14 rounded-full object-cover" />
+                             <div key={match.id} onClick={() => onChatSelect(match)} className="flex items-center p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+                                <img src={match.profileImageUrls?.[0] || 'https://picsum.photos/seed/user/200'} alt={match.name} className="w-14 h-14 rounded-full object-cover shadow-sm" />
                                 <div className="ml-4 flex-1 overflow-hidden">
                                     <div className="flex justify-between items-center">
-                                      <h2 className="font-bold text-brand-dark">{match.name}</h2>
+                                      <h2 className="font-bold text-brand-dark dark:text-white">{match.name}</h2>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <p className="text-sm text-gray-500 truncate">Tap to start chatting</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">Tap to start chatting</p>
                                     </div>
                                 </div>
                             </div>

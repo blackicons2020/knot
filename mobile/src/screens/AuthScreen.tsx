@@ -16,9 +16,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { Colors, BorderRadius, Spacing } from '../theme/colors';
 import { useToast } from '../contexts/ToastContext';
-import KnotLogo from '../components/KnotLogo';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function AuthScreen() {
+  const { isDarkMode } = useTheme();
   const [isLogin, setIsLogin] = useState(true);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
@@ -55,7 +56,7 @@ export default function AuthScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top }]}
+      style={[styles.container, { paddingTop: insets.top, backgroundColor: isDarkMode ? Colors.dark : Colors.light }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView

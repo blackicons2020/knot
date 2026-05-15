@@ -37,10 +37,10 @@ const AppContent: React.FC = () => {
     const [isDarkMode, setIsDarkMode] = useState(() => {
         try {
             const saved = localStorage.getItem('knot_theme');
-            if (saved === null) return false;
+            if (saved === null) return true;
             return saved === 'dark';
         } catch (e) {
-            return false;
+            return true;
         }
     });
     const { addToast } = useToast();

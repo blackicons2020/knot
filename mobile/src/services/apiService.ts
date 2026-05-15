@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { User, Match, Message } from '../types';
 
 const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:5000/api' : 'http://10.0.2.2:5000/api';
-const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'https://knotmobile-backend.onrender.com/api');
+const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'https://knot-navy-gamma.vercel.app/api');
 // Base URL without /api — used for serving uploaded files
 const BASE_URL = API_URL.replace(/\/api$/, '');
 

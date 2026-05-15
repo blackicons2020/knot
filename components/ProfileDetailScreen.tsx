@@ -18,9 +18,9 @@ interface ProfileSectionProps {
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ title, children }) => (
-    <div className="border-b border-gray-100 last:border-0">
+    <div className="border-b border-gray-100 dark:border-gray-800 last:border-0">
         <div className="py-5 text-left">
-            <h3 className="font-black text-lg text-brand-dark uppercase tracking-tight">{title}</h3>
+            <h3 className="font-black text-lg text-brand-dark dark:text-white uppercase tracking-tight">{title}</h3>
         </div>
         <div className="pb-6 space-y-5 animate-fade-in">
             {children}
@@ -31,8 +31,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ title, children }) => (
 const ProfileDataItem: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
     <div className="space-y-1">
         <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{label}</p>
-        <div className="text-sm text-black font-medium leading-relaxed">
-            {value || <span className="text-gray-300 italic">Not specified</span>}
+        <div className="text-sm text-black dark:text-gray-200 font-medium leading-relaxed">
+            {value || <span className="text-gray-300 dark:text-gray-600 italic">Not specified</span>}
         </div>
     </div>
 );
@@ -61,7 +61,7 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
   };
 
   return (
-    <div className="w-full h-screen bg-white flex flex-col">
+    <div className="w-full h-screen bg-white dark:bg-brand-dark flex flex-col transition-colors">
       <div className="flex-1 overflow-y-auto pb-32">
         {/* Image Carousel */}
         <div className="relative aspect-square w-full flex-shrink-0">
@@ -86,12 +86,12 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
         </div>
 
         {/* Profile Info */}
-        <div className="bg-white -mt-12 rounded-t-[3rem] z-10 relative">
+        <div className="bg-white dark:bg-brand-dark -mt-12 rounded-t-[3rem] z-10 relative border-t border-white/10">
           <div className="p-8 pb-4">
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-4xl font-black text-brand-dark tracking-tighter">{match.name}, {match.age}</h1>
+                        <h1 className="text-4xl font-black text-brand-dark dark:text-white tracking-tighter">{match.name}, {match.age}</h1>
                         {match.isVerified && (
                              <div className="bg-brand-accent rounded-full p-1 shadow-md">
                                 <VerifiedIcon className="w-4 h-4 text-brand-dark" />
@@ -111,9 +111,9 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
           {/* Profile Content */}
           <div className="px-8 space-y-2">
               {isAccessRestricted && (
-                  <div className="bg-brand-light/50 border border-brand-primary/10 rounded-2xl p-4 mb-4 flex flex-col items-center text-center">
-                      <p className="text-[10px] font-black text-brand-primary uppercase tracking-widest mb-2">Subscription Required</p>
-                      <p className="text-xs text-gray-600 font-medium mb-3">
+                  <div className="bg-brand-light/50 dark:bg-brand-accent/5 border border-brand-primary/10 dark:border-brand-accent/10 rounded-2xl p-4 mb-4 flex flex-col items-center text-center">
+                      <p className="text-[10px] font-black text-brand-primary dark:text-brand-accent uppercase tracking-widest mb-2">Subscription Required</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-3">
                         {!user.isPremium 
                             ? "Subscribe to view full contact details and interact with this user."
                             : "This user is not a subscriber. Contact details and interactions are restricted."
@@ -122,7 +122,7 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
                       {!user.isPremium && (
                           <button 
                             onClick={onUpgrade}
-                            className="bg-brand-primary text-white text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full shadow-lg shadow-brand-primary/20 active:scale-95 transition-transform"
+                            className="bg-brand-primary dark:bg-brand-accent text-white dark:text-brand-dark text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full shadow-lg shadow-brand-primary/20 active:scale-95 transition-transform"
                           >
                             Upgrade Now
                           </button>
@@ -135,9 +135,9 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
                       <ProfileDataItem label="Occupation" value={match.occupation} />
                   </div>
 
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-4">
                         <div className="space-y-2">
-                            <h4 className="text-[9px] font-black text-brand-primary uppercase tracking-widest">Current Residence</h4>
+                            <h4 className="text-[9px] font-black text-brand-primary dark:text-brand-accent uppercase tracking-widest">Current Residence</h4>
                             <div className="grid grid-cols-3 gap-2">
                                 <ProfileDataItem label="Country" value={match.residenceCountry} />
                                 <ProfileDataItem label="State" value={isAccessRestricted ? "••••••" : match.residenceState} />
@@ -145,10 +145,10 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
                             </div>
                         </div>
                         
-                        <div className="h-[1px] bg-gray-200 w-full"></div>
+                        <div className="h-[1px] bg-gray-200 dark:bg-gray-800 w-full"></div>
                         
                         <div className="space-y-2">
-                            <h4 className="text-[9px] font-black text-brand-primary uppercase tracking-widest">Heritage & Origin</h4>
+                            <h4 className="text-[9px] font-black text-brand-primary dark:text-brand-accent uppercase tracking-widest">Heritage & Origin</h4>
                             <div className="grid grid-cols-3 gap-2">
                                 <ProfileDataItem label="Country" value={match.originCountry} />
                                 <ProfileDataItem label="State" value={isAccessRestricted ? "••••••" : match.originState} />
@@ -177,7 +177,7 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
                   <ProfileDataItem label="Core Life Values" value={
                       <div className="flex flex-wrap gap-2 mt-2">
                           {match.personalValues.map(v => (
-                               <span key={v} className="bg-gray-100 text-gray-700 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                               <span key={v} className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
                                     {v}
                                </span>
                           ))}
@@ -195,7 +195,7 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
                   <ProfileDataItem label="Ideal Partner Traits" value={
                       <div className="flex flex-wrap gap-2 mt-2">
                           {match.idealPartnerTraits.map(t => (
-                               <span key={t} className="bg-brand-light text-brand-primary text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-brand-primary/10">
+                               <span key={t} className="bg-brand-light dark:bg-brand-primary/20 text-brand-primary dark:text-brand-accent text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-brand-primary/10 dark:border-brand-accent/10">
                                     {t}
                                </span>
                           ))}
@@ -208,7 +208,7 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
       </div>
       
        {/* Action Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-white border-t border-gray-100 z-30">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-white dark:bg-brand-dark border-t border-gray-100 dark:border-gray-800 z-30 transition-colors">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => {
@@ -223,8 +223,8 @@ const ProfileDetailScreen: React.FC<ProfileDetailScreenProps> = ({ match, user, 
             disabled={user.isPremium && !match.isPremium}
             className={`flex-1 flex items-center justify-center gap-3 font-black py-4 rounded-2xl text-lg transition-all shadow-xl active:scale-95 ${
                 user.isPremium && !match.isPremium 
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
-                    : 'bg-brand-primary text-white hover:bg-brand-secondary shadow-brand-primary/20'
+                    ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed shadow-none' 
+                    : 'bg-brand-primary dark:bg-brand-accent text-white dark:text-brand-dark hover:bg-brand-secondary shadow-brand-primary/20'
             }`}
           >
               <MessageIcon className="w-6 h-6" />

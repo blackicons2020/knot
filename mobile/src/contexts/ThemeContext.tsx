@@ -13,12 +13,16 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const systemScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
 
   useEffect(() => {
     AsyncStorage.getItem('knot_theme').then(saved => {
-      if (saved !== null) setIsDarkMode(saved === 'dark');
+      if (saved !== null) {
+        setIsDarkMode(saved === 'dark');
+      } else {
+        setIsDarkMode(true);
+      }
     });
   }, []);
 

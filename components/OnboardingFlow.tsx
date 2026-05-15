@@ -17,7 +17,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
   const [formData, setFormData] = useState<User>(user);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Explicitly tracked manual text inputs (temp state)
   const [manualInputs, setManualInputs] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +55,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    // Cascading reset logic
     if (name === 'residenceCountry') {
         setFormData(prev => ({ ...prev, residenceCountry: value, residenceState: '', residenceCity: '', country: value }));
         setManualInputs(p => ({ ...p, residenceState: '', residenceCity: '' }));
@@ -96,9 +94,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
     reader.readAsDataURL(file);
   };
 
-  const inputClass = "w-full p-4 border border-gray-200 rounded-2xl bg-white text-black focus:ring-2 focus:ring-brand-primary focus:border-transparent focus:outline-none shadow-sm transition-all text-sm";
+  const inputClass = "w-full p-4 border border-gray-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-900 text-black dark:text-white focus:ring-2 focus:ring-brand-primary dark:focus:ring-brand-accent focus:border-transparent focus:outline-none shadow-sm transition-all text-sm";
   const labelClass = "block text-[10px] font-black text-gray-400 mb-2 uppercase tracking-widest";
-  const sectionTitleClass = "text-xs font-black text-brand-primary uppercase tracking-widest border-b pb-2 mb-4 mt-6";
+  const sectionTitleClass = "text-xs font-black text-brand-primary dark:text-brand-accent uppercase tracking-widest border-b border-gray-100 dark:border-gray-800 pb-2 mb-4 mt-6";
 
   const renderLocationGroup = (prefix: 'residence' | 'origin', title: string) => {
     const countryField = `${prefix}Country` as keyof User;
@@ -112,11 +110,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
     const availableStates = STATES_BY_COUNTRY[countryVal] || [];
     const availableCities = CITIES_BY_STATE[stateVal] || [];
 
-    // Check if we are currently in manual mode for state or city
     const isStateManual = stateVal && availableStates.length > 0 && !availableStates.includes(stateVal);
     const isCityManual = cityVal && availableCities.length > 0 && !availableCities.includes(cityVal);
     
-    // Determine if we should show the text input directly (if no data exists for country/state)
     const forceStateManual = countryVal && availableStates.length === 0;
     const forceCityManual = stateVal && availableCities.length === 0;
 
@@ -124,7 +120,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
       <div className="space-y-4">
         <h3 className={sectionTitleClass}>{title}</h3>
         
-        {/* Country */}
         <div>
           <label className={labelClass}>Country</label>
           <select name={countryField} value={countryVal} onChange={handleChange} className={inputClass}>
@@ -133,7 +128,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
           </select>
         </div>
 
-        {/* State */}
         {countryVal && (
           <div>
             <label className={labelClass}>State / Province</label>
@@ -176,7 +170,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
           </div>
         )}
 
-        {/* City */}
         {(stateVal || forceStateManual) && (
           <div>
             <label className={labelClass}>City / Town</label>
@@ -223,22 +216,23 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col p-6 pb-32 relative font-sans">
+    <div className="min-h-screen bg-white dark:bg-brand-dark flex flex-col p-6 pb-32 relative font-sans transition-colors">
       <div className="mb-10">
         <div className="flex justify-between items-start mb-3">
             <div>
-                <h4 className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em]">Knot Global Registry</h4>
-                <h2 className="text-2xl font-black text-brand-dark">
+                <h4 className="text-[10px] font-black text-brand-primary dark:text-brand-accent uppercase tracking-[0.2em]">Knot Global Registry</h4>
+                <h2 className="text-2xl font-black text-brand-dark dark:text-white">
                   {step === 1 && 'Identity & Roots'}
                   {step === 2 && 'Lifestyle & Values'}
                   {step === 3 && 'Commitment'}
                   {step === 4 && 'First Impressions'}
+                  {step === 5 && 'Activation'}
                 </h2>
             </div>
             <div className="flex flex-col items-end gap-2">
                 <button 
                   onClick={onCancel} 
-                  className="p-1.5 text-gray-300 hover:text-brand-primary hover:bg-gray-50 rounded-full transition-all"
+                  className="p-1.5 text-gray-300 hover:text-brand-primary dark:hover:text-brand-accent hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-all"
                   aria-label="Exit registration"
                 >
                   <CloseIcon className="w-5 h-5" />
@@ -246,8 +240,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
                 <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{step}/{totalSteps}</span>
             </div>
         </div>
-        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-brand-primary transition-all duration-700 ease-in-out" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
+        <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-full bg-brand-primary dark:bg-brand-accent transition-all duration-700 ease-in-out" style={{ width: `${(step / totalSteps) * 100}%` }}></div>
         </div>
       </div>
 
@@ -294,7 +288,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
 
         {step === 2 && (
           <div className="space-y-8">
-            <p className="text-gray-500 text-sm leading-relaxed">Honesty about your lifestyle ensures a more stable marriage match.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Honesty about your lifestyle ensures a more stable marriage match.</p>
             <div className="space-y-5">
               <div>
                 <label className={labelClass}>Religion / Faith</label>
@@ -320,7 +314,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
 
         {step === 3 && (
           <div className="space-y-8">
-            <p className="text-gray-500 text-sm leading-relaxed">Knot matches users based on their marriage timeline and relocation readiness.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Knot matches users based on their marriage timeline and relocation readiness.</p>
             <div className="space-y-5">
               <div>
                 <label className={labelClass}>Ideal Marriage Timeline</label>
@@ -399,12 +393,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
                 <div className="flex justify-center mb-2">
                     <SparklesIcon className="w-6 h-6 text-brand-accent animate-pulse" />
                 </div>
-                <h3 className="text-3xl font-serif text-brand-primary mb-2">First Impressions</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">Registry members prefer authentic, high-quality portraits.</p>
+                <h3 className="text-3xl font-serif text-brand-primary dark:text-brand-accent mb-2">First Impressions</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Registry members prefer authentic, high-quality portraits.</p>
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             <div onClick={() => fileInputRef.current?.click()} className="relative inline-block w-full max-w-[280px] aspect-[4/5] mx-auto cursor-pointer group animate-scale-in">
-                <div className={`w-full h-full rounded-[2.5rem] border-4 border-dashed ${formData.profileImageUrls.length > 0 ? 'border-brand-primary border-solid' : 'border-gray-200'} overflow-hidden bg-gray-50 flex items-center justify-center shadow-2xl transition-all hover:bg-brand-light active:scale-[0.98]`}>
+                <div className={`w-full h-full rounded-[2.5rem] border-4 border-dashed ${formData.profileImageUrls.length > 0 ? 'border-brand-primary border-solid' : 'border-gray-200 dark:border-gray-800'} overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center shadow-2xl transition-all hover:bg-brand-light dark:hover:bg-gray-800 active:scale-[0.98]`}>
                     {formData.profileImageUrls.length > 0 ? (
                          <img src={formData.profileImageUrls[0]} className="w-full h-full object-cover animate-fade-in" />
                     ) : (
@@ -413,8 +407,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
                                 <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
                             ) : (
                                 <>
-                                    <div className="w-20 h-20 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                        <PlusIcon className="h-10 w-10 text-brand-primary" />
+                                    <div className="w-20 h-20 bg-brand-light dark:bg-brand-dark rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <PlusIcon className="h-10 w-10 text-brand-primary dark:text-brand-accent" />
                                     </div>
                                     <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-relaxed px-4">Tap to upload your registry photo</p>
                                 </>
@@ -428,18 +422,18 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
 
         {step === 5 && (
           <div className="space-y-8 text-center px-4">
-            <div className="flex flex-col items-center justify-center p-8 bg-brand-light/20 rounded-[3rem] border border-brand-primary/10 animate-fade-in">
-              <div className="w-20 h-20 bg-brand-primary text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-brand-primary/20">
+            <div className="flex flex-col items-center justify-center p-8 bg-brand-light/20 dark:bg-brand-accent/5 rounded-[3rem] border border-brand-primary/10 dark:border-brand-accent/10 animate-fade-in">
+              <div className="w-20 h-20 bg-brand-primary dark:bg-brand-accent text-white dark:text-brand-dark rounded-full flex items-center justify-center mb-6 shadow-xl shadow-brand-primary/20">
                 <SparklesIcon className="w-10 h-10" />
               </div>
-              <h2 className="text-2xl font-black text-brand-dark mb-4">Final Step: Verification</h2>
-              <p className="text-gray-500 text-sm leading-relaxed mb-8">
+              <h2 className="text-2xl font-black text-brand-dark dark:text-white mb-4">Final Step: Verification</h2>
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8">
                 To ensure the safety and authenticity of our community, all users must verify their identity. 
                 This helps us maintain a high-quality environment for everyone.
               </p>
               
               {formData.isVerified ? (
-                <div className="flex items-center gap-3 bg-green-50 text-green-700 px-6 py-4 rounded-2xl border border-green-100 animate-fade-in">
+                <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-6 py-4 rounded-2xl border border-green-100 dark:border-green-900/30 animate-fade-in">
                   <div className="bg-green-500 rounded-full p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -451,7 +445,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
                 <button 
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, isVerified: true }))}
-                  className="w-full bg-brand-primary text-white font-black py-5 rounded-3xl text-lg hover:bg-brand-secondary transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center gap-3"
+                  className="w-full bg-brand-primary dark:bg-brand-accent text-white dark:text-brand-dark font-black py-5 rounded-3xl text-lg hover:bg-brand-secondary transition-all shadow-xl shadow-brand-primary/20 active:scale-95 flex items-center justify-center gap-3"
                 >
                   <SparklesIcon className="w-6 h-6" />
                   <span>Verify Now</span>
@@ -466,9 +460,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ user, onComplete, onCan
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-white flex items-center gap-4 z-30 border-t border-gray-50">
-        {step > 1 && <button onClick={handlePrev} className="px-8 py-4 rounded-2xl border border-gray-100 text-gray-400 font-bold hover:bg-gray-50 transition-all">Back</button>}
-        <button onClick={handleNext} className="flex-1 bg-brand-primary text-white font-black py-4 rounded-2xl text-lg hover:bg-brand-secondary transition-all shadow-xl shadow-brand-primary/30 active:scale-95">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-white dark:bg-brand-dark flex items-center gap-4 z-30 border-t border-gray-50 dark:border-gray-800 transition-colors">
+        {step > 1 && <button onClick={handlePrev} className="px-8 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-gray-400 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">Back</button>}
+        <button onClick={handleNext} className="flex-1 bg-brand-primary dark:bg-brand-accent text-white dark:text-brand-dark font-black py-4 rounded-2xl text-lg hover:bg-brand-secondary transition-all shadow-xl shadow-brand-primary/30 active:scale-95">
             {step === totalSteps ? 'Activate Registry' : 'Continue'}
         </button>
       </div>
