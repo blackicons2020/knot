@@ -5,6 +5,8 @@ backend/node_modules/
 
 # Build output
 dist/
+backend/dist/
+backend/*.js
 build/
 
 # Environment variables (never commit secrets)
