@@ -94,10 +94,10 @@ const UserSchema = new Schema<IUser>(
 UserSchema.set('toJSON', {
   virtuals: true,
   transform: (_doc, ret) => {
-    ret.id = ret._id.toString();
-    delete ret._id;
-    delete ret.__v;
-    delete ret.passwordHash;
+    const r = ret as any;
+    delete r._id;
+    delete r.__v;
+    delete r.passwordHash;
   },
 });
 

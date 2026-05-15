@@ -23,9 +23,9 @@ MatchSchema.index({ userId: 1, matchedUserId: 1 }, { unique: true });
 MatchSchema.set('toJSON', {
   virtuals: true,
   transform: (_doc, ret) => {
-    ret.id = ret._id.toString();
-    delete ret._id;
-    delete ret.__v;
+    const r = ret as any;
+    delete r._id;
+    delete r.__v;
   },
 });
 
