@@ -1,0 +1,125 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  email                String    @unique
+  passwordHash         String
+  name                 String
+  age                  Int
+  bio                  String    @default("")
+  occupation           String    @default("")
+  education            String    @default("")
+  religion             String    @default("")
+  culturalBackground   String    @default("")
+  
+  // Lifestyle & Commitment Preferences
+  smoking              String    @default("Non-smoker")
+  drinking             String    @default("Never")
+  maritalStatus        String    @default("Never Married")
+  childrenStatus       String    @default("No kids")
+  marriageTimeline     String    @default("ASAP")
+  willingToRelocate    String    @default("Maybe")
+  childrenPreference   String    @default("Open to children")
+  idealPartnerTraits   String[]  @default([])
+  marriageExpectations String    @default("")
+  careerGoals          String    @default("")
+
+  // Location Details
+  residenceCountry     String    @default("")
+  residenceState       String    @default("")
+  residenceCity        String    @default("")
+  originCountry        String    @default("")
+  originState          String    @default("")
+  originCity           String    @default("")
+
+  // AI Relationship Intelligence Profiles
+  personalityArchetype String?
+  attachmentStyle      String?
+  readinessScore       Int       @default(0) // Emotional Readiness Index (0-100)
+  seriousnessLevel     Int       @default(0) // Commitment Intention Index (0-100)
+  trustScore           Int       @default(60) // Base trust score starts at 60
+
+  // Advanced Trust & Safety Metrics
+  isVerified           Boolean   @default(false)
+  isPremium            Boolean   @default(false)
+  idVerified           Boolean   @default(false)
+  selfieVerified       Boolean   @default(false)
+  selfieUrl            String?
+  moderationFlags      Int       @default(0)
+
+  // Assets
+  profileImages        Image[]
+
+  // Matches Relationships
+  matchesInitiated     Match[]   @relation("UserAMatches")
+  matchesReceived      Match[]   @relation("UserBMatches")
+  
+  // Chats & Messaging
+  messagesSent         Message[] @relation("SentMessages")
+  messagesReceived     Message[] @relation("ReceivedMessages")
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Match {
+  id                     String      @id @default(uuid())
+  userAId                String
+  userBId                String
+  userA                  User        @relation("UserAMatches", fields: [userAId], references: [id], onDelete: Cascade)
+  userB                  User        @relation("UserBMatches", fields: [userBId], references: [id], onDelete: Cascade)
+
+  // Multi-dimensional compatibility ratings
+  compatibilityScore     Int         @default(0)
+  emotionalAlignment     Int         @default(0)
+  communicationStyle     Int         @default(0)
+  valuesAlignment        Int         @default(0)
+  lifestyleCompatibility Int         @default(0)
+
+  aiExplanation          String?     // Why You Matched Explanation
+  status                 MatchStatus @default(PENDING)
+  
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  @@unique([userAId, userBId])
+}
+
+model Message {
+  id                 String   @id @default(uuid())
+  senderId           String
+  receiverId         String
+  sender             User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver           User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  content            String
+  isRead             Boolean  @default(false)
+  
+  // Trust & Safety Moderation Status
+  aiModerationStatus String   @default("SAFE") // SAFE, FLAGGED, SHIELDED
+  flagReason         String?
+
+  createdAt          DateTime @default(now())
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum MatchStatus {
+  PENDING
+  CONNECTED
+  DISMISSED
+}

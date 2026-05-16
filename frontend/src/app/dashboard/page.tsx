@@ -1,0 +1,454 @@
+"use client";
+
+import React, { useState } from "react";
+import { 
+  Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
+  Settings, LogOut, Send, AlertTriangle, Shield, CheckCircle2,
+  TrendingUp, Award, Activity, Compass, BrainCircuit, HeartHandshake
+} from "lucide-react";
+
+export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState("matches"); // matches, insights, coach, messages, profile
+  
+  // Mock Matches Data
+  const mockMatches = [
+    {
+      id: "m1",
+      name: "Sophia",
+      age: 27,
+      occupation: "Pediatrician",
+      religion: "Christian",
+      location: "Boston, MA",
+      bio: "Committed to growth, faith, and building a secure loving home. Looking for a partner who is emotionally available and loves traveling.",
+      archetype: "The Calm Connector",
+      attachment: "Secure",
+      trustScore: 98,
+      readiness: 92,
+      values: ["Faith", "Children", "Altruism"],
+      aiExplanation: "Sophia's secure attachment and calm connectivity traits directly complement your intentional builder mindset. Your shared family plans and aligned moral values form a robust foundation for a successful long-term marriage.",
+      imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"
+    }
+  ];
+
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+  const activeMatch = mockMatches[currentMatchIndex];
+
+  // AI Coach State
+  const [coachMessages, setCoachMessages] = useState([
+    { role: "ai", text: "Hello! I am your KNOT Relationship Coach. Ask me anything about attachment styles, conflict resolution, or first-date suggestions." }
+  ]);
+  const [coachInput, setCoachInput] = useState("");
+
+  // Messaging State
+  const [chatMessages, setChatMessages] = useState([
+    { sender: "Sophia", text: "Hi! I really liked your thoughts on long-term commitment. How was your weekend?" }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [aiChatTip, setAiChatTip] = useState(
+    "AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory."
+  );
+
+  const handleSendCoachMessage = () => {
+    if (!coachInput.trim()) return;
+    setCoachMessages(prev => [...prev, { role: "user", text: coachInput }]);
+    const userQ = coachInput;
+    setCoachInput("");
+
+    setTimeout(() => {
+      let aiResponse = "As your relationship coach, I recommend focusing on emotional availability. In serious partnerships, alignment on family structures and timelines resolves 80% of conflict early.";
+      if (userQ.toLowerCase().includes("date")) {
+        aiResponse = "For a successful first date, choose a quiet, premium environment like a botanical garden or a quiet lounge. Ask open-ended questions like: 'What does a fulfilling life look like for you in five years?'";
+      } else if (userQ.toLowerCase().includes("relocate")) {
+        aiResponse = "Discussing relocation requires collaborative transparency. Emphasize that your primary goal is finding mutual alignment where both partners feel emotionally safe, productive, and connected to family circles.";
+      }
+      setCoachMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
+    }, 1000);
+  };
+
+  const handleSendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    setChatMessages(prev => [...prev, { sender: "me", text: chatInput }]);
+    setChatInput("");
+    setAiChatTip(""); // Remove tip once sent
+
+    setTimeout(() => {
+      // Simulate real-time response
+      setChatMessages(prev => [...prev, { sender: "Sophia", text: "That sounds wonderful! I actually think communication is key. We should talk more about our goals." }]);
+      setAiChatTip("AI Message Assistant: Sophia is expressing strong communicative openness. Share a story of a major life goal you achieved recently.");
+    }, 1500);
+  };
+
+  return (
+    <div className="flex h-screen bg-[#0A0E14] text-white overflow-hidden">
+      
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-[#121721] border-r border-white/5 flex flex-col justify-between p-6">
+        <div className="space-y-8">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
+              KNOT<span className="text-[#D4AF37]">.</span>
+            </span>
+          </Link>
+
+          <nav className="space-y-2">
+            <button 
+              onClick={() => setActiveTab("matches")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "matches" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            >
+              <Compass className="w-4 h-4" /> Daily Matches
+            </button>
+            <button 
+              onClick={() => setActiveTab("insights")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "insights" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            >
+              <BrainCircuit className="w-4 h-4" /> Insights Dashboard
+            </button>
+            <button 
+              onClick={() => setActiveTab("coach")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "coach" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            >
+              <Bot className="w-4 h-4" /> AI Coach
+            </button>
+            <button 
+              onClick={() => setActiveTab("messages")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "messages" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            >
+              <MessageSquare className="w-4 h-4" /> Messages
+            </button>
+            <button 
+              onClick={() => setActiveTab("profile")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "profile" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
+            >
+              <User className="w-4 h-4" /> My Profile
+            </button>
+          </nav>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+            <div className="w-8 h-8 rounded-full bg-[#10B981]/20 flex items-center justify-center text-[#10B981]">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h5 className="text-xs font-bold text-white leading-none">Gabriel</h5>
+              <span className="text-[9px] text-[#10B981] font-bold">Base Trust 98%</span>
+            </div>
+          </div>
+          <Link href="/" className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/5 rounded-2xl transition-colors">
+            <LogOut className="w-4 h-4" /> Log Out
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 bg-[#0A0E14] relative overflow-y-auto flex flex-col">
+        
+        {/* Top Navbar */}
+        <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#0A0E14]/50 backdrop-blur-md sticky top-0 z-10">
+          <h2 className="text-xl font-serif font-black text-white capitalize">
+            {activeTab === "matches" && "Your AI Curated Match"}
+            {activeTab === "insights" && "Relationship Intelligence Dashboard"}
+            {activeTab === "coach" && "AI Relationship Counselor"}
+            {activeTab === "messages" && "Secure Messenger"}
+            {activeTab === "profile" && "My Identity Registry"}
+          </h2>
+          <div className="flex items-center gap-3">
+            <div className="trust-badge px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5" /> Biometric Identity Active
+            </div>
+          </div>
+        </header>
+
+        {/* Tab Components */}
+        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
+
+          {/* TAB 1: DAILY MATCHES */}
+          {activeTab === "matches" && activeMatch && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+              {/* Profile Card */}
+              <div className="md:col-span-7 glass-card rounded-[32px] overflow-hidden border border-white/10 p-6 space-y-6">
+                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden">
+                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
+                  <div className="absolute top-4 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Trust {activeMatch.trustScore}%
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+                    <h3 className="text-2xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h3>
+                    <p className="text-xs text-[#D4AF37] font-semibold">{activeMatch.occupation} • {activeMatch.location}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-gray-300">✔ {activeMatch.archetype}</span>
+                    <span className="px-3 py-1 rounded-full bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-xs text-[#D4AF37]">✔ {activeMatch.attachment} Attachment</span>
+                  </div>
+                  <p className="text-sm text-gray-400 leading-relaxed font-sans">{activeMatch.bio}</p>
+                </div>
+              </div>
+
+              {/* Match Details & AI Explanations */}
+              <div className="md:col-span-5 space-y-6">
+                <div className="glass-card rounded-[28px] p-6 border border-white/10 space-y-6">
+                  <h4 className="text-xs uppercase tracking-widest text-[#D4AF37] font-black">Compatibility Profile</h4>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span className="text-gray-400">Values Alignment</span>
+                        <span className="text-[#D4AF37]">95%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#D4AF37]" style={{ width: "95%" }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span className="text-gray-400">Emotional Synergy</span>
+                        <span className="text-[#E27D8D]">91%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#E27D8D]" style={{ width: "91%" }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span className="text-gray-400">Communication Match</span>
+                        <span className="text-white">88%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-white" style={{ width: "88%" }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Explanation Glow Box */}
+                <div className="glass-card rounded-[28px] p-6 border border-[#D4AF37]/30 shadow-lg shadow-[#D4AF37]/5 space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-[#D4AF37] font-black">
+                    <Bot className="w-5 h-5 animate-pulse" /> Why You Matched
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed font-sans">
+                    {activeMatch.aiExplanation}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-4">
+                  <button className="flex-1 py-4 rounded-full text-sm font-bold bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 transition-colors">
+                    Pass
+                  </button>
+                  <button className="flex-1 py-4 rounded-full text-sm font-black rose-glow-btn text-white flex items-center justify-center gap-1.5">
+                    Connect <Heart className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: INSIGHTS DASHBOARD */}
+          {activeTab === "insights" && (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="p-6 rounded-[24px] glass-card border border-[#D4AF37]/20 text-center space-y-2">
+                  <Award className="w-8 h-8 text-[#D4AF37] mx-auto" />
+                  <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Readiness Index</div>
+                  <div className="text-3xl font-serif font-black text-white">88%</div>
+                  <span className="text-[9px] text-[#10B981] font-bold uppercase">Highly Marriage Ready</span>
+                </div>
+                <div className="p-6 rounded-[24px] glass-card border border-white/5 text-center space-y-2">
+                  <TrendingUp className="w-8 h-8 text-white mx-auto" />
+                  <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Seriousness index</div>
+                  <div className="text-3xl font-serif font-black text-white">94%</div>
+                  <span className="text-[9px] text-gray-400 uppercase">Elite Intention Index</span>
+                </div>
+                <div className="p-6 rounded-[24px] glass-card border border-[#10B981]/20 text-center space-y-2">
+                  <ShieldCheck className="w-8 h-8 text-[#10B981] mx-auto" />
+                  <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Safety trust</div>
+                  <div className="text-3xl font-serif font-black text-white">98%</div>
+                  <span className="text-[9px] text-[#10B981] font-bold uppercase">Authentic Signature</span>
+                </div>
+              </div>
+
+              {/* Attachment styles */}
+              <div className="glass-card rounded-[32px] p-8 border border-white/10 space-y-6">
+                <h3 className="text-xl font-serif font-bold">Psychological Alignment Map</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-[#D4AF37]">Personality Archetype</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      You are registered as an **Intentional Builder**. You approach relationship milestones deliberately, prioritizing family values, structural boundaries, and joint growth curves.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold text-[#E27D8D]">Attachment Profile</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Your attachment is **Secure**. You comfortably express intimacy, manage boundaries with high collaborative intelligence, and recover from relationship friction smoothly.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: AI RELATIONSHIP COACH */}
+          {activeTab === "coach" && (
+            <div className="glass-card rounded-[32px] border border-white/10 flex flex-col h-[550px] overflow-hidden">
+              <div className="p-4 bg-[#121721]/90 border-b border-white/5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] border border-[#D4AF37]/20">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold">Counselor KNOT</h4>
+                  <p className="text-[9px] uppercase tracking-wider text-[#D4AF37] font-bold">Active Coaching Session</p>
+                </div>
+              </div>
+
+              <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                {coachMessages.map((m, idx) => (
+                  <div key={idx} className={`flex items-start gap-3 ${m.role === "user" ? "justify-end" : ""}`}>
+                    {m.role === "ai" && (
+                      <div className="w-8 h-8 rounded-full bg-[#D4AF37]/15 flex items-center justify-center text-[#D4AF37] text-xs font-bold flex-shrink-0">AI</div>
+                    )}
+                    <div className={`p-4 rounded-[22px] text-xs leading-relaxed max-w-[80%] ${
+                      m.role === "user" 
+                        ? "bg-[#E27D8D]/15 border border-[#E27D8D]/25 rounded-tr-none text-white"
+                        : "bg-white/5 border border-white/5 rounded-tl-none text-gray-300"
+                    }`}>
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 bg-[#121721]/90 border-t border-white/5 flex items-center gap-2">
+                <input 
+                  type="text" 
+                  value={coachInput}
+                  onChange={e => setCoachInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleSendCoachMessage()}
+                  placeholder="Ask for advice on attachment, relocation, timelines..."
+                  className="flex-1 bg-white/5 border border-white/5 rounded-full py-3px px-6 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                />
+                <button 
+                  onClick={handleSendCoachMessage}
+                  className="w-10 h-10 rounded-full bg-[#2D1B4E] flex items-center justify-center text-white hover:bg-[#D4AF37] hover:text-black transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: MESSAGES */}
+          {activeTab === "messages" && (
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch h-[550px]">
+              
+              {/* Inbox Lists */}
+              <div className="md:col-span-4 glass-card rounded-[28px] border border-white/5 p-4 overflow-y-auto space-y-2">
+                <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black px-2 mb-3">Chats</h4>
+                <button className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-left">
+                  <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Sophia</h5>
+                    <p className="text-[10px] text-gray-400 truncate">How was your weekend?</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Chat View */}
+              <div className="md:col-span-8 glass-card rounded-[28px] border border-white/5 flex flex-col overflow-hidden">
+                <div className="p-4 bg-[#121721]/90 border-b border-white/5 flex items-center gap-3">
+                  <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
+                  <div>
+                    <h5 className="text-xs font-bold text-white">Sophia</h5>
+                    <span className="text-[9px] text-[#10B981] font-bold">Verified Real Human</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                  {chatMessages.map((m, idx) => (
+                    <div key={idx} className={`flex items-start gap-3 ${m.sender === "me" ? "justify-end" : ""}`}>
+                      <div className={`p-4 rounded-[22px] text-xs leading-relaxed max-w-[80%] ${
+                        m.sender === "me" 
+                          ? "bg-[#2D1B4E] border border-white/10 rounded-tr-none text-white"
+                          : "bg-white/5 border border-white/5 rounded-tl-none text-gray-300"
+                      }`}>
+                        {m.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* AI Safety/Prompt Indicator */}
+                {aiChatTip && (
+                  <div className="p-3 bg-[#D4AF37]/10 border-t border-[#D4AF37]/20 text-[10px] text-[#D4AF37] font-semibold flex items-center gap-2">
+                    <Bot className="w-4 h-4 flex-shrink-0 animate-bounce" /> {aiChatTip}
+                  </div>
+                )}
+
+                <div className="p-4 bg-[#121721]/90 border-t border-white/5 flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSendChatMessage()}
+                    placeholder="Type an emotionally authentic message..."
+                    className="flex-1 bg-white/5 border border-white/5 rounded-full py-3 px-6 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                  <button 
+                    onClick={handleSendChatMessage}
+                    className="w-10 h-10 rounded-full bg-[#2D1B4E] flex items-center justify-center text-white"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: MY PROFILE */}
+          {activeTab === "profile" && (
+            <div className="glass-card rounded-[32px] p-8 border border-white/10 space-y-8">
+              <div className="flex items-center gap-6 pb-6 border-b border-white/5">
+                <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 text-3xl font-black">G</div>
+                <div>
+                  <h3 className="text-xl font-bold">Gabriel, 29</h3>
+                  <p className="text-xs text-gray-400">Software Engineer • Boston, MA</p>
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Identity Verification</h4>
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Government ID Scan</span>
+                    <span className="text-[#10B981] font-bold">Approved</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Liveness Selfie Match</span>
+                    <span className="text-[#10B981] font-bold">Approved</span>
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Membership Subscription</h4>
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Active Plan</span>
+                    <span className="text-[#D4AF37] font-bold">Premium Alignment</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span>Renews On</span>
+                    <span className="text-gray-400">June 16, 2026</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+}

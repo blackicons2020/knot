@@ -1,0 +1,73 @@
+import { Injectable, Logger } from '@nestjs/common';
+import axios from 'axios';
+
+@Injectable()
+export class AIService {
+  private readonly logger = new Logger(AIService.name);
+  private readonly aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+
+  async calculateCompatibility(userA: any, userB: any): Promise<any> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/compatibility`, {
+        user_a: userA,
+        user_b: userB,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error calculating compatibility: ${error.message}`);
+      return {
+        compatibilityScore: 50,
+        emotionalAlignment: 50,
+        communicationStyle: 50,
+        valuesAlignment: 50,
+        lifestyleCompatibility: 50,
+        relationshipReadiness: 50,
+        strengths: ['Shared background'],
+        challenges: ['Potential value differences'],
+        aiExplanation: 'An error occurred calculating deeper insights, but a baseline match is possible.',
+      };
+    }
+  }
+
+  async extractInterviewData(transcript: Array<{ role: string; text: string }>): Promise<any> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/interview/extract`, {
+        transcript,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error extracting interview data: ${error.message}`);
+      return null;
+    }
+  }
+
+  async getCoachResponse(
+    conversationHistory: Array<{ role: string; text: string }>,
+    userProfile: any,
+    currentMessage: string,
+  ): Promise<string> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/coach/respond`, {
+        conversation_history: conversationHistory,
+        user_profile: userProfile,
+        current_message: currentMessage,
+      });
+      return response.data.response;
+    } catch (error) {
+      this.logger.error(`Error from AI coach: ${error.message}`);
+      return "I'm having a little trouble connecting with my insights right now. Let's talk about what makes you feel emotionally safe in a relationship.";
+    }
+  }
+
+  async checkModeration(messages: Array<{ role: string; text: string }>): Promise<any> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/moderation/check`, {
+        messages,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error in moderation check: ${error.message}`);
+      return { status: 'SAFE', reason: '', trustDeduction: 0, severity: 'LOW' };
+    }
+  }
+}

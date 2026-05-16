@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with pgvector extension
+  db:
+    image: ankane/pgvector:v0.5.1
+    container_name: knot-postgres-local
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: knot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for pub/sub and state
+  redis:
+    image: redis:alpine
+    container_name: knot-redis-local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # FastAPI AI Service
+  backend-ai:
+    build:
+      context: ./backend-ai
+      dockerfile: Dockerfile
+    container_name: knot-backend-ai-local
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./backend-ai:/app
+    depends_on:
+      - db
+
+  # NestJS Core Gateway
+  backend-core:
+    build:
+      context: ./backend-core
+      dockerfile: Dockerfile
+    container_name: knot-backend-core-local
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DATABASE_URL=postgresql://postgres:password@db:5432/knot?schema=public
+      - REDIS_URL=redis://redis:6379
+      - AI_SERVICE_URL=http://backend-ai:8000
+      - JWT_SECRET=supersecretlocaltoken
+    volumes:
+      - ./backend-core:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Next.js Web Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: knot-frontend-local
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend-core
+
+volumes:
+  postgres_data:
+  redis_data:
