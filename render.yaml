@@ -17,7 +17,7 @@ services:
   - type: web
     name: knot-backend-core
     runtime: node
-    buildCommand: npm run build && npx prisma generate
+    buildCommand: npm install --include=dev && npm run build && npx prisma generate
     startCommand: npm run start:prod
     rootDir: backend-core
     envVars:
