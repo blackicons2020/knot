@@ -29,7 +29,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: knot-redis
           property: connectionString
       - key: AI_SERVICE_URL
@@ -53,14 +53,14 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
-# Managed Redis
+  # Managed Redis (Key Value Service)
+  - type: keyvalue
+    name: knot-redis
+    plan: free
+    ipAllowList: []
+
+# Managed Postgres Database
 databases:
   - name: knot-db
     plan: free
     postgresVersion: 15
-
-# Managed Redis
-redis:
-  - name: knot-redis
-    plan: free
-    ipAllowList: []
