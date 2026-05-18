@@ -253,7 +253,7 @@ export default function Onboarding() {
                 placeholder="Share your thoughts empathetically..."
                 className="flex-1 bg-white/5 border border-white/5 rounded-full py-3 px-6 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
               />
-              {interviewQuestionIndex > interviewPrompts.length && currentInput === "" ? (
+              {interviewQuestionIndex >= interviewPrompts.length && currentInput === "" ? (
                 <button 
                   onClick={handleProcessAIArchetype}
                   className="px-5 py-3 rounded-full text-xs font-black rose-glow-btn text-white flex items-center gap-1.5"
