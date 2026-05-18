@@ -3,7 +3,7 @@ services:
   - type: web
     name: knot-frontend
     runtime: node
-    buildCommand: npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start
     rootDir: frontend
     envVars:
