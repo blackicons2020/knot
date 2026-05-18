@@ -24,7 +24,7 @@ export class MatchesService {
       take: 5,
     });
 
-    const matchesList = [];
+    const matchesList: any[] = [];
 
     for (const cand of candidates) {
       // Check if we already have calculated their compatibility

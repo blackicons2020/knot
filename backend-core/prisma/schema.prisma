@@ -28,6 +28,7 @@ model User {
   willingToRelocate    String    @default("Maybe")
   childrenPreference   String    @default("Open to children")
   idealPartnerTraits   String[]  @default([])
+  personalValues       String[]  @default([])
   marriageExpectations String    @default("")
   careerGoals          String    @default("")
 
