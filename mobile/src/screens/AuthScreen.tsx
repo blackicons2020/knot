@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Colors, BorderRadius, Spacing } from '../theme/colors';
 import { useToast } from '../contexts/ToastContext';
 import { useTheme } from '../contexts/ThemeContext';
+import KnotLogo from '../components/KnotLogo';
 
 export default function AuthScreen() {
   const { isDarkMode } = useTheme();
