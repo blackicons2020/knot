@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { 
   Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
   Settings, LogOut, Send, AlertTriangle, Shield, CheckCircle2,
