@@ -17,6 +17,7 @@ export default function Onboarding() {
   const [location, setLocation] = useState("");
   const [religion, setReligion] = useState("");
   const [occupation, setOccupation] = useState("");
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
 
   // AI Interview Conversation State
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
@@ -146,6 +147,44 @@ export default function Onboarding() {
                 </div>
               </div>
 
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Selfie Picture Verification</label>
+                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {profilePicture ? (
+                      <img src={profilePicture} alt="Selfie Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-6 h-6 text-gray-500" />
+                    )}
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      id="selfie-upload" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setProfilePicture(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="selfie-upload" 
+                      className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 cursor-pointer transition-colors inline-block"
+                    >
+                      Choose Front Selfie Photo
+                    </label>
+                    <p className="text-[9px] text-gray-500">Front face selfie is required for secure AI liveness verification.</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Age</label>
@@ -202,7 +241,7 @@ export default function Onboarding() {
 
             <button 
               onClick={handleNextStep}
-              disabled={!name || !email}
+              disabled={!name || !email || !profilePicture}
               className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
             >
               Continue to AI Interview

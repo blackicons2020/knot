@@ -135,11 +135,11 @@ export default function Dashboard() {
         if (loadedPaystack) {
           triggerPaystackPopup(loadedPaystack);
         } else {
-          activatePremiumSimulated();
+          alert("Error: Paystack payment gateway could not be loaded. Please disable any active adblockers and try again.");
         }
       };
       script.onerror = () => {
-        activatePremiumSimulated();
+        alert("Error: Connection to secure payment gateway failed. Please check your internet connection.");
       };
       document.body.appendChild(script);
     } else {
@@ -157,9 +157,8 @@ export default function Dashboard() {
         ref: "KNOT-WEB-" + Date.now(),
         callback: async (response: any) => {
           console.log("Paystack payment successful! Reference:", response.reference);
-          setIsPremium(true);
           try {
-            await fetch("http://localhost:8080/payments/verify", {
+            const verifyRes = await fetch("http://localhost:8080/payments/verify", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -170,8 +169,16 @@ export default function Dashboard() {
                 months: 1,
               }),
             });
+            const verifyData = await verifyRes.json();
+            if (verifyData && verifyData.success) {
+              setIsPremium(true);
+              alert("🌟 Premium Registry Activated!\n\nWelcome to Premium Alignment. You now have unlimited access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.");
+            } else {
+              alert("Verification Pending: Payment is being processed. Please refresh your profile in a few moments.");
+            }
           } catch (err) {
             console.error("Verification error:", err);
+            alert("Verification Connection Issue: Your payment was successful, but we couldn't connect to the verification server. Our webhook will automatically verify and upgrade your profile shortly.");
           }
         },
         onClose: () => {
@@ -180,14 +187,9 @@ export default function Dashboard() {
       });
       handler.openIframe();
     } catch (err) {
-      console.error("Paystack popup error, running simulation fallback:", err);
-      activatePremiumSimulated();
+      console.error("Paystack popup error:", err);
+      alert("Error: Secure payment setup failed. Please try again.");
     }
-  };
-
-  const activatePremiumSimulated = () => {
-    setIsPremium(true);
-    alert("🌟 Premium Registry Activated!\n\nWelcome to Premium Alignment. You now have unlimited access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.");
   };
 
   return (

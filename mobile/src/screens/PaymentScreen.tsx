@@ -64,12 +64,13 @@ export default function PaymentScreen() {
         setPaystackReference(data.reference);
         setShowWebView(true);
       } else {
-        addToast('Failed to initialize Paystack session.', 'error');
+        addToast('Failed to initialize Paystack session. Please try again.', 'error');
         setProcessing(false);
       }
     } catch (error) {
-      console.warn('API initialize error, running premium simulation:', error);
-      activatePremiumAnyway();
+      console.error('API initialize error:', error);
+      addToast('Unable to securely connect to payment gateway. Please check your connection and try again.', 'error');
+      setProcessing(false);
     }
   };
 
@@ -99,25 +100,14 @@ export default function PaymentScreen() {
         addToast('Registry Activated! Welcome to Premium.', 'success');
         navigation.goBack();
       } else {
-        console.warn('Backend verification failed, auto-completing to ensure user access.');
-        activatePremiumAnyway();
+        addToast('Verification incomplete. Please refresh your profile in a moment.', 'warning');
+        setProcessing(false);
       }
     } catch (error) {
       console.error('Verify transaction error:', error);
-      activatePremiumAnyway();
+      addToast('Connection issue during verification. Our servers will auto-activate your profile shortly.', 'warning');
+      setProcessing(false);
     }
-  };
-
-  const activatePremiumAnyway = () => {
-    setUserProfile({
-      ...user,
-      isPremium: true,
-      subscriptionAmount: totalUsd,
-      subscriptionDate: new Date().toISOString(),
-    });
-    addToast('Registry Activated! Welcome to Premium.', 'success');
-    setProcessing(false);
-    navigation.goBack();
   };
 
   return (
