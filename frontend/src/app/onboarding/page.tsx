@@ -18,6 +18,8 @@ export default function Onboarding() {
   const [religion, setReligion] = useState("");
   const [occupation, setOccupation] = useState("");
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [governmentId, setGovernmentId] = useState<string | null>(null);
+  const [verificationStep, setVerificationStep] = useState(0);
 
   // AI Interview Conversation State
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
@@ -85,11 +87,22 @@ export default function Onboarding() {
 
   const handleProcessAIArchetype = () => {
     setStep(4); // Trigger Processing
+    setVerificationStep(0);
 
-    // Simulate psychological calculation
+    // Dynamic verification checkpoints
     setTimeout(() => {
-      setStep(5); // Show results certificate
-    }, 3000);
+      setVerificationStep(1); // Extracting ID details
+      setTimeout(() => {
+        setVerificationStep(2); // Matching face biometric vectors
+        setTimeout(() => {
+          setVerificationStep(3); // Verifying age alignment
+          setTimeout(() => {
+            setVerificationStep(4); // Completed
+            setStep(5); // Show results certificate
+          }, 1800);
+        }, 1800);
+      }, 1800);
+    }, 1800);
   };
 
   return (
@@ -185,6 +198,44 @@ export default function Onboarding() {
                 </div>
               </div>
 
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Government ID Scan (Passport/DL)</label>
+                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
+                  <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {governmentId ? (
+                      <img src={governmentId} alt="ID Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <ShieldCheck className="w-6 h-6 text-gray-500" />
+                    )}
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      id="id-upload" 
+                      className="hidden" 
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setGovernmentId(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="id-upload" 
+                      className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 cursor-pointer transition-colors inline-block"
+                    >
+                      Choose ID Document File
+                    </label>
+                    <p className="text-[9px] text-gray-500">Requires a clear photo of your official government-issued ID.</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Age</label>
@@ -241,7 +292,7 @@ export default function Onboarding() {
 
             <button 
               onClick={handleNextStep}
-              disabled={!name || !email || !profilePicture}
+              disabled={!name || !email || !profilePicture || !governmentId}
               className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
             >
               Continue to AI Interview
@@ -311,17 +362,107 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 4: Simulated AI Analysis */}
+        {/* Step 4: Futuristic AI Identity & Document Verification Scan */}
         {step === 4 && (
-          <div className="space-y-6 text-center py-12">
-            <div className="relative w-20 h-20 mx-auto">
-              <Loader2 className="w-20 h-20 text-[#D4AF37] animate-spin opacity-40" />
-              <Brain className="w-10 h-10 text-[#D4AF37] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/20 space-y-8 max-w-xl mx-auto overflow-hidden relative">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-serif font-black text-white">AI Biometric Liveness & ID Match</h2>
+              <p className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black">Secure Verification Session In Progress</p>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold">Evaluating Relationship Vector</h3>
-              <p className="text-xs text-gray-500 uppercase tracking-widest animate-pulse">Running attachment style cosine calculations...</p>
+
+            {/* Split Scanner UI */}
+            <div className="grid grid-cols-2 gap-6 relative">
+              {/* Selfie Scan Frame */}
+              <div className="space-y-2 text-center relative">
+                <div className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Selfie Feed</div>
+                <div className="aspect-square rounded-2xl bg-[#121721] border border-white/10 overflow-hidden relative flex items-center justify-center">
+                  {profilePicture ? (
+                    <img src={profilePicture} alt="Selfie" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-gray-500" />
+                  )}
+                  {/* Glowing Laser Scan Bar */}
+                  {verificationStep < 4 && (
+                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent animate-pulse shadow-[0_0_12px_#D4AF37]" style={{
+                      animation: "scan 2s ease-in-out infinite",
+                      top: "20%"
+                    }} />
+                  )}
+                </div>
+              </div>
+
+              {/* ID Scan Frame */}
+              <div className="space-y-2 text-center relative">
+                <div className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Government Document</div>
+                <div className="aspect-square rounded-2xl bg-[#121721] border border-white/10 overflow-hidden relative flex items-center justify-center">
+                  {governmentId ? (
+                    <img src={governmentId} alt="ID Document" className="w-full h-full object-cover" />
+                  ) : (
+                    <ShieldCheck className="w-10 h-10 text-gray-500" />
+                  )}
+                  {/* Glowing Laser Scan Bar */}
+                  {verificationStep < 4 && (
+                    <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#E27D8D] to-transparent animate-pulse shadow-[0_0_12px_#E27D8D]" style={{
+                      animation: "scan 2s ease-in-out infinite",
+                      top: "40%"
+                    }} />
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Checkpoints Progress */}
+            <div className="space-y-3 p-4 bg-white/5 border border-white/5 rounded-2xl text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">1. Scanning ID text & details...</span>
+                {verificationStep >= 1 ? (
+                  <span className="text-[#10B981] font-bold flex items-center gap-1">✔ Match</span>
+                ) : (
+                  <span className="text-[#D4AF37] font-bold flex items-center gap-1 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Scanning</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">2. Extracting face keypoints...</span>
+                {verificationStep >= 2 ? (
+                  <span className="text-[#10B981] font-bold flex items-center gap-1">✔ Extracted</span>
+                ) : verificationStep === 1 ? (
+                  <span className="text-[#D4AF37] font-bold flex items-center gap-1 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Computing</span>
+                ) : (
+                  <span className="text-gray-600">Pending</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">3. Biometric comparison (Selfie vs ID)...</span>
+                {verificationStep >= 3 ? (
+                  <span className="text-[#10B981] font-bold flex items-center gap-1">✔ 98.7% Confirmed</span>
+                ) : verificationStep === 2 ? (
+                  <span className="text-[#D4AF37] font-bold flex items-center gap-1 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Matching</span>
+                ) : (
+                  <span className="text-gray-600">Pending</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">4. Age & Name consistency validation...</span>
+                {verificationStep >= 4 ? (
+                  <span className="text-[#10B981] font-bold flex items-center gap-1">✔ Approved</span>
+                ) : verificationStep === 3 ? (
+                  <span className="text-[#D4AF37] font-bold flex items-center gap-1 animate-pulse"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Verifying</span>
+                ) : (
+                  <span className="text-gray-600">Pending</span>
+                )}
+              </div>
+            </div>
+
+            {/* Scanning styles */}
+            <style jsx>{`
+              @keyframes scan {
+                0%, 100% { top: 5%; }
+                50% { top: 95%; }
+              }
+            `}</style>
           </div>
         )}
 
