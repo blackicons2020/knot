@@ -5,11 +5,14 @@ import Link from "next/link";
 import { 
   Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
   Settings, LogOut, Send, AlertTriangle, Shield, CheckCircle2,
-  TrendingUp, Award, Activity, Compass, BrainCircuit, HeartHandshake
+  TrendingUp, Award, Activity, Compass, BrainCircuit, HeartHandshake,
+  Menu, X, ArrowLeft
 } from "lucide-react";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("matches"); // matches, insights, coach, messages, profile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeChatId, setActiveChatId] = useState<string | null>("m1");
   
   // Mock Matches Data
   const mockMatches = [
@@ -82,42 +85,59 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-[#0A0E14] text-white overflow-hidden">
       
+      {/* Sidebar Backdrop for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-[#121721] border-r border-white/5 flex flex-col justify-between p-6">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#121721] border-r border-white/5 flex flex-col justify-between p-6 transition-transform duration-300 md:static md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="space-y-8">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
-              KNOT<span className="text-[#D4AF37]">.</span>
-            </span>
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2" onClick={() => setIsSidebarOpen(false)}>
+              <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
+                KNOT<span className="text-[#D4AF37]">.</span>
+              </span>
+            </Link>
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-1 text-gray-400 hover:text-white md:hidden"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           <nav className="space-y-2">
             <button 
-              onClick={() => setActiveTab("matches")}
+              onClick={() => { setActiveTab("matches"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "matches" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
             >
               <Compass className="w-4 h-4" /> Daily Matches
             </button>
             <button 
-              onClick={() => setActiveTab("insights")}
+              onClick={() => { setActiveTab("insights"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "insights" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
             >
               <BrainCircuit className="w-4 h-4" /> Insights Dashboard
             </button>
             <button 
-              onClick={() => setActiveTab("coach")}
+              onClick={() => { setActiveTab("coach"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "coach" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
             >
               <Bot className="w-4 h-4" /> AI Coach
             </button>
             <button 
-              onClick={() => setActiveTab("messages")}
+              onClick={() => { setActiveTab("messages"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "messages" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
             >
               <MessageSquare className="w-4 h-4" /> Messages
             </button>
             <button 
-              onClick={() => setActiveTab("profile")}
+              onClick={() => { setActiveTab("profile"); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === "profile" ? "bg-[#2D1B4E] text-[#D4AF37] border-l-2 border-[#D4AF37]" : "text-gray-400 hover:text-white hover:bg-white/5"}`}
             >
               <User className="w-4 h-4" /> My Profile
@@ -145,23 +165,34 @@ export default function Dashboard() {
       <main className="flex-1 bg-[#0A0E14] relative overflow-y-auto flex flex-col">
         
         {/* Top Navbar */}
-        <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#0A0E14]/50 backdrop-blur-md sticky top-0 z-10">
-          <h2 className="text-xl font-serif font-black text-white capitalize">
-            {activeTab === "matches" && "Your AI Curated Match"}
-            {activeTab === "insights" && "Relationship Intelligence Dashboard"}
-            {activeTab === "coach" && "AI Relationship Counselor"}
-            {activeTab === "messages" && "Secure Messenger"}
-            {activeTab === "profile" && "My Identity Registry"}
-          </h2>
+        <header className="h-16 md:h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#0A0E14]/50 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex items-center gap-2 md:gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-400 hover:text-white md:hidden"
+              aria-label="Open sidebar"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <h2 className="text-base md:text-xl font-serif font-black text-white capitalize truncate max-w-[180px] sm:max-w-none">
+              {activeTab === "matches" && "Your AI Curated Match"}
+              {activeTab === "insights" && "Relationship Intelligence Dashboard"}
+              {activeTab === "coach" && "AI Relationship Counselor"}
+              {activeTab === "messages" && "Secure Messenger"}
+              {activeTab === "profile" && "My Identity Registry"}
+            </h2>
+          </div>
           <div className="flex items-center gap-3">
-            <div className="trust-badge px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5" /> Biometric Identity Active
+            <div className="trust-badge px-2.5 py-1.5 md:px-3.5 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 md:gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="hidden sm:inline">Biometric Identity Active</span>
+              <span className="sm:hidden">Active</span>
             </div>
           </div>
         </header>
 
         {/* Tab Components */}
-        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
+        <div className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
 
           {/* TAB 1: DAILY MATCHES */}
           {activeTab === "matches" && activeMatch && (
@@ -329,7 +360,7 @@ export default function Dashboard() {
                   onChange={e => setCoachInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSendCoachMessage()}
                   placeholder="Ask for advice on attachment, relocation, timelines..."
-                  className="flex-1 bg-white/5 border border-white/5 rounded-full py-3px px-6 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  className="flex-1 bg-white/5 border border-white/5 rounded-full py-3 px-6 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
                 />
                 <button 
                   onClick={handleSendCoachMessage}
@@ -343,12 +374,15 @@ export default function Dashboard() {
 
           {/* TAB 4: MESSAGES */}
           {activeTab === "messages" && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch h-[550px]">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch h-[550px] md:h-[550px]">
               
               {/* Inbox Lists */}
-              <div className="md:col-span-4 glass-card rounded-[28px] border border-white/5 p-4 overflow-y-auto space-y-2">
+              <div className={`md:col-span-4 glass-card rounded-[28px] border border-white/5 p-4 overflow-y-auto space-y-2 h-full ${activeChatId ? "hidden md:block" : "block"}`}>
                 <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black px-2 mb-3">Chats</h4>
-                <button className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-left">
+                <button 
+                  onClick={() => setActiveChatId("m1")}
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-left transition-all hover:bg-[#2D1B4E]/40"
+                >
                   <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
                     <h5 className="text-xs font-bold text-white">Sophia</h5>
@@ -358,8 +392,15 @@ export default function Dashboard() {
               </div>
 
               {/* Chat View */}
-              <div className="md:col-span-8 glass-card rounded-[28px] border border-white/5 flex flex-col overflow-hidden">
+              <div className={`md:col-span-8 glass-card rounded-[28px] border border-white/5 flex flex-col overflow-hidden h-full ${!activeChatId ? "hidden md:flex" : "flex"}`}>
                 <div className="p-4 bg-[#121721]/90 border-b border-white/5 flex items-center gap-3">
+                  <button 
+                    onClick={() => setActiveChatId(null)}
+                    className="p-2 -ml-2 text-gray-400 hover:text-white md:hidden"
+                    aria-label="Back to chats"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
                   <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
                     <h5 className="text-xs font-bold text-white">Sophia</h5>
@@ -410,9 +451,9 @@ export default function Dashboard() {
 
           {/* TAB 5: MY PROFILE */}
           {activeTab === "profile" && (
-            <div className="glass-card rounded-[32px] p-8 border border-white/10 space-y-8">
-              <div className="flex items-center gap-6 pb-6 border-b border-white/5">
-                <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 text-3xl font-black">G</div>
+            <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 pb-6 border-b border-white/5">
+                <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 text-3xl font-black flex-shrink-0">G</div>
                 <div>
                   <h3 className="text-xl font-bold">Gabriel, 29</h3>
                   <p className="text-xs text-gray-400">Software Engineer • Boston, MA</p>

@@ -92,7 +92,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0E14] text-white flex flex-col justify-between py-12 px-6">
+    <div className="min-h-screen bg-[#0A0E14] text-white flex flex-col justify-between py-6 px-4 sm:py-12 sm:px-6">
       {/* Header */}
       <header className="max-w-4xl mx-auto w-full flex items-center justify-between">
         <Link href="/" className="text-xl font-serif font-black tracking-wider flex items-center gap-1">
@@ -104,7 +104,7 @@ export default function Onboarding() {
       </header>
 
       {/* Main Container */}
-      <main className="max-w-2xl mx-auto w-full my-auto py-12">
+      <main className="max-w-2xl mx-auto w-full my-auto py-6 sm:py-12">
         
         {/* Step 1: Cinematic Welcome */}
         {step === 1 && (
@@ -129,7 +129,7 @@ export default function Onboarding() {
 
         {/* Step 2: Essentials Form */}
         {step === 2 && (
-          <div className="glass-card rounded-[32px] p-8 border border-white/10 space-y-6">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-6">
             <h2 className="text-2xl font-serif font-black text-center">Identity Details</h2>
             <div className="space-y-4">
               <div>
@@ -146,7 +146,7 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Age</label>
                   <div className="relative">
@@ -289,7 +289,7 @@ export default function Onboarding() {
         {/* Step 5: Cinematic AI Relationship Certificate Reveal */}
         {step === 5 && (
           <div className="space-y-8 animate-fade-in">
-            <div className="glass-card rounded-[36px] p-8 border border-[#D4AF37]/30 shadow-2xl shadow-[#D4AF37]/5 relative overflow-hidden max-w-md mx-auto">
+            <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/30 shadow-2xl shadow-[#D4AF37]/5 relative overflow-hidden max-w-md mx-auto">
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
               
               <div className="text-center space-y-4 mb-6">

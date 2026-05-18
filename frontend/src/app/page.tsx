@@ -14,9 +14,9 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Premium Header */}
       <header className="fixed top-0 left-0 right-0 z-50 glass-nav">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 md:h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
+            <span className="text-xl md:text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
               KNOT<span className="text-[#D4AF37]">.</span>
             </span>
           </Link>
@@ -26,11 +26,11 @@ export default function Home() {
             <Link href="#coach" className="hover:text-[#D4AF37] transition-colors">AI Coach</Link>
             <Link href="#pricing" className="hover:text-[#D4AF37] transition-colors">Elite Tiers</Link>
           </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/onboarding" className="text-sm font-semibold hover:text-[#D4AF37] transition-colors">
+          <div className="flex items-center gap-3 md:gap-4">
+            <Link href="/onboarding" className="hidden sm:inline text-sm font-semibold hover:text-[#D4AF37] transition-colors">
               Sign In
             </Link>
-            <Link href="/onboarding" className="px-5 py-2.5 rounded-full text-sm font-black rose-glow-btn text-white">
+            <Link href="/onboarding" className="px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-black rose-glow-btn text-white">
               Join Registry
             </Link>
           </div>
@@ -38,17 +38,17 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-24 md:pt-48 md:pb-36 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+      <section className="relative pt-24 pb-16 md:pt-48 md:pb-36 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           <div className="lg:col-span-7 space-y-8 text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-wider text-[#D4AF37] uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-semibold tracking-wider text-[#D4AF37] uppercase">
               <Sparkles className="w-3.5 h-3.5" /> High-Trust AI Matchmaking for Serious Singles
             </div>
-            <h1 className="text-5xl md:text-7xl font-serif font-black text-[#F5F5F1] leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-serif font-black text-[#F5F5F1] leading-tight">
               Where Compatibility <br />
               Becomes <span className="gold-gradient-text">Commitment.</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-400 font-sans max-w-xl leading-relaxed">
+            <p className="text-base md:text-xl text-gray-400 font-sans max-w-xl leading-relaxed">
               KNOT is the world's most trusted relationship intelligence ecosystem built exclusively for verified singles seeking marriage and permanent partnership. No shallow swipes. No superficial games. Just real love.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -59,17 +59,17 @@ export default function Home() {
                 Our Verification System
               </Link>
             </div>
-            <div className="flex items-center gap-8 pt-6 border-t border-white/5">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8 pt-6 border-t border-white/5">
               <div>
                 <h4 className="text-2xl font-black text-white">100%</h4>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Verified Users</p>
               </div>
-              <div className="h-8 w-px bg-white/10" />
+              <div className="hidden sm:block h-8 w-px bg-white/10" />
               <div>
                 <h4 className="text-2xl font-black text-[#D4AF37]">94%</h4>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Success Match Index</p>
               </div>
-              <div className="h-8 w-px bg-white/10" />
+              <div className="hidden sm:block h-8 w-px bg-white/10" />
               <div>
                 <h4 className="text-2xl font-black text-white">0%</h4>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Superficial Swiping</p>
@@ -381,12 +381,12 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-black/60 border-t border-white/5 py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500">
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
             <span className="text-lg font-serif font-black text-white">KNOT.</span>
             <span className="text-xs">© 2026 KNOT AI Relationship Systems.</span>
           </div>
-          <div className="flex gap-8 text-xs font-medium text-gray-400">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-400">
             <Link href="#" className="hover:text-[#D4AF37] transition-colors">Privacy Charter</Link>
             <Link href="#" className="hover:text-[#D4AF37] transition-colors">Commitment Pledge</Link>
             <Link href="#" className="hover:text-[#D4AF37] transition-colors">Trust & Safety Guidelines</Link>
