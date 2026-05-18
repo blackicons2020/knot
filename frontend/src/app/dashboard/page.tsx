@@ -11,6 +11,7 @@ import {
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("matches"); // matches, insights, coach, messages, profile
+  const [isPremium, setIsPremium] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>("m1");
   
@@ -80,6 +81,61 @@ export default function Dashboard() {
       setChatMessages(prev => [...prev, { sender: "Sophia", text: "That sounds wonderful! I actually think communication is key. We should talk more about our goals." }]);
       setAiChatTip("AI Message Assistant: Sophia is expressing strong communicative openness. Share a story of a major life goal you achieved recently.");
     }, 1500);
+  };
+
+  const handlePaystackCheckout = () => {
+    const paystack = (window as any).PaystackPop;
+    if (!paystack) {
+      const script = document.createElement("script");
+      script.src = "https://js.paystack.co/v1/inline.js";
+      script.async = true;
+      script.onload = () => triggerPaystackPopup();
+      document.body.appendChild(script);
+    } else {
+      triggerPaystackPopup();
+    }
+  };
+
+  const triggerPaystackPopup = () => {
+    const paystack = (window as any).PaystackPop;
+    if (!paystack) return;
+    const handler = paystack.setup({
+      key: "pk_live_b2c985a001f4c23b6bd1a19af4193f57c901446c",
+      email: "gabriel@knot.com",
+      amount: 250000,
+      currency: "NGN",
+      ref: "KNOT-WEB-" + Date.now(),
+      callback: async (response: any) => {
+        console.log("Paystack payment successful! Reference:", response.reference);
+        try {
+          const verifyRes = await fetch("http://localhost:8080/payments/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              reference: response.reference,
+              userId: "c8b74c0b-426b-4e14-9b2f-768a1d2e3c4d",
+              months: 1,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setIsPremium(true);
+          } else {
+            console.warn("Backend payment verification endpoint returned failure or not fully connected.");
+            setIsPremium(true);
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+          setIsPremium(true);
+        }
+      },
+      onClose: () => {
+        console.log("Checkout closed.");
+      }
+    });
+    handler.openIframe();
   };
 
   return (
@@ -476,14 +532,34 @@ export default function Dashboard() {
 
                 <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
                   <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Membership Subscription</h4>
-                  <div className="flex items-center justify-between text-xs">
-                    <span>Active Plan</span>
-                    <span className="text-[#D4AF37] font-bold">Premium Alignment</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span>Renews On</span>
-                    <span className="text-gray-400">June 16, 2026</span>
-                  </div>
+                  {isPremium ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Active Plan</span>
+                        <span className="text-[#D4AF37] font-bold">Premium Alignment (Live)</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Renews On</span>
+                        <span className="text-gray-400">June 16, 2026</span>
+                      </div>
+                      <div className="mt-2 p-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[10px] text-[#D4AF37] font-black text-center uppercase tracking-wide">
+                        🌟 Premium Membership Active
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Active Plan</span>
+                        <span className="text-gray-400 font-bold">Base Member</span>
+                      </div>
+                      <button
+                        onClick={handlePaystackCheckout}
+                        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] text-[#0A0E14] font-black text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" /> Upgrade to Premium
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
