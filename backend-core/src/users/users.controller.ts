@@ -5,6 +5,11 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  async getAll() {
+    return this.usersService.findAll();
+  }
+
   @Get('profile')
   async getProfile(@Request() req: any) {
     // Note: Request would normally carry authenticated user id via Guard. 

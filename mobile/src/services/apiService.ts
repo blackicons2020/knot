@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { User, Match, Message } from '../types';
 
 const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.43.103:8080';
-const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'https://knot-backend-core.onrender.com');
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'https://knot-backend-core.onrender.com');
 // Base URL for backend resources
 const BASE_URL = API_URL;
 

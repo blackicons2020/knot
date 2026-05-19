@@ -9,6 +9,12 @@ export class UsersService {
     private readonly aiService: AIService,
   ) {}
 
+  async findAll() {
+    return this.prisma.user.findMany({
+      include: { profileImages: true },
+    });
+  }
+
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },

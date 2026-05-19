@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList } from '../types';
+import { API_URL } from '../services/apiService';
 import { formatLocalPrice, getCurrencyForCountry, getPaystackCurrency } from '../services/currencyService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -47,7 +48,7 @@ export default function PaymentScreen() {
       const email = user.email || 'gabriel@knot.com';
       const localAmount = 2500 * months;
       
-      const response = await fetch('http://10.0.2.2:8080/payments/initialize', {
+      const response = await fetch(`${API_URL}/payments/initialize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ export default function PaymentScreen() {
     setProcessing(true);
     addToast('Verifying transaction...', 'info');
     try {
-      const response = await fetch('http://10.0.2.2:8080/payments/verify', {
+      const response = await fetch(`${API_URL}/payments/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
