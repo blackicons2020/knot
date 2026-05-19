@@ -152,6 +152,11 @@ export default function OnboardingScreen() {
   };
 
 
+  // Religion Select States
+  const [religionSelect, setReligionSelect] = useState('');
+  const [religionCustom, setReligionCustom] = useState('');
+
+
   // Gold Archetype Results
   const archetype = {
     personalityArchetype: 'The Intentional Builder',
@@ -328,6 +333,21 @@ export default function OnboardingScreen() {
         {renderDropdownField('Country', countryVal, 'Select country', COUNTRIES, setCountry)}
         {!!countryVal && (
           <>
+            <View style={{ marginBottom: 12 }}>
+              <Text style={styles.label}>City / Town</Text>
+              {cities.length > 0 ? (
+                renderDropdownField('City / Town', cityVal, 'Select city / town', cities, setCity)
+              ) : (
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={cityVal}
+                  onChangeText={setCity}
+                  placeholder="Type city / town"
+                  placeholderTextColor={Colors.gray400}
+                />
+              )}
+            </View>
+
             {states.length > 0 ? (
               renderDropdownField('State / Province / Region', stateVal, 'Select state / province', states, setState)
             ) : (
@@ -343,22 +363,6 @@ export default function OnboardingScreen() {
               </View>
             )}
           </>
-        )}
-        {!!stateVal && (
-          <View style={{ marginBottom: 12 }}>
-            <Text style={styles.label}>City / Town</Text>
-            {cities.length > 0 ? (
-              renderDropdownField('City / Town', cityVal, 'Select city / town', cities, setCity)
-            ) : (
-              <TextInput
-                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                value={cityVal}
-                onChangeText={setCity}
-                placeholder="Type city / town"
-                placeholderTextColor={Colors.gray400}
-              />
-            )}
-          </View>
         )}
       </View>
     );
@@ -462,13 +466,41 @@ export default function OnboardingScreen() {
 
             <View style={{ marginTop: 12 }}>
               <Text style={styles.label}>Religion / Faith</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                value={form.religion}
-                onChangeText={(v) => set('religion', v)}
-                placeholder="e.g. Christian, Muslim"
-                placeholderTextColor={Colors.gray400}
-              />
+              {renderDropdownField(
+                'Religion / Faith',
+                religionSelect,
+                'Select religion / faith',
+                [
+                  'Christian',
+                  'Muslim',
+                  'Jewish',
+                  'Hindu',
+                  'Buddhist',
+                  'Atheist',
+                  'Agnostic',
+                  'Other',
+                ],
+                (val) => {
+                  setReligionSelect(val);
+                  if (val !== 'Other') {
+                    set('religion', val);
+                  } else {
+                    set('religion', religionCustom);
+                  }
+                }
+              )}
+              {religionSelect === 'Other' && (
+                <TextInput
+                  style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={religionCustom}
+                  onChangeText={(v) => {
+                    setReligionCustom(v);
+                    set('religion', v);
+                  }}
+                  placeholder="Specify your religion"
+                  placeholderTextColor={Colors.gray400}
+                />
+              )}
             </View>
 
             {renderLocationGroup('residence', 'Current Residence')}

@@ -21,6 +21,8 @@ export default function Onboarding() {
   const [age, setAge] = useState(25);
   const [email, setEmail] = useState("");
   const [religion, setReligion] = useState("");
+  const [religionSelect, setReligionSelect] = useState("");
+  const [religionCustom, setReligionCustom] = useState("");
   const [occupation, setOccupation] = useState("");
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [governmentId, setGovernmentId] = useState<string | null>(null);
@@ -337,17 +339,45 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Religion / Faith</label>
-                  <input 
-                    type="text" 
-                    value={religion} 
-                    onChange={e => setReligion(e.target.value)}
-                    placeholder="e.g. Christian, Muslim, Jewish" 
+                  <select
+                    value={religionSelect}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setReligionSelect(val);
+                      if (val !== "Other") {
+                        setReligion(val);
+                      } else {
+                        setReligion(religionCustom);
+                      }
+                    }}
                     className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
+                  >
+                    <option value="">Select Religion</option>
+                    <option value="Christian">Christian</option>
+                    <option value="Muslim">Muslim</option>
+                    <option value="Jewish">Jewish</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Buddhist">Buddhist</option>
+                    <option value="Atheist">Atheist</option>
+                    <option value="Agnostic">Agnostic</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {religionSelect === "Other" && (
+                    <input 
+                      type="text" 
+                      value={religionCustom} 
+                      onChange={e => {
+                        setReligionCustom(e.target.value);
+                        setReligion(e.target.value);
+                      }}
+                      placeholder="Please specify your religion" 
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
+                    />
+                  )}
                 </div>
               </div>
 
-              {/* Current Residence Location Selectors */}
+              {/* Current Residence Location Selectors (Reordered to Country, City, State) */}
               <div className="pt-2 border-t border-white/5 space-y-3">
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Current Residence Location</span>
                 <div className="grid grid-cols-3 gap-2">
@@ -367,6 +397,29 @@ export default function Onboarding() {
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    {residenceCities.length > 0 ? (
+                      <select
+                        value={residenceCity}
+                        onChange={(e) => setResidenceCity(e.target.value)}
+                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                      >
+                        <option value="">Select</option>
+                        {residenceCities.map((ct) => (
+                          <option key={ct} value={ct}>{ct}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={residenceCity}
+                        onChange={(e) => setResidenceCity(e.target.value)}
+                        placeholder="City"
+                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
@@ -397,33 +450,10 @@ export default function Onboarding() {
                       />
                     )}
                   </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    {residenceCities.length > 0 ? (
-                      <select
-                        value={residenceCity}
-                        onChange={(e) => setResidenceCity(e.target.value)}
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      >
-                        <option value="">Select</option>
-                        {residenceCities.map((ct) => (
-                          <option key={ct} value={ct}>{ct}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={residenceCity}
-                        onChange={(e) => setResidenceCity(e.target.value)}
-                        placeholder="City"
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      />
-                    )}
-                  </div>
                 </div>
               </div>
 
-              {/* Heritage & Origin Location Selectors */}
+              {/* Heritage & Origin Location Selectors (Reordered to Country, City, State) */}
               <div className="pt-2 border-t border-white/5 space-y-3">
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Heritage & Origin</span>
                 <div className="grid grid-cols-3 gap-2">
@@ -443,6 +473,29 @@ export default function Onboarding() {
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    {originCities.length > 0 ? (
+                      <select
+                        value={originCity}
+                        onChange={(e) => setOriginCity(e.target.value)}
+                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                      >
+                        <option value="">Select</option>
+                        {originCities.map((ct) => (
+                          <option key={ct} value={ct}>{ct}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={originCity}
+                        onChange={(e) => setOriginCity(e.target.value)}
+                        placeholder="City"
+                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
@@ -469,29 +522,6 @@ export default function Onboarding() {
                           setOriginCity("");
                         }}
                         placeholder="State"
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    {originCities.length > 0 ? (
-                      <select
-                        value={originCity}
-                        onChange={(e) => setOriginCity(e.target.value)}
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      >
-                        <option value="">Select</option>
-                        {originCities.map((ct) => (
-                          <option key={ct} value={ct}>{ct}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={originCity}
-                        onChange={(e) => setOriginCity(e.target.value)}
-                        placeholder="City"
                         className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
                       />
                     )}
