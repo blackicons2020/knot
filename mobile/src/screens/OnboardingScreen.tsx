@@ -94,6 +94,64 @@ export default function OnboardingScreen() {
   const [verificationStep, setVerificationStep] = useState(0);
   const scanAnim = useRef(new Animated.Value(0)).current;
 
+  // Selfie Liveness Interactive Modal States
+  const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
+  const [livenessState, setLivenessState] = useState<'align' | 'smile' | 'tilt' | 'complete'>('align');
+  const [livenessPrompt, setLivenessPrompt] = useState('Center your face in the circle');
+
+  // ID Scanning Interactive Modal States
+  const [isIdScanModalOpen, setIsIdScanModalOpen] = useState(false);
+  const [idScanState, setIdScanState] = useState<'align' | 'scanning' | 'complete'>('align');
+  const [idScanPrompt, setIdScanPrompt] = useState('Align ID inside the rectangle frame');
+
+  const startLivenessScanner = () => {
+    setIsLivenessModalOpen(true);
+    setLivenessState('align');
+    setLivenessPrompt('Center your face in the circular aperture');
+    
+    setTimeout(() => {
+      setLivenessState('smile');
+      setLivenessPrompt('Now smile big and blink to verify aliveness');
+      
+      setTimeout(() => {
+        setLivenessState('tilt');
+        setLivenessPrompt('Perfect! Tilt your head slowly to the left');
+        
+        setTimeout(() => {
+          setLivenessState('complete');
+          setLivenessPrompt('Liveness Confirmed! Biometric face scan complete.');
+          set('profileImageUrls', ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80']);
+          
+          setTimeout(() => {
+            setIsLivenessModalOpen(false);
+          }, 1500);
+        }, 2000);
+      }, 2000);
+    }, 2000);
+  };
+
+  const startIdScanner = () => {
+    setIsIdScanModalOpen(true);
+    setIdScanState('align');
+    setIdScanPrompt('Align document inside the rectangular frame');
+
+    setTimeout(() => {
+      setIdScanState('scanning');
+      setIdScanPrompt('Scanning ID barcode & OCR features...');
+
+      setTimeout(() => {
+        setIdScanState('complete');
+        setIdScanPrompt('ID Scan Complete! OCR match succeeded.');
+        setGovIdUri('https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&w=300&q=80');
+
+        setTimeout(() => {
+          setIsIdScanModalOpen(false);
+        }, 1500);
+      }, 2000);
+    }, 2000);
+  };
+
+
   // Gold Archetype Results
   const archetype = {
     personalityArchetype: 'The Intentional Builder',
@@ -428,10 +486,15 @@ export default function OnboardingScreen() {
                   )}
                 </View>
                 <View style={styles.uploadInfo}>
-                  <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('selfie')}>
-                    <Text style={styles.uploadBtnText}>Choose Front Selfie Photo</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.uploadSubtext}>Front face selfie is required for secure AI liveness verification.</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    <TouchableOpacity style={[styles.uploadBtn, { backgroundColor: Colors.primary + '1F', borderColor: Colors.primary + '3B' }]} onPress={startLivenessScanner}>
+                      <Text style={[styles.uploadBtnText, { color: Colors.primary }]}>Start Live Face Scan</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('selfie')}>
+                      <Text style={styles.uploadBtnText}>Upload Photo</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.uploadSubtext}>Live Face Scan utilizes aliveness verification to increase your Compatibility Trust Rating.</Text>
                 </View>
               </View>
             </View>
@@ -448,13 +511,19 @@ export default function OnboardingScreen() {
                   )}
                 </View>
                 <View style={styles.uploadInfo}>
-                  <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('id')}>
-                    <Text style={styles.uploadBtnText}>Choose ID Document File</Text>
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    <TouchableOpacity style={[styles.uploadBtn, { backgroundColor: Colors.primary + '1F', borderColor: Colors.primary + '3B' }]} onPress={startIdScanner}>
+                      <Text style={[styles.uploadBtnText, { color: Colors.primary }]}>Scan ID Document</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('id')}>
+                      <Text style={styles.uploadBtnText}>Upload ID</Text>
+                    </TouchableOpacity>
+                  </View>
                   <Text style={styles.uploadSubtext}>Requires a clear photo of your official government-issued ID.</Text>
                 </View>
               </View>
             </View>
+
 
             <TouchableOpacity
               style={[styles.actionButton, { marginTop: 24, opacity: (!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
@@ -729,6 +798,99 @@ export default function OnboardingScreen() {
               )}
               ListEmptyComponent={<Text style={[styles.modalEmpty, { color: Colors.gray400 }]}>No results found</Text>}
             />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Selfie Liveness Face Scan Modal */}
+      <Modal visible={isLivenessModalOpen} animationType="fade" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(10,14,20,0.95)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderWidth: 1, borderColor: Colors.accent + '40', borderRadius: 32, padding: 24, width: '100%', maxWidth: 360, alignItems: 'center', position: 'relative' }}>
+            <TouchableOpacity 
+              onPress={() => setIsLivenessModalOpen(false)}
+              style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+            >
+              <Ionicons name="close" size={24} color={Colors.gray400} />
+            </TouchableOpacity>
+
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: '900', color: isDarkMode ? Colors.white : Colors.dark }}>Biometric Face Scanner</Text>
+              <Text style={{ fontSize: 8, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Verifying Live Authenticity</Text>
+            </View>
+
+            {/* Circular Aperture */}
+            <View style={{ width: 180, height: 180, borderRadius: 90, borderWidth: 4, borderColor: Colors.accent, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', backgroundColor: '#121721', marginVertical: 20, shadowColor: Colors.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 }}>
+              {/* Simulation avatar/camera feed */}
+              <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', opacity: livenessState === 'complete' ? 0.3 : 1 }}>
+                <Ionicons name="person" size={72} color={Colors.gray600} />
+              </View>
+
+              {/* Success Checkmark */}
+              {livenessState === 'complete' && (
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(16,185,129,0.9)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="checkmark-circle" size={56} color={Colors.white} />
+                </View>
+              )}
+
+              {/* Pulsing Scan Line */}
+              {livenessState !== 'complete' && (
+                <View style={{ position: 'absolute', left: 0, right: 0, height: 2, backgroundColor: Colors.accent }} />
+              )}
+            </View>
+
+            {/* Prompt Instructions */}
+            <View style={{ backgroundColor: Colors.white + '08', borderRadius: 16, padding: 12, width: '100%', minHeight: 64, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? Colors.gray200 : Colors.gray800, textAlign: 'center' }}>{livenessPrompt}</Text>
+              <View style={{ flexDirection: 'row', gap: 6, marginTop: 10 }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'align' ? Colors.accent : livenessState !== 'align' ? '#10b981' : Colors.gray500 }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'smile' ? Colors.accent : livenessState === 'tilt' || livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'tilt' ? Colors.accent : livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ID Document Scanner Modal */}
+      <Modal visible={isIdScanModalOpen} animationType="fade" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(10,14,20,0.95)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderWidth: 1, borderColor: Colors.white + '15', borderRadius: 32, padding: 24, width: '100%', maxWidth: 360, alignItems: 'center', position: 'relative' }}>
+            <TouchableOpacity 
+              onPress={() => setIsIdScanModalOpen(false)}
+              style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+            >
+              <Ionicons name="close" size={24} color={Colors.gray400} />
+            </TouchableOpacity>
+
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <Text style={{ fontSize: 16, fontWeight: '900', color: isDarkMode ? Colors.white : Colors.dark }}>Government ID Scanner</Text>
+              <Text style={{ fontSize: 8, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Scanning Document Verification</Text>
+            </View>
+
+            {/* Rectangular Guide Frame */}
+            <View style={{ width: '100%', aspectRatio: 1.586, borderRadius: 16, borderWidth: 3, borderColor: Colors.primary, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', backgroundColor: '#121721', marginVertical: 20 }}>
+              {/* Simulation Document icon */}
+              <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', opacity: idScanState === 'complete' ? 0.3 : 1 }}>
+                <Ionicons name="card" size={64} color={Colors.gray600} />
+              </View>
+
+              {/* Success Checkmark */}
+              {idScanState === 'complete' && (
+                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(16,185,129,0.9)', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="checkmark-circle" size={56} color={Colors.white} />
+                </View>
+              )}
+
+              {/* Pulsing Scan Line */}
+              {idScanState === 'scanning' && (
+                <View style={{ position: 'absolute', left: 0, right: 0, height: 2, backgroundColor: Colors.primary }} />
+              )}
+            </View>
+
+            {/* Prompt Instructions */}
+            <View style={{ backgroundColor: Colors.white + '08', borderRadius: 16, padding: 12, width: '100%', minHeight: 48, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? Colors.gray200 : Colors.gray800, textAlign: 'center' }}>{idScanPrompt}</Text>
+            </View>
           </View>
         </View>
       </Modal>
