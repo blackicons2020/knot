@@ -66,47 +66,65 @@ export default function AuthScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Decorative background blobs */}
-        <View style={styles.blobTopRight} />
-        <View style={styles.blobBottomLeft} />
+        <View style={[styles.blobTopRight, { backgroundColor: isDarkMode ? Colors.primary + '18' : Colors.primary + '0B' }]} />
+        <View style={[styles.blobBottomLeft, { backgroundColor: isDarkMode ? Colors.accent + '20' : Colors.accent + '15' }]} />
 
         <KnotLogo style={styles.logo} />
 
-        <Text style={styles.headline}>
+        <Text style={[styles.headline, { color: isDarkMode ? Colors.white : Colors.dark }]}>
           {isLogin ? 'Welcome Back' : 'Join the Registry'}
         </Text>
-        <Text style={styles.subheadline}>
+        <Text style={[styles.subheadline, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
           Where true relationships lead to vows
         </Text>
 
         {/* Social Buttons */}
         <View style={styles.socialContainer}>
-          <TouchableOpacity style={styles.socialBtn} onPress={handleGoogleSignIn} activeOpacity={0.8}>
-            <Ionicons name="logo-google" size={20} color={Colors.gray700} />
-            <Text style={styles.socialBtnText}>Continue with Google</Text>
+          <TouchableOpacity
+            style={[
+              styles.socialBtn,
+              {
+                backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.white,
+                borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : Colors.gray200,
+              },
+            ]}
+            onPress={handleGoogleSignIn}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="logo-google" size={20} color={isDarkMode ? Colors.white : Colors.gray700} />
+            <Text style={[styles.socialBtnText, { color: isDarkMode ? Colors.white : Colors.gray700 }]}>
+              Continue with Google
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.dividerRow}>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]} />
           <Text style={styles.dividerText}>OR</Text>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]} />
         </View>
 
         {!showEmailForm ? (
           <TouchableOpacity
-            style={styles.emailToggleBtn}
+            style={[
+              styles.emailToggleBtn,
+              {
+                backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.white,
+                borderColor: isDarkMode ? Colors.primary + '80' : Colors.primary,
+              },
+            ]}
             onPress={() => setShowEmailForm(true)}
             activeOpacity={0.8}
           >
             <Ionicons name="mail-outline" size={20} color={Colors.primary} />
-            <Text style={styles.emailToggleBtnText}>Continue with Email</Text>
+            <Text style={[styles.emailToggleBtnText, { color: Colors.primary }]}>Continue with Email</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.form}>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
               <Ionicons name="mail-outline" size={16} color={Colors.gray400} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: isDarkMode ? Colors.white : Colors.dark }]}
                 placeholder="Email address"
                 placeholderTextColor={Colors.gray400}
                 value={email}
@@ -116,10 +134,10 @@ export default function AuthScreen() {
                 autoCorrect={false}
               />
             </View>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
               <Ionicons name="lock-closed-outline" size={16} color={Colors.gray400} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: isDarkMode ? Colors.white : Colors.dark }]}
                 placeholder="Password"
                 placeholderTextColor={Colors.gray400}
                 value={password}
@@ -145,7 +163,7 @@ export default function AuthScreen() {
         )}
 
         <TouchableOpacity onPress={() => { setIsLogin(!isLogin); setShowEmailForm(false); }} style={styles.toggleRow}>
-          <Text style={styles.toggleText}>
+          <Text style={[styles.toggleText, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
             {isLogin ? "Don't have an account? " : 'Already registered? '}
             <Text style={styles.toggleLink}>{isLogin ? 'Sign Up' : 'Sign In'}</Text>
           </Text>
@@ -153,7 +171,9 @@ export default function AuthScreen() {
 
         <View style={styles.trustRow}>
           <Ionicons name="shield-checkmark-outline" size={14} color={Colors.gray400} />
-          <Text style={styles.trustText}>Verified profiles · Secure registry · Real connections</Text>
+          <Text style={[styles.trustText, { color: isDarkMode ? Colors.gray400 : Colors.gray400 }]}>
+            Verified profiles · Secure registry · Real connections
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -163,7 +183,6 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light,
   },
   scroll: {
     flexGrow: 1,
@@ -178,7 +197,6 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: Colors.primary + '12',
   },
   blobBottomLeft: {
     position: 'absolute',
@@ -187,22 +205,19 @@ const styles = StyleSheet.create({
     width: 220,
     height: 220,
     borderRadius: 110,
-    backgroundColor: Colors.accent + '20',
   },
   logo: {
-    marginTop: 60,
-    marginBottom: 24,
+    marginTop: 80,
+    marginBottom: 36,
   },
   headline: {
     fontSize: 28,
     fontWeight: '900',
-    color: Colors.dark,
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   subheadline: {
     fontSize: 13,
-    color: Colors.gray500,
     textAlign: 'center',
     marginTop: 6,
     marginBottom: 40,
@@ -217,21 +232,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderWidth: 1,
-    borderColor: Colors.gray200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   socialBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.gray700,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -243,12 +250,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.gray200,
   },
   dividerText: {
     fontSize: 11,
     fontWeight: '900',
-    color: Colors.gray400,
+    color: Colors.gray500,
     letterSpacing: 1,
   },
   emailToggleBtn: {
@@ -257,16 +263,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     width: '100%',
-    backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderWidth: 1.5,
-    borderColor: Colors.primary,
   },
   emailToggleBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.primary,
   },
   form: {
     width: '100%',
@@ -275,10 +278,8 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.gray200,
     paddingHorizontal: 14,
   },
   inputIcon: {
@@ -288,7 +289,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     fontSize: 14,
-    color: Colors.dark,
   },
   submitBtn: {
     backgroundColor: Colors.primary,
@@ -296,10 +296,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
     marginTop: 4,
   },
   submitBtnDisabled: {
@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 13,
-    color: Colors.gray500,
     textAlign: 'center',
   },
   toggleLink: {
@@ -328,11 +327,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 32,
+    marginTop: 48,
   },
   trustText: {
     fontSize: 11,
-    color: Colors.gray400,
     fontWeight: '600',
   },
 });

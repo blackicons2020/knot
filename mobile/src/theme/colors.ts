@@ -1,10 +1,10 @@
 export const Colors = {
-  // Brand
-  primary: '#4A0D67',
-  secondary: '#7B2D8B',
-  accent: '#F4C430',
-  dark: '#1A0A2E',
-  light: '#F8F0FF',
+  // Brand (Premium Cinematic Carbon, Gold, and Rose matching the Web app)
+  primary: '#E27D8D',     // Rose / Pink
+  secondary: '#E25C70',   // Deep Rose
+  accent: '#D4AF37',      // Gold / Brass
+  dark: '#0A0E14',        // Deep Carbon Black
+  light: '#F8F9FA',       // Premium Light Neutral
 
   // Neutrals
   white: '#FFFFFF',
@@ -21,9 +21,9 @@ export const Colors = {
   gray900: '#111827',
 
   // Dark mode surfaces
-  darkSurface: '#1E103A',
-  darkCard: '#2A1650',
-  darkBorder: '#3D2461',
+  darkSurface: '#121721', // Carbon Card background
+  darkCard: '#181E2A',    // Carbon Secondary
+  darkBorder: '#232B3B',  // Premium subtle border
 
   // Status
   success: '#22C55E',

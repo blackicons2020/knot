@@ -12,7 +12,8 @@ export default function KnotLogo({ style, size = 'md' }: KnotLogoProps) {
   return (
     <View style={[styles.container, style]}>
       <Text style={[styles.text, { fontSize }]}>
-        <Text style={styles.knot}>Knot</Text>
+        <Text style={styles.knot}>KNOT</Text>
+        <Text style={styles.dot}>.</Text>
       </Text>
     </View>
   );
