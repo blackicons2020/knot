@@ -24,8 +24,8 @@ export class AuthService {
       data: {
         email: dto.email.toLowerCase(),
         passwordHash,
-        name: dto.name,
-        age: dto.age,
+        name: dto.name || '',
+        age: dto.age !== undefined ? Number(dto.age) : 0,
         bio: dto.bio || '',
         occupation: dto.occupation || '',
         education: dto.education || '',
