@@ -865,7 +865,7 @@ export default function OnboardingScreen() {
             <View style={{ backgroundColor: Colors.white + '08', borderRadius: 16, padding: 12, width: '100%', minHeight: 64, justifyContent: 'center', alignItems: 'center' }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? Colors.gray200 : Colors.gray800, textAlign: 'center' }}>{livenessPrompt}</Text>
               <View style={{ flexDirection: 'row', gap: 6, marginTop: 10 }}>
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'align' ? Colors.accent : livenessState !== 'align' ? '#10b981' : Colors.gray500 }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'align' ? Colors.accent : '#10b981' }} />
                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'smile' ? Colors.accent : livenessState === 'tilt' || livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'tilt' ? Colors.accent : livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
               </View>
