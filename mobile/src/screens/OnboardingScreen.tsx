@@ -322,7 +322,6 @@ export default function OnboardingScreen() {
     const stateVal = prefix === 'residence' ? form.residenceState : form.originState;
     const cityVal = prefix === 'residence' ? form.residenceCity : form.originCity;
     const states = STATES_BY_COUNTRY[countryVal] || [];
-    const cities = CITIES_BY_STATE[stateVal] || [];
     const setCountry = prefix === 'residence' ? setResCountry : setOriCountry;
     const setState = prefix === 'residence' ? setResState : setOriState;
     const setCity = prefix === 'residence' ? setResCity : (v: string) => set('originCity', v);
@@ -331,38 +330,31 @@ export default function OnboardingScreen() {
       <View style={{ marginTop: 16 }}>
         <Text style={styles.subSectionTitle}>{title}</Text>
         {renderDropdownField('Country', countryVal, 'Select country', COUNTRIES, setCountry)}
-        {!!countryVal && (
-          <>
-            <View style={{ marginBottom: 12 }}>
-              <Text style={styles.label}>City / Town</Text>
-              {cities.length > 0 ? (
-                renderDropdownField('City / Town', cityVal, 'Select city / town', cities, setCity)
-              ) : (
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={cityVal}
-                  onChangeText={setCity}
-                  placeholder="Type city / town"
-                  placeholderTextColor={Colors.gray400}
-                />
-              )}
-            </View>
+        
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.label}>City / Town</Text>
+          <TextInput
+            style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+            value={cityVal}
+            onChangeText={setCity}
+            placeholder="Type city / town"
+            placeholderTextColor={Colors.gray400}
+          />
+        </View>
 
-            {states.length > 0 ? (
-              renderDropdownField('State / Province / Region', stateVal, 'Select state / province', states, setState)
-            ) : (
-              <View style={{ marginBottom: 12 }}>
-                <Text style={styles.label}>State / Province / Region</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={stateVal}
-                  onChangeText={setState}
-                  placeholder="Type state / province"
-                  placeholderTextColor={Colors.gray400}
-                />
-              </View>
-            )}
-          </>
+        {states.length > 0 ? (
+          renderDropdownField('State / Province / Region', stateVal, 'Select state / province', states, setState)
+        ) : (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.label}>State / Province / Region</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+              value={stateVal}
+              onChangeText={setState}
+              placeholder="Type state / province"
+              placeholderTextColor={Colors.gray400}
+            />
+          </View>
         )}
       </View>
     );
@@ -465,7 +457,6 @@ export default function OnboardingScreen() {
             </View>
 
             <View style={{ marginTop: 12 }}>
-              <Text style={styles.label}>Religion / Faith</Text>
               {renderDropdownField(
                 'Religion / Faith',
                 religionSelect,
