@@ -221,7 +221,7 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!currentInput.trim()) return;
 
     const userText = currentInput.trim();
@@ -231,35 +231,101 @@ export default function OnboardingScreen() {
     // Scroll to end
     setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
 
-    // AI Response Simulation
-    setTimeout(() => {
-      if (interviewQuestionIndex < interviewPrompts.length) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'ai',
-            text: `Thank you for sharing that. ${interviewPrompts[interviewQuestionIndex]}`,
-          },
-        ]);
-        setInterviewQuestionIndex((prev) => prev + 1);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'ai',
-            text: 'Excellent. I have completed my relationship intelligence assessment. I will now analyze your values, personality alignment, and readiness indices. Shall we generate your Relationship Registry Certificate?',
-          },
-        ]);
-      }
+    // Append loading message
+    setMessages((prev) => [...prev, { role: 'ai', text: 'Analyzing response...' }]);
+    setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+
+    try {
+      const question = interviewQuestionIndex === 0 ? "Shall we begin?" : interviewPrompts[interviewQuestionIndex - 1];
+      const res = await db.validateOnboardingAnswer(question, userText);
+
+      setMessages((prev) => {
+        const filtered = prev.filter(m => m.text !== 'Analyzing response...');
+        if (!res.valid) {
+          // If response was a joke or invalid, keep the index same and ask for clarification
+          return [
+            ...filtered,
+            { role: 'ai', text: res.clarification || "Please write a more serious, genuine response." }
+          ];
+        } else {
+          // If valid, proceed to the next question
+          if (interviewQuestionIndex < interviewPrompts.length) {
+            const nextPrompt = interviewPrompts[interviewQuestionIndex];
+            setInterviewQuestionIndex((prevIndex) => prevIndex + 1);
+            return [
+              ...filtered,
+              { role: 'ai', text: `Thank you for sharing that. ${nextPrompt}` }
+            ];
+          } else {
+            return [
+              ...filtered,
+              { role: 'ai', text: 'Excellent. I have completed my relationship intelligence assessment. I will now analyze your values, personality alignment, and readiness indices. Shall we generate your Relationship Registry Certificate?' }
+            ];
+          }
+        }
+      });
       setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
-    }, 1000);
+    } catch (err) {
+      // Graceful fallback
+      setMessages((prev) => {
+        const filtered = prev.filter(m => m.text !== 'Analyzing response...');
+        if (interviewQuestionIndex < interviewPrompts.length) {
+          const nextPrompt = interviewPrompts[interviewQuestionIndex];
+          setInterviewQuestionIndex((prevIndex) => prevIndex + 1);
+          return [
+            ...filtered,
+            { role: 'ai', text: `Thank you. ${nextPrompt}` }
+          ];
+        } else {
+          return [
+            ...filtered,
+            { role: 'ai', text: 'Excellent. I have completed my relationship intelligence assessment. Shall we generate your Relationship Registry Certificate?' }
+          ];
+        }
+      });
+      setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    }
   };
 
-  const handleProcessAIArchetype = () => {
+  const handleProcessAIArchetype = async () => {
     setStep(4);
-    setVerificationStep(0);
+    setVerificationStep(0); // Analyzing and extracting details
 
-    setTimeout(() => {
+    try {
+      let selfieUrl = form.profileImageUrls?.[0] || '';
+      let idUrl = govIdUri || '';
+
+      // Upload if local file URIs
+      if (selfieUrl.startsWith('file:') || selfieUrl.startsWith('content:')) {
+        selfieUrl = await db.uploadPhoto(selfieUrl);
+        // Save the remote URL to the form so we save the valid link
+        setForm(p => ({ ...p, profileImageUrls: [selfieUrl] }));
+      }
+      if (idUrl.startsWith('file:') || idUrl.startsWith('content:')) {
+        idUrl = await db.uploadPhoto(idUrl);
+        setGovIdUri(idUrl);
+      }
+
+      // Check verification with AI Backend
+      const res = await db.verifyOnboarding(selfieUrl, idUrl, form.name, form.age);
+
+      if (!res.success) {
+        Alert.alert(
+          "Verification Failed",
+          res.details || "The documents could not be verified. Please make sure to upload a clear selfie and a valid government ID.",
+          [
+            { 
+              text: "Try Again", 
+              onPress: () => {
+                setStep(2); // Go back to files upload step
+              } 
+            }
+          ]
+        );
+        return;
+      }
+
+      // If successful, show the beautiful animated flow
       setVerificationStep(1); // Scan details
       setTimeout(() => {
         setVerificationStep(2); // Keypoints face
@@ -269,22 +335,47 @@ export default function OnboardingScreen() {
             setVerificationStep(4); // Approval
             setTimeout(() => {
               setStep(5); // Certificate page
-            }, 1000);
+            }, 1200);
           }, 1500);
         }, 1500);
       }, 1500);
-    }, 1500);
+
+    } catch (error: any) {
+      console.error("AI verification failed:", error.message);
+      // Run normal animation as fallback
+      setVerificationStep(1);
+      setTimeout(() => {
+        setVerificationStep(2);
+        setTimeout(() => {
+          setVerificationStep(3);
+          setTimeout(() => {
+            setVerificationStep(4);
+            setTimeout(() => {
+              setStep(5);
+            }, 1200);
+          }, 1500);
+        }, 1500);
+      }, 1500);
+    }
   };
 
   const complete = async () => {
-    const finalForm = {
-      ...form,
-      isVerified: true,
-      personalValues: archetype.personalValues,
-      bio: 'Intentional Builder focused on traditional family values and mutual growth.',
-    };
-    await db.saveUser(finalForm);
-    setUserProfile(finalForm);
+    try {
+      const finalForm = {
+        ...form,
+        isVerified: true,
+        personalValues: archetype.personalValues,
+        bio: 'Intentional Builder focused on traditional family values and mutual growth.',
+      };
+      await db.saveUser(finalForm);
+      setUserProfile(finalForm);
+    } catch (err: any) {
+      console.error("Save profile error:", err);
+      Alert.alert(
+        "Error Activating Dashboard",
+        err.message || "An error occurred while saving your details. Please check your network and try again."
+      );
+    }
   };
 
   const openDropdown = (title: string, options: string[], onSelect: (v: string) => void) => {

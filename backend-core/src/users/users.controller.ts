@@ -36,4 +36,19 @@ export class UsersController {
   async getInsights(@Param('id') id: string) {
     return this.usersService.getInsights(id);
   }
+
+  @Post('onboarding/validate-answer')
+  async validateAnswer(@Body('question') question: string, @Body('answer') answer: string) {
+    return this.usersService.validateOnboardingAnswer(question, answer);
+  }
+
+  @Post('onboarding/verify')
+  async verifyDocuments(
+    @Body('selfieUrl') selfieUrl: string,
+    @Body('idUrl') idUrl: string,
+    @Body('name') name: string,
+    @Body('age') age: number,
+  ) {
+    return this.usersService.verifyOnboardingDocuments(selfieUrl, idUrl, name, age);
+  }
 }

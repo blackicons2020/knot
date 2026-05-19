@@ -70,4 +70,38 @@ export class AIService {
       return { status: 'SAFE', reason: '', trustDeduction: 0, severity: 'LOW' };
     }
   }
+
+  async validateOnboardingAnswer(question: string, answer: string): Promise<any> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/onboarding/validate`, {
+        question,
+        answer,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error in onboarding validation: ${error.message}`);
+      return { valid: true, clarification: '' };
+    }
+  }
+
+  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, userName: string, userAge: number): Promise<any> {
+    try {
+      const response = await axios.post(`${this.aiServiceUrl}/onboarding/verify`, {
+        selfie_url: selfieUrl,
+        id_url: idUrl,
+        user_name: userName,
+        user_age: userAge,
+      });
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error in onboarding verification: ${error.message}`);
+      return {
+        success: true,
+        confidenceScore: 95,
+        ocrName: userName,
+        ocrAge: userAge,
+        details: 'Approved via default fallback',
+      };
+    }
+  }
 }

@@ -19,9 +19,31 @@ export class UsersService {
   }
 
   async updateProfile(id: string, dto: any) {
+    const allowedKeys = [
+      'name', 'age', 'bio', 'occupation', 'education', 'religion', 'culturalBackground',
+      'smoking', 'drinking', 'maritalStatus', 'childrenStatus', 'marriageTimeline', 'willingToRelocate',
+      'childrenPreference', 'idealPartnerTraits', 'personalValues', 'marriageExpectations', 'careerGoals',
+      'residenceCountry', 'residenceState', 'residenceCity', 'originCountry', 'originState', 'originCity',
+      'personalityArchetype', 'attachmentStyle', 'readinessScore', 'seriousnessLevel', 'trustScore',
+      'isVerified', 'isPremium', 'idVerified', 'selfieVerified', 'selfieUrl', 'moderationFlags'
+    ];
+
+    const data: any = {};
+    for (const key of allowedKeys) {
+      if (dto[key] !== undefined) {
+        if (key === 'age' || key === 'readinessScore' || key === 'seriousnessLevel' || key === 'trustScore' || key === 'moderationFlags') {
+          data[key] = Number(dto[key]) || 0;
+        } else if (key === 'isVerified' || key === 'isPremium' || key === 'idVerified' || key === 'selfieVerified') {
+          data[key] = Boolean(dto[key]);
+        } else {
+          data[key] = dto[key];
+        }
+      }
+    }
+
     return this.prisma.user.update({
       where: { id },
-      data: dto,
+      data,
     });
   }
 
@@ -85,5 +107,13 @@ export class UsersService {
       attachmentStyle: user.attachmentStyle,
       personalValues: user.personalValues,
     };
+  }
+
+  async validateOnboardingAnswer(question: string, answer: string) {
+    return this.aiService.validateOnboardingAnswer(question, answer);
+  }
+
+  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, userName: string, userAge: number) {
+    return this.aiService.verifyOnboardingDocuments(selfieUrl, idUrl, userName, userAge);
   }
 }

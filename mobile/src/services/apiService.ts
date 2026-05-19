@@ -96,6 +96,20 @@ class ApiService {
     await this.request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) });
   }
 
+  async validateOnboardingAnswer(question: string, answer: string): Promise<{ valid: boolean; clarification: string }> {
+    return this.request<{ valid: boolean; clarification: string }>('/users/onboarding/validate-answer', {
+      method: 'POST',
+      body: JSON.stringify({ question, answer }),
+    });
+  }
+
+  async verifyOnboarding(selfieUrl: string, idUrl: string, name: string, age: number): Promise<{ success: boolean; confidenceScore: number; ocrName: string; ocrAge: string; details: string }> {
+    return this.request<{ success: boolean; confidenceScore: number; ocrName: string; ocrAge: string; details: string }>('/users/onboarding/verify', {
+      method: 'POST',
+      body: JSON.stringify({ selfieUrl, idUrl, name, age }),
+    });
+  }
+
   async updatePremiumStatus(uid: string, isPremium: boolean): Promise<void> {
     await this.request(`/users/${uid}`, {
       method: 'PUT',

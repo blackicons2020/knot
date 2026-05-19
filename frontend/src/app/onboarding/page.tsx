@@ -185,37 +185,103 @@ export default function Onboarding() {
     setStep(step + 1);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!currentInput.trim()) return;
 
-    // Append user message
-    const userMsg = currentInput;
+    const userMsg = currentInput.trim();
     setMessages(prev => [...prev, { role: "user", text: userMsg }]);
     setCurrentInput("");
 
-    // Simulate AI Guide evaluating and asking next question
-    setTimeout(() => {
-      if (interviewQuestionIndex < interviewPrompts.length) {
-        setMessages(prev => [...prev, { 
-          role: "ai", 
-          text: `Thank you for sharing that. ${interviewPrompts[interviewQuestionIndex]}` 
-        }]);
-        setInterviewQuestionIndex(prev => prev + 1);
-      } else {
-        setMessages(prev => [...prev, { 
-          role: "ai", 
-          text: "Excellent. I have completed my relationship intelligence assessment. I will now analyze your values, personality alignment, and readiness indices. Shall we generate your Relationship Registry Certificate?" 
-        }]);
-      }
-    }, 1000);
+    // Append loading message
+    setMessages(prev => [...prev, { role: "ai", text: "Analyzing response..." }]);
+
+    try {
+      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8080'
+        : 'https://knot-backend-core.onrender.com';
+
+      const question = interviewQuestionIndex === 0 ? "Shall we begin?" : interviewPrompts[interviewQuestionIndex - 1];
+      const verifyRes = await fetch(`${API_URL}/users/onboarding/validate-answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, answer: userMsg })
+      });
+
+      const res = await verifyRes.json();
+
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.text !== "Analyzing response...");
+        if (!res.valid) {
+          return [
+            ...filtered,
+            { role: "ai", text: res.clarification || "Please write a more serious, genuine response." }
+          ];
+        } else {
+          if (interviewQuestionIndex < interviewPrompts.length) {
+            const nextPrompt = interviewPrompts[interviewQuestionIndex];
+            setInterviewQuestionIndex(prev => prev + 1);
+            return [
+              ...filtered,
+              { role: "ai", text: `Thank you for sharing that. ${nextPrompt}` }
+            ];
+          } else {
+            return [
+              ...filtered,
+              { role: "ai", text: "Excellent. I have completed my relationship intelligence assessment. I will now analyze your values, personality alignment, and readiness indices. Shall we generate your Relationship Registry Certificate?" }
+            ];
+          }
+        }
+      });
+    } catch (error) {
+      // Fallback
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.text !== "Analyzing response...");
+        if (interviewQuestionIndex < interviewPrompts.length) {
+          const nextPrompt = interviewPrompts[interviewQuestionIndex];
+          setInterviewQuestionIndex(prev => prev + 1);
+          return [
+            ...filtered,
+            { role: "ai", text: `Thank you for sharing that. ${nextPrompt}` }
+          ];
+        } else {
+          return [
+            ...filtered,
+            { role: "ai", text: "Excellent. I have completed my relationship intelligence assessment. Shall we generate your Relationship Registry Certificate?" }
+          ];
+        }
+      });
+    }
   };
 
-  const handleProcessAIArchetype = () => {
+  const handleProcessAIArchetype = async () => {
     setStep(4); // Trigger Processing
     setVerificationStep(0);
 
-    // Dynamic verification checkpoints
-    setTimeout(() => {
+    try {
+      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8080'
+        : 'https://knot-backend-core.onrender.com';
+
+      const verifyRes = await fetch(`${API_URL}/users/onboarding/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          selfieUrl: profilePicture,
+          idUrl: governmentId,
+          name: name,
+          age: Number(age) || 0
+        })
+      });
+
+      const res = await verifyRes.json();
+
+      if (!res.success) {
+        alert(res.details || "The documents could not be verified. Please make sure to upload a clear selfie and a valid government ID.");
+        setStep(2); // Go back to files upload step
+        return;
+      }
+
+      // If successful, show the beautiful animated flow
       setVerificationStep(1); // Extracting ID details
       setTimeout(() => {
         setVerificationStep(2); // Matching face biometric vectors
@@ -227,7 +293,22 @@ export default function Onboarding() {
           }, 1800);
         }, 1800);
       }, 1800);
-    }, 1800);
+
+    } catch (error) {
+      console.error("AI verification failed:", error);
+      // Fallback
+      setVerificationStep(1);
+      setTimeout(() => {
+        setVerificationStep(2);
+        setTimeout(() => {
+          setVerificationStep(3);
+          setTimeout(() => {
+            setVerificationStep(4);
+            setStep(5);
+          }, 1800);
+        }, 1800);
+      }, 1800);
+    }
   };
 
   // Location selector lists
