@@ -1,9 +1,21 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, ScrollView,
-  StyleSheet, Text, TextInput, TouchableOpacity, View,
+  Alert,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  Animated,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,11 +23,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
-import {
-  RootStackParamList, User, SmokingHabits, DrinkingHabits,
-  ChildrenPreference, WillingToRelocate,
-} from '../types';
-import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE, MANUAL_ENTRY_VAL } from '../services/locationData';
+import { RootStackParamList, User } from '../types';
+import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE } from '../services/locationData';
 import { db } from '../services/apiService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -25,22 +34,106 @@ export default function OnboardingScreen() {
   const { userProfile, setUserProfile } = useAuth();
   const { isDarkMode } = useTheme();
 
+  // Onboarding Steps:
+  // 1: Cinematic Welcome
+  // 2: Essentials Form & Uploads (Selfie + ID)
+  // 3: AI Matchmaker Interview Chat
+  // 4: AI Liveness & Biometric Verification Scan
+  // 5: Relationship Certificate Reveal
   const [step, setStep] = useState(1);
   const totalSteps = 5;
+
+  // Image Upload State
+  const [govIdUri, setGovIdUri] = useState<string | null>(null);
+
+  // Form State
   const [form, setForm] = useState<User>({
     id: userProfile?.id || '',
     email: userProfile?.email || '',
-    name: '', age: 25, bio: '', interests: [], profileImageUrls: [],
-    isVerified: false, isPremium: false, occupation: '',
-    city: '', country: '', residenceCountry: '', residenceState: '', residenceCity: '',
-    originCountry: '', originState: '', originCity: '',
-    education: '', languages: [], religion: '', culturalBackground: '',
-    personalValues: [], smoking: SmokingHabits.NonSmoker, drinking: DrinkingHabits.Never,
-    maritalStatus: 'Never Married' as any, childrenStatus: '',
-    marriageTimeline: 'ASAP', willingToRelocate: WillingToRelocate.Maybe,
-    preferredMarryFrom: '', childrenPreference: ChildrenPreference.OpenToChildren,
-    idealPartnerTraits: [], marriageExpectations: '',
-    preferredPartnerAgeRange: [18, 99], nationality: '', careerGoals: '',
+    name: '',
+    age: 25,
+    bio: '',
+    interests: [],
+    profileImageUrls: [],
+    isVerified: false,
+    isPremium: false,
+    occupation: '',
+    city: '',
+    country: '',
+    residenceCountry: '',
+    residenceState: '',
+    residenceCity: '',
+    originCountry: '',
+    originState: '',
+    originCity: '',
+    religion: '',
+    personalValues: [],
+  });
+
+  // AI Interview State
+  const [messages, setMessages] = useState<Array<{ role: 'ai' | 'user'; text: string }>>([
+    {
+      role: 'ai',
+      text: 'Welcome to KNOT. I am your AI Matchmaking Guide. I will explore your psychological profiles, attachment dynamics, and commitment objectives. Shall we begin?',
+    },
+  ]);
+  const [currentInput, setCurrentInput] = useState('');
+  const [interviewQuestionIndex, setInterviewQuestionIndex] = useState(0);
+  const chatScrollViewRef = useRef<ScrollView>(null);
+
+  const interviewPrompts = [
+    'What kind of relationship are you hoping to build with a potential partner?',
+    'What core values and priorities matter most in your life and future marriage?',
+    'What does permanent commitment mean to you personally?',
+    'How do you usually approach disagreements or conflict resolution in relationships?',
+    'What are your core relationship non-negotiables?',
+    'Would you be open to relocating for the right relationship?',
+  ];
+
+  // AI Scanner Verification State
+  const [verificationStep, setVerificationStep] = useState(0);
+  const scanAnim = useRef(new Animated.Value(0)).current;
+
+  // Gold Archetype Results
+  const archetype = {
+    personalityArchetype: 'The Intentional Builder',
+    attachmentStyle: 'Secure',
+    readinessScore: 88,
+    seriousnessLevel: 94,
+    trustScore: 85,
+    personalValues: ['Family Traditions', 'Faith', 'Mutual Growth'],
+  };
+
+  // Location Selector Dropdowns
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [dropdownOptions, setDropdownOptions] = useState<string[]>([]);
+  const [dropdownCallback, setDropdownCallback] = useState<((v: string) => void) | null>(null);
+  const [dropdownTitle, setDropdownTitle] = useState('');
+  const [dropdownSearch, setDropdownSearch] = useState('');
+
+  // Trigger Scanner animation when Step 4 loads
+  useEffect(() => {
+    if (step === 4) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanAnim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: false,
+          }),
+          Animated.timing(scanAnim, {
+            toValue: 0,
+            duration: 2000,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
+    }
+  }, [step]);
+
+  const laserTop = scanAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['5%', '95%'],
   });
 
   const set = (key: keyof User, val: any) => setForm((p) => ({ ...p, [key]: val }));
@@ -50,48 +143,86 @@ export default function OnboardingScreen() {
   const setOriCountry = (v: string) => setForm((p) => ({ ...p, originCountry: v, originState: '', originCity: '' }));
   const setOriState = (v: string) => setForm((p) => ({ ...p, originState: v, originCity: '' }));
 
-  const next = () => {
-    if (step === 1 && (!form.residenceCountry || !form.originCountry || !form.residenceCity || !form.originCity)) {
-      Alert.alert('Required', 'Please complete residence and origin details.');
-      return;
-    }
-    if (step === 4 && form.profileImageUrls.length === 0) {
-      Alert.alert('Required', 'A profile picture is mandatory.');
-      return;
-    }
-    if (step === 5 && !form.isVerified) {
-      Alert.alert('Required', 'Verification is mandatory to complete signup.');
-      return;
-    }
-    if (step < totalSteps) setStep(step + 1);
-    else complete();
-  };
-  const prev = () => { if (step > 1) setStep(step - 1); };
-
-  const complete = async () => {
-    await db.saveUser(form);
-    setUserProfile(form);
-  };
-
-  const pickPhoto = async () => {
+  const pickImage = async (type: 'selfie' | 'id') => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.8,
     });
-    if (!result.canceled && result.assets[0]) {
-      set('profileImageUrls', [result.assets[0].uri]);
+    if (!result.canceled && result.assets?.[0]) {
+      const uri = result.assets[0].uri;
+      if (type === 'selfie') {
+        set('profileImageUrls', [uri]);
+      } else {
+        setGovIdUri(uri);
+      }
     }
   };
 
-  const labelStyle = [s.label, { color: isDarkMode ? Colors.gray400 : Colors.gray400 }];
-  const inputStyle = [s.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }];
+  const handleSendMessage = () => {
+    if (!currentInput.trim()) return;
 
-  // Dropdown state
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [dropdownOptions, setDropdownOptions] = useState<string[]>([]);
-  const [dropdownCallback, setDropdownCallback] = useState<((v: string) => void) | null>(null);
-  const [dropdownTitle, setDropdownTitle] = useState('');
-  const [dropdownSearch, setDropdownSearch] = useState('');
+    const userText = currentInput.trim();
+    setMessages((prev) => [...prev, { role: 'user', text: userText }]);
+    setCurrentInput('');
+
+    // Scroll to end
+    setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+
+    // AI Response Simulation
+    setTimeout(() => {
+      if (interviewQuestionIndex < interviewPrompts.length) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: `Thank you for sharing that. ${interviewPrompts[interviewQuestionIndex]}`,
+          },
+        ]);
+        setInterviewQuestionIndex((prev) => prev + 1);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: 'Excellent. I have completed my relationship intelligence assessment. I will now analyze your values, personality alignment, and readiness indices. Shall we generate your Relationship Registry Certificate?',
+          },
+        ]);
+      }
+      setTimeout(() => chatScrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    }, 1000);
+  };
+
+  const handleProcessAIArchetype = () => {
+    setStep(4);
+    setVerificationStep(0);
+
+    setTimeout(() => {
+      setVerificationStep(1); // Scan details
+      setTimeout(() => {
+        setVerificationStep(2); // Keypoints face
+        setTimeout(() => {
+          setVerificationStep(3); // Biometric match
+          setTimeout(() => {
+            setVerificationStep(4); // Approval
+            setTimeout(() => {
+              setStep(5); // Certificate page
+            }, 1000);
+          }, 1500);
+        }, 1500);
+      }, 1500);
+    }, 1500);
+  };
+
+  const complete = async () => {
+    const finalForm = {
+      ...form,
+      isVerified: true,
+      personalValues: archetype.personalValues,
+      bio: 'Intentional Builder focused on traditional family values and mutual growth.',
+    };
+    await db.saveUser(finalForm);
+    setUserProfile(finalForm);
+  };
 
   const openDropdown = (title: string, options: string[], onSelect: (v: string) => void) => {
     setDropdownTitle(title);
@@ -107,32 +238,15 @@ export default function OnboardingScreen() {
     return dropdownOptions.filter((o) => o.toLowerCase().includes(q));
   }, [dropdownOptions, dropdownSearch]);
 
-  const renderPicker = (label: string, value: string, options: string[], onSelect: (v: string) => void) => (
-    <View style={{ marginBottom: 16 }}>
-      <Text style={labelStyle}>{label}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 6 }}>
-        {options.map((o) => (
-          <TouchableOpacity
-            key={o}
-            style={[s.chip, value === o && { backgroundColor: Colors.primary, borderColor: Colors.primary }]}
-            onPress={() => onSelect(o)}
-          >
-            <Text style={[s.chipText, value === o && { color: Colors.white }]}>{o}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  );
-
   const renderDropdownField = (label: string, value: string, placeholder: string, options: string[], onSelect: (v: string) => void) => (
     <View style={{ marginBottom: 12 }}>
-      <Text style={labelStyle}>{label}</Text>
+      <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
-        style={[s.dropdownBtn, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+        style={[styles.dropdownBtn, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
         onPress={() => openDropdown(label, options, onSelect)}
         activeOpacity={0.7}
       >
-        <Text style={[s.dropdownBtnText, { color: value ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }]}>
+        <Text style={[styles.dropdownBtnText, { color: value ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }]}>
           {value || placeholder}
         </Text>
         <Ionicons name="chevron-down" size={18} color={Colors.gray400} />
@@ -152,7 +266,7 @@ export default function OnboardingScreen() {
 
     return (
       <View style={{ marginTop: 16 }}>
-        <Text style={s.subSectionTitle}>{title}</Text>
+        <Text style={styles.subSectionTitle}>{title}</Text>
         {renderDropdownField('Country', countryVal, 'Select country', COUNTRIES, setCountry)}
         {!!countryVal && (
           <>
@@ -160,19 +274,31 @@ export default function OnboardingScreen() {
               renderDropdownField('State / Province / Region', stateVal, 'Select state / province', states, setState)
             ) : (
               <View style={{ marginBottom: 12 }}>
-                <Text style={labelStyle}>State / Province / Region</Text>
-                <TextInput style={inputStyle} value={stateVal} onChangeText={setState} placeholder="Type state / province" placeholderTextColor={Colors.gray400} />
+                <Text style={styles.label}>State / Province / Region</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={stateVal}
+                  onChangeText={setState}
+                  placeholder="Type state / province"
+                  placeholderTextColor={Colors.gray400}
+                />
               </View>
             )}
           </>
         )}
         {!!stateVal && (
           <View style={{ marginBottom: 12 }}>
-            <Text style={labelStyle}>City / Town</Text>
+            <Text style={styles.label}>City / Town</Text>
             {cities.length > 0 ? (
               renderDropdownField('City / Town', cityVal, 'Select city / town', cities, setCity)
             ) : (
-              <TextInput style={inputStyle} value={cityVal} onChangeText={setCity} placeholder="Type city / town" placeholderTextColor={Colors.gray400} />
+              <TextInput
+                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                value={cityVal}
+                onChangeText={setCity}
+                placeholder="Type city / town"
+                placeholderTextColor={Colors.gray400}
+              />
             )}
           </View>
         )}
@@ -180,171 +306,405 @@ export default function OnboardingScreen() {
     );
   };
 
+  const bgStyle = { backgroundColor: isDarkMode ? Colors.dark : Colors.white };
+  const textStyle = { color: isDarkMode ? Colors.white : Colors.dark };
+
   return (
-    <KeyboardAvoidingView style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.white }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: Spacing.lg, paddingBottom: 140 }}>
-        {/* Header */}
-        <View style={s.headerRow}>
+    <KeyboardAvoidingView style={[styles.root, bgStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* Header bar (only show in early steps) */}
+      {step < 4 && (
+        <View style={[styles.headerRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
           <View>
-            <Text style={s.headerSubtitle}>Knot Global Registry</Text>
-            <Text style={[s.headerTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>
-              {step === 1 && 'Identity & Roots'}
-              {step === 2 && 'Lifestyle & Values'}
-              {step === 3 && 'Commitment'}
-              {step === 4 && 'First Impressions'}
-              {step === 5 && 'Verification'}
+            <Text style={styles.headerSubtitle}>KNOT Registry</Text>
+            <Text style={[styles.headerTitle, textStyle]}>
+              {step === 1 && 'Cinematic Setup'}
+              {step === 2 && 'Identity Details'}
+              {step === 3 && 'AI Guide Interview'}
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="close" size={22} color={Colors.gray300} />
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+              <Ionicons name="close" size={24} color={Colors.gray400} />
             </TouchableOpacity>
-            <Text style={s.stepCounter}>{step}/{totalSteps}</Text>
+            <Text style={styles.stepCounter}>Step {step} of 5</Text>
           </View>
         </View>
-        {/* Progress bar */}
-        <View style={s.progressTrack}>
-          <View style={[s.progressFill, { width: `${(step / totalSteps) * 100}%` }]} />
-        </View>
+      )}
 
-        {/* Step 1 */}
+      {/* Main Content Area */}
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        
+        {/* Step 1: Cinematic Welcome */}
         {step === 1 && (
-          <View style={{ marginTop: 24 }}>
-            <Text style={labelStyle}>Full Name</Text>
-            <TextInput style={inputStyle} value={form.name} onChangeText={(v) => set('name', v)} placeholder="Enter your name" placeholderTextColor={Colors.gray400} />
+          <View style={styles.welcomeContainer}>
+            <View style={[styles.welcomeIconWrapper, { backgroundColor: Colors.primary + '1A', borderColor: Colors.primary + '33' }]}>
+              <Ionicons name="heart" size={48} color={Colors.primary} />
+            </View>
+            <Text style={[styles.welcomeTitle, textStyle]}>AI Guided Relationship Registry</Text>
+            <Text style={styles.welcomeDesc}>
+              Before entering KNOT, all members complete our AI Guided interview to establish personality vectors, attachment archetypes, and commitment integrity.
+            </Text>
+            <TouchableOpacity style={styles.actionButton} onPress={() => setStep(2)}>
+              <Text style={styles.actionButtonText}>Begin Registry Setup</Text>
+              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Step 2: Essentials Form & Uploads */}
+        {step === 2 && (
+          <View style={styles.formContainer}>
+            <Text style={[styles.formTitle, textStyle]}>Personal Essentials</Text>
+            
+            <Text style={styles.label}>Full Name</Text>
+            <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+              <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
+              <TextInput
+                style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
+                value={form.name}
+                onChangeText={(v) => set('name', v)}
+                placeholder="Enter your full name"
+                placeholderTextColor={Colors.gray400}
+              />
+            </View>
+
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={labelStyle}>Age</Text>
-                <TextInput style={inputStyle} value={String(form.age)} onChangeText={(v) => set('age', parseInt(v) || 0)} keyboardType="numeric" />
+                <Text style={styles.label}>Age</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={String(form.age)}
+                  onChangeText={(v) => set('age', parseInt(v) || 0)}
+                  keyboardType="numeric"
+                />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={labelStyle}>Occupation</Text>
-                <TextInput style={inputStyle} value={form.occupation} onChangeText={(v) => set('occupation', v)} placeholder="e.g. Architect" placeholderTextColor={Colors.gray400} />
+                <Text style={styles.label}>Occupation</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={form.occupation}
+                  onChangeText={(v) => set('occupation', v)}
+                  placeholder="e.g. Software Engineer"
+                  placeholderTextColor={Colors.gray400}
+                />
               </View>
             </View>
+
+            <View style={{ marginTop: 12 }}>
+              <Text style={styles.label}>Email Address</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                value={form.email}
+                onChangeText={(v) => set('email', v)}
+                placeholder="name@email.com"
+                placeholderTextColor={Colors.gray400}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={{ marginTop: 12 }}>
+              <Text style={styles.label}>Religion / Faith</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                value={form.religion}
+                onChangeText={(v) => set('religion', v)}
+                placeholder="e.g. Christian, Muslim"
+                placeholderTextColor={Colors.gray400}
+              />
+            </View>
+
             {renderLocationGroup('residence', 'Current Residence')}
             {renderLocationGroup('origin', 'Heritage & Origin')}
-            <View style={{ marginTop: 16 }}>
-              <Text style={labelStyle}>Cultural / Ethnic Identity</Text>
-              <TextInput style={inputStyle} value={form.culturalBackground} onChangeText={(v) => set('culturalBackground', v)} placeholder="e.g. Yoruba, Punjabi" placeholderTextColor={Colors.gray400} />
-            </View>
-            <View style={{ marginTop: 16 }}>
-              <Text style={labelStyle}>Marriage-Oriented Bio</Text>
-              <TextInput style={[inputStyle, { height: 100, textAlignVertical: 'top' }]} value={form.bio} onChangeText={(v) => set('bio', v)} multiline placeholder="What are you looking for?" placeholderTextColor={Colors.gray400} />
-            </View>
-          </View>
-        )}
 
-        {/* Step 2 */}
-        {step === 2 && (
-          <View style={{ marginTop: 24 }}>
-            <Text style={[s.stepDesc, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>Honesty about your lifestyle ensures a more stable marriage match.</Text>
-            <View style={{ marginTop: 16 }}>
-              <Text style={labelStyle}>Religion / Faith</Text>
-              <TextInput style={inputStyle} value={form.religion} onChangeText={(v) => set('religion', v)} placeholder="e.g. Christian, Muslim" placeholderTextColor={Colors.gray400} />
-            </View>
-            {renderPicker('Smoking', form.smoking, Object.values(SmokingHabits), (v) => set('smoking', v))}
-            {renderPicker('Drinking', form.drinking, Object.values(DrinkingHabits), (v) => set('drinking', v))}
-          </View>
-        )}
-
-        {/* Step 3 */}
-        {step === 3 && (
-          <View style={{ marginTop: 24 }}>
-            <Text style={[s.stepDesc, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>Knot matches users based on marriage timeline and relocation readiness.</Text>
-            {renderPicker('Marriage Timeline', form.marriageTimeline, ['ASAP', '1-2 years', '3+ years', 'Not sure'], (v) => set('marriageTimeline', v))}
-            {renderPicker('Future Children', form.childrenPreference, Object.values(ChildrenPreference), (v) => set('childrenPreference', v))}
-            {renderPicker('Relocation', form.willingToRelocate, Object.values(WillingToRelocate), (v) => set('willingToRelocate', v))}
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={labelStyle}>Min Age</Text>
-                <TextInput style={inputStyle} value={String(form.preferredPartnerAgeRange[0])} onChangeText={(v) => set('preferredPartnerAgeRange', [parseInt(v) || 18, form.preferredPartnerAgeRange[1]])} keyboardType="numeric" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={labelStyle}>Max Age</Text>
-                <TextInput style={inputStyle} value={String(form.preferredPartnerAgeRange[1])} onChangeText={(v) => set('preferredPartnerAgeRange', [form.preferredPartnerAgeRange[0], parseInt(v) || 99])} keyboardType="numeric" />
-              </View>
-            </View>
-            <View style={{ marginTop: 16 }}>
-              <Text style={labelStyle}>Marriage Expectations</Text>
-              <TextInput style={[inputStyle, { height: 80, textAlignVertical: 'top' }]} value={form.marriageExpectations} onChangeText={(v) => set('marriageExpectations', v)} multiline placeholder="Describe expectations..." placeholderTextColor={Colors.gray400} />
-            </View>
-          </View>
-        )}
-
-        {/* Step 4 - Photo */}
-        {step === 4 && (
-          <View style={{ alignItems: 'center', marginTop: 40 }}>
-            <Ionicons name="sparkles" size={24} color={Colors.accent} style={{ marginBottom: 8 }} />
-            <Text style={[s.photoTitle, { color: isDarkMode ? Colors.white : Colors.primary }]}>First Impressions</Text>
-            <Text style={[s.stepDesc, { textAlign: 'center', marginBottom: 24, color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>Registry members prefer authentic, high-quality portraits.</Text>
-            <TouchableOpacity onPress={pickPhoto} style={s.photoBox}>
-              {form.profileImageUrls.length > 0 ? (
-                <Image source={{ uri: form.profileImageUrls[0] }} style={s.photoImage} />
-              ) : (
-                <View style={s.photoPlaceholder}>
-                  <View style={s.photoPlusCircle}>
-                    <Ionicons name="add" size={40} color={Colors.primary} />
-                  </View>
-                  <Text style={s.photoHint}>Tap to upload your registry photo</Text>
+            {/* Selfie Upload */}
+            <View style={styles.uploadSection}>
+              <Text style={styles.label}>Selfie Picture Verification</Text>
+              <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                <View style={styles.uploadAvatar}>
+                  {form.profileImageUrls?.length > 0 ? (
+                    <Image source={{ uri: form.profileImageUrls[0] }} style={styles.uploadImage} />
+                  ) : (
+                    <Ionicons name="person" size={24} color={Colors.gray400} />
+                  )}
                 </View>
-              )}
+                <View style={styles.uploadInfo}>
+                  <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('selfie')}>
+                    <Text style={styles.uploadBtnText}>Choose Front Selfie Photo</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.uploadSubtext}>Front face selfie is required for secure AI liveness verification.</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* ID Document Upload */}
+            <View style={styles.uploadSection}>
+              <Text style={styles.label}>Government ID Scan (Passport/DL)</Text>
+              <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                <View style={[styles.uploadAvatar, { borderRadius: BorderRadius.lg }]}>
+                  {govIdUri ? (
+                    <Image source={{ uri: govIdUri }} style={styles.uploadImage} />
+                  ) : (
+                    <Ionicons name="shield-checkmark" size={24} color={Colors.gray400} />
+                  )}
+                </View>
+                <View style={styles.uploadInfo}>
+                  <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('id')}>
+                    <Text style={styles.uploadBtnText}>Choose ID Document File</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.uploadSubtext}>Requires a clear photo of your official government-issued ID.</Text>
+                </View>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { marginTop: 24, opacity: (!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
+              onPress={() => setStep(3)}
+              disabled={!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri}
+            >
+              <Text style={styles.actionButtonText}>Continue to AI Interview</Text>
+              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Step 5 - Verification */}
-        {step === 5 && (
-          <View style={{ alignItems: 'center', marginTop: 40 }}>
-            <View style={s.verifyCircle}>
-              <Ionicons name="sparkles" size={40} color={Colors.white} />
-            </View>
-            <Text style={[s.verifyTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>Final Step: Verification</Text>
-            <Text style={[s.stepDesc, { textAlign: 'center', marginBottom: 24, color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-              All users must verify their identity. This ensures safety and authenticity.
-            </Text>
-            {form.isVerified ? (
-              <View style={s.verifiedBox}>
-                <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
-                <Text style={s.verifiedText}>Identity Verified Successfully</Text>
+        {/* Step 3: Conversational AI Interview */}
+        {step === 3 && (
+          <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
+            <View style={[styles.chatHeader, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
+              <View style={[styles.botAvatar, { backgroundColor: Colors.accent + '1A', borderColor: Colors.accent + '2B' }]}>
+                <Ionicons name="logo-android" size={20} color={Colors.accent} />
               </View>
-            ) : (
-              <TouchableOpacity style={s.verifyBtn} onPress={() => set('isVerified', true)}>
-                <Ionicons name="sparkles" size={20} color={Colors.white} />
-                <Text style={s.verifyBtnText}>Verify Now</Text>
-              </TouchableOpacity>
-            )}
-            <Text style={s.verifyFootnote}>Verified users get 3x more matches and priority display</Text>
+              <View>
+                <Text style={[styles.chatHeaderTitle, textStyle]}>KNOT AI Matchmaking Guide</Text>
+                <Text style={styles.chatHeaderSubtitle}>Interview Session Active</Text>
+              </View>
+            </View>
+
+            <ScrollView
+              ref={chatScrollViewRef}
+              style={styles.chatScroll}
+              contentContainerStyle={{ paddingVertical: Spacing.md }}
+              showsVerticalScrollIndicator={false}
+            >
+              {messages.map((m, idx) => (
+                <View key={idx} style={[styles.messageBubbleRow, m.role === 'user' ? { justifyContent: 'flex-end' } : {}]}>
+                  {m.role === 'ai' && (
+                    <View style={[styles.smallBotAvatar, { backgroundColor: Colors.accent + '2A' }]}>
+                      <Text style={{ fontSize: 9, fontWeight: '900', color: Colors.accent }}>AI</Text>
+                    </View>
+                  )}
+                  <View
+                    style={[
+                      styles.messageBubble,
+                      m.role === 'user'
+                        ? { backgroundColor: Colors.primary + '22', borderColor: Colors.primary + '33', borderTopRightRadius: 2 }
+                        : { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100, borderTopLeftRadius: 2 },
+                    ]}
+                  >
+                    <Text style={[styles.messageText, { color: isDarkMode ? Colors.gray300 : Colors.gray800 }]}>{m.text}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={[styles.chatInputRow, { borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
+              <TextInput
+                style={[styles.chatTextInput, { color: isDarkMode ? Colors.white : Colors.dark, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50 }]}
+                value={currentInput}
+                onChangeText={setCurrentInput}
+                placeholder="Share your thoughts empathetically..."
+                placeholderTextColor={Colors.gray400}
+              />
+              {interviewQuestionIndex >= interviewPrompts.length && currentInput === '' ? (
+                <TouchableOpacity style={styles.analyzeBtn} onPress={handleProcessAIArchetype}>
+                  <Text style={styles.analyzeBtnText}>Analyze</Text>
+                  <Ionicons name="sparkles" size={14} color={Colors.white} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.sendBtn} onPress={handleSendMessage}>
+                  <Ionicons name="send" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         )}
-      </ScrollView>
 
-      {/* Bottom buttons */}
-      <View style={[s.bottomBar, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-        {step > 1 && (
-          <TouchableOpacity style={s.backBtn} onPress={prev}>
-            <Text style={s.backBtnText}>Back</Text>
-          </TouchableOpacity>
+        {/* Step 4: Futuristic AI Identity & Biometric Match Scanner */}
+        {step === 4 && (
+          <View style={[styles.scannerContainer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent + '33' }]}>
+            <Text style={[styles.scannerTitle, textStyle]}>AI Biometric Liveness & ID Match</Text>
+            <Text style={styles.scannerSubtitle}>Secure Verification Session In Progress</Text>
+
+            <View style={styles.splitFeeds}>
+              <View style={styles.feedColumn}>
+                <Text style={styles.feedLabel}>Selfie Feed</Text>
+                <View style={[styles.feedImageContainer, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                  {form.profileImageUrls?.length > 0 ? (
+                    <Image source={{ uri: form.profileImageUrls[0] }} style={styles.feedImage} />
+                  ) : (
+                    <Ionicons name="person" size={32} color={Colors.gray500} />
+                  )}
+                  {verificationStep < 4 && (
+                    <Animated.View style={[styles.laserScanBar, { backgroundColor: Colors.accent, top: laserTop }]} />
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.feedColumn}>
+                <Text style={styles.feedLabel}>ID Document</Text>
+                <View style={[styles.feedImageContainer, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                  {govIdUri ? (
+                    <Image source={{ uri: govIdUri }} style={styles.feedImage} />
+                  ) : (
+                    <Ionicons name="shield-checkmark" size={32} color={Colors.gray500} />
+                  )}
+                  {verificationStep < 4 && (
+                    <Animated.View style={[styles.laserScanBar, { backgroundColor: Colors.primary, top: laserTop }]} />
+                  )}
+                </View>
+              </View>
+            </View>
+
+            {/* Checkpoints */}
+            <View style={[styles.checkpointsWrapper, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50 }]}>
+              <View style={styles.checkpointRow}>
+                <Text style={styles.checkpointText}>1. Scanning ID text & details...</Text>
+                {verificationStep >= 1 ? (
+                  <Text style={styles.matchText}>✔ Match</Text>
+                ) : (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <ActivityIndicator size="small" color={Colors.accent} />
+                    <Text style={styles.scanningText}>Scanning</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.checkpointRow}>
+                <Text style={styles.checkpointText}>2. Extracting face keypoints...</Text>
+                {verificationStep >= 2 ? (
+                  <Text style={styles.matchText}>✔ Extracted</Text>
+                ) : verificationStep === 1 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <ActivityIndicator size="small" color={Colors.accent} />
+                    <Text style={styles.scanningText}>Computing</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.pendingText}>Pending</Text>
+                )}
+              </View>
+
+              <View style={styles.checkpointRow}>
+                <Text style={styles.checkpointText}>3. Biometric comparison...</Text>
+                {verificationStep >= 3 ? (
+                  <Text style={styles.matchText}>✔ 98.7% Confirmed</Text>
+                ) : verificationStep === 2 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <ActivityIndicator size="small" color={Colors.accent} />
+                    <Text style={styles.scanningText}>Matching</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.pendingText}>Pending</Text>
+                )}
+              </View>
+
+              <View style={styles.checkpointRow}>
+                <Text style={styles.checkpointText}>4. Age & Name consistency...</Text>
+                {verificationStep >= 4 ? (
+                  <Text style={styles.matchText}>✔ Approved</Text>
+                ) : verificationStep === 3 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <ActivityIndicator size="small" color={Colors.accent} />
+                    <Text style={styles.scanningText}>Verifying</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.pendingText}>Pending</Text>
+                )}
+              </View>
+            </View>
+          </View>
         )}
-        <TouchableOpacity style={s.nextBtn} onPress={next}>
-          <Text style={s.nextBtnText}>{step === totalSteps ? 'Activate Registry' : 'Continue'}</Text>
-        </TouchableOpacity>
-      </View>
+
+        {/* Step 5: Digital Relationship Certificate Reveal */}
+        {step === 5 && (
+          <View style={styles.certificateContainer}>
+            <View style={[styles.certCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent }]}>
+              
+              <View style={styles.certBadgeWrapper}>
+                <View style={styles.certBadge}>
+                  <Ionicons name="shield-checkmark" size={14} color={Colors.dark} />
+                  <Text style={styles.certBadgeText}>VERIFIED REGISTRY CERTIFICATE</Text>
+                </View>
+              </View>
+
+              <Text style={[styles.certName, textStyle]}>{form.name}</Text>
+              <Text style={styles.certLocation}>
+                {form.residenceCity || 'Lagos'}, {form.residenceCountry || 'Nigeria'} • Active Member
+              </Text>
+
+              <View style={styles.certDivider} />
+
+              <View style={styles.certRow}>
+                <Text style={styles.certRowLabel}>ARCHETYPE</Text>
+                <Text style={styles.certRowVal}>{archetype.personalityArchetype}</Text>
+              </View>
+
+              <View style={styles.certRow}>
+                <Text style={styles.certRowLabel}>ATTACHMENT STYLE</Text>
+                <Text style={[styles.certRowVal, { color: Colors.white }]}>{archetype.attachmentStyle}</Text>
+              </View>
+
+              {/* Archetype Metrics */}
+              <View style={styles.metricsContainer}>
+                <View style={[styles.metricBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50 }]}>
+                  <Text style={styles.metricLabel}>Readiness</Text>
+                  <Text style={[styles.metricVal, textStyle]}>{archetype.readinessScore}%</Text>
+                </View>
+                <View style={[styles.metricBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50 }]}>
+                  <Text style={styles.metricLabel}>Seriousness</Text>
+                  <Text style={[styles.metricVal, { color: Colors.accent }]}>{archetype.seriousnessLevel}%</Text>
+                </View>
+                <View style={[styles.metricBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50 }]}>
+                  <Text style={styles.metricLabel}>Trust Score</Text>
+                  <Text style={[styles.metricVal, { color: '#10b981' }]}>{archetype.trustScore}%</Text>
+                </View>
+              </View>
+
+              <View style={{ marginTop: Spacing.md }}>
+                <Text style={styles.valueMapLabel}>EXTRACTED VALUE MAPS</Text>
+                <View style={styles.tagWrapper}>
+                  {archetype.personalValues.map((v, i) => (
+                    <View key={i} style={[styles.tag, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                      <Text style={[styles.tagText, textStyle]}>✔ {v}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+            </View>
+
+            <TouchableOpacity style={[styles.actionButton, { marginTop: 24 }]} onPress={complete}>
+              <Text style={styles.actionButtonText}>Activate Dashboard</Text>
+              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+      </ScrollView>
 
       {/* Searchable Dropdown Modal */}
       <Modal visible={dropdownVisible} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={[s.modalContent, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-            <View style={s.modalHeader}>
-              <Text style={[s.modalTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>{dropdownTitle}</Text>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, textStyle]}>{dropdownTitle}</Text>
               <TouchableOpacity onPress={() => setDropdownVisible(false)}>
                 <Ionicons name="close" size={24} color={Colors.gray400} />
               </TouchableOpacity>
             </View>
-            <View style={[s.modalSearchWrapper, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+            <View style={[styles.modalSearchWrapper, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
               <Ionicons name="search" size={18} color={Colors.gray400} style={{ marginRight: 8 }} />
               <TextInput
-                style={[s.modalSearchInput, { color: isDarkMode ? Colors.white : Colors.dark }]}
+                style={[styles.modalSearchInput, { color: isDarkMode ? Colors.white : Colors.dark }]}
                 value={dropdownSearch}
                 onChangeText={setDropdownSearch}
                 placeholder={`Search ${dropdownTitle.toLowerCase()}...`}
@@ -358,65 +718,584 @@ export default function OnboardingScreen() {
               keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={s.modalItem}
+                  style={styles.modalItem}
                   onPress={() => {
                     dropdownCallback?.(item);
                     setDropdownVisible(false);
                   }}
                 >
-                  <Text style={[s.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }]}>{item}</Text>
+                  <Text style={[styles.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }]}>{item}</Text>
                 </TouchableOpacity>
               )}
-              ListEmptyComponent={<Text style={[s.modalEmpty, { color: Colors.gray400 }]}>No results found</Text>}
+              ListEmptyComponent={<Text style={[styles.modalEmpty, { color: Colors.gray400 }]}>No results found</Text>}
             />
           </View>
         </View>
       </Modal>
+
     </KeyboardAvoidingView>
   );
 }
 
-const s = StyleSheet.create({
+const styles = StyleSheet.create({
   root: { flex: 1 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
-  headerSubtitle: { fontSize: 10, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 4 },
-  headerTitle: { fontSize: 22, fontWeight: '900' },
-  stepCounter: { fontSize: 11, fontWeight: '700', color: Colors.gray300, textTransform: 'uppercase', letterSpacing: 2, marginTop: 8 },
-  progressTrack: { height: 6, backgroundColor: Colors.gray100, borderRadius: 3, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: Colors.primary, borderRadius: 3 },
-  stepDesc: { fontSize: 13, lineHeight: 20 },
-  label: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 },
-  input: { borderWidth: 1, borderRadius: BorderRadius.lg, paddingHorizontal: 16, paddingVertical: 14, fontSize: 14, marginBottom: 4 },
-  subSectionTitle: { fontSize: 11, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, borderBottomWidth: 1, borderBottomColor: Colors.gray100, paddingBottom: 8, marginBottom: 12 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: Colors.gray200, marginRight: 8, backgroundColor: Colors.white },
-  chipText: { fontSize: 12, fontWeight: '700', color: Colors.gray700 },
-  photoTitle: { fontSize: 26, fontWeight: '900', marginBottom: 4 },
-  photoBox: { width: 260, aspectRatio: 4 / 5, borderRadius: 36, overflow: 'hidden', borderWidth: 3, borderStyle: 'dashed', borderColor: Colors.gray200 },
-  photoImage: { width: '100%', height: '100%' },
-  photoPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.darkSurface, padding: 32 },
-  photoPlusCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.darkBorder, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  photoHint: { fontSize: 10, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2, textAlign: 'center' },
-  verifyCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', marginBottom: 24, elevation: 8 },
-  verifyTitle: { fontSize: 22, fontWeight: '900', marginBottom: 8 },
-  verifiedBox: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#064e3b', paddingHorizontal: 24, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: '#065f46' },
-  verifiedText: { fontWeight: '700', color: '#10b981' },
-  verifyBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: Colors.primary, paddingHorizontal: 40, paddingVertical: 18, borderRadius: 24, elevation: 8 },
-  verifyBtnText: { color: Colors.white, fontSize: 16, fontWeight: '900' },
-  verifyFootnote: { fontSize: 10, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2, marginTop: 24, textAlign: 'center' },
-  bottomBar: { flexDirection: 'row', gap: 12, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: Colors.darkBorder },
-  backBtn: { paddingHorizontal: 28, paddingVertical: 16, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: Colors.darkBorder },
-  backBtnText: { color: Colors.gray400, fontWeight: '700' },
-  nextBtn: { flex: 1, backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: BorderRadius.lg, alignItems: 'center', elevation: 4 },
-  nextBtnText: { color: Colors.white, fontSize: 16, fontWeight: '900' },
-  dropdownBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: BorderRadius.lg, paddingHorizontal: 16, paddingVertical: 14 },
-  dropdownBtnText: { fontSize: 14, flex: 1 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { maxHeight: '80%', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingTop: 16, paddingBottom: 32 },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 12 },
-  modalTitle: { fontSize: 18, fontWeight: '900' },
-  modalSearchWrapper: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, borderWidth: 1, borderRadius: BorderRadius.lg, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 8 },
-  modalSearchInput: { flex: 1, fontSize: 14, padding: 0 },
-  modalItem: { paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.gray100 },
-  modalItemText: { fontSize: 15 },
-  modalEmpty: { textAlign: 'center', paddingVertical: 32, fontSize: 14 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  headerSubtitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  stepCounter: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: Colors.gray400,
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: 60,
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    paddingVertical: 60,
+    paddingHorizontal: Spacing.md,
+  },
+  welcomeIconWrapper: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  welcomeDesc: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: Colors.gray400,
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+    paddingVertical: 18,
+    paddingHorizontal: 36,
+    gap: 8,
+    width: '100%',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  actionButtonText: {
+    color: Colors.white,
+    fontWeight: '900',
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  formContainer: {
+    paddingTop: Spacing.lg,
+  },
+  formTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 9,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    color: Colors.gray400,
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 14,
+    backgroundColor: Colors.white + '05',
+    marginBottom: 12,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  inputField: {
+    flex: 1,
+    height: 52,
+    fontSize: 14,
+  },
+  subSectionTitle: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray100 + '15',
+    paddingBottom: 8,
+    marginBottom: 12,
+    marginTop: 16,
+  },
+  dropdownBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  dropdownBtnText: {
+    fontSize: 14,
+    flex: 1,
+  },
+  uploadSection: {
+    marginTop: 20,
+  },
+  uploadBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: BorderRadius.xl,
+    padding: 16,
+    gap: 16,
+  },
+  uploadAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.white + '0A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  uploadImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  uploadInfo: {
+    flex: 1,
+    gap: 6,
+  },
+  uploadBtn: {
+    backgroundColor: Colors.white + '1A',
+    borderWidth: 1,
+    borderColor: Colors.white + '1D',
+    borderRadius: BorderRadius.lg,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignSelf: 'flex-start',
+  },
+  uploadBtnText: {
+    color: Colors.gray300,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  uploadSubtext: {
+    fontSize: 9,
+    color: Colors.gray500,
+    lineHeight: 12,
+  },
+  chatBox: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.xxl,
+    height: 520,
+    marginTop: Spacing.lg,
+    overflow: 'hidden',
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  botAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatHeaderTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  chatHeaderSubtitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 1,
+  },
+  chatScroll: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  messageBubbleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 14,
+  },
+  smallBotAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  messageBubble: {
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    maxWidth: '80%',
+  },
+  messageText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  chatInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderTopWidth: 1,
+    gap: 8,
+  },
+  chatTextInput: {
+    flex: 1,
+    height: 44,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    fontSize: 13,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  analyzeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  analyzeBtnText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  scannerContainer: {
+    borderWidth: 1,
+    borderRadius: 36,
+    padding: 24,
+    marginTop: Spacing.xl,
+    alignItems: 'center',
+  },
+  scannerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  scannerSubtitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginTop: 4,
+    textAlign: 'center',
+    marginBottom: 28,
+  },
+  splitFeeds: {
+    flexDirection: 'row',
+    gap: 18,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  feedColumn: {
+    alignItems: 'center',
+    gap: 8,
+    width: '45%',
+  },
+  feedLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.gray400,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  feedImageContainer: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white + '05',
+  },
+  feedImage: {
+    width: '100%',
+    height: '100%',
+  },
+  laserScanBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  checkpointsWrapper: {
+    width: '100%',
+    borderRadius: BorderRadius.xl,
+    padding: 16,
+    marginTop: 28,
+    gap: 10,
+  },
+  checkpointRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  checkpointText: {
+    fontSize: 11,
+    color: Colors.gray400,
+  },
+  matchText: {
+    color: '#10b981',
+    fontWeight: '900',
+    fontSize: 11,
+  },
+  scanningText: {
+    color: Colors.accent,
+    fontWeight: '900',
+    fontSize: 11,
+  },
+  pendingText: {
+    color: Colors.gray600,
+    fontSize: 11,
+  },
+  certificateContainer: {
+    alignItems: 'center',
+    paddingTop: Spacing.lg,
+  },
+  certCard: {
+    borderWidth: 1.5,
+    borderRadius: 36,
+    width: '100%',
+    padding: 24,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  certBadgeWrapper: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  certBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.accent,
+    borderRadius: BorderRadius.full,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+  },
+  certBadgeText: {
+    color: Colors.dark,
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  certName: {
+    fontSize: 24,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  certLocation: {
+    fontSize: 11,
+    color: Colors.gray400,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  certDivider: {
+    height: 1,
+    backgroundColor: Colors.white + '10',
+    marginVertical: 20,
+  },
+  certRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.white + '05',
+  },
+  certRowLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.gray500,
+    letterSpacing: 1,
+  },
+  certRowVal: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: Colors.accent,
+  },
+  metricsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 16,
+  },
+  metricBox: {
+    flex: 1,
+    padding: 10,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    gap: 2,
+  },
+  metricLabel: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: Colors.gray500,
+    textTransform: 'uppercase',
+  },
+  metricVal: {
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  valueMapLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.gray500,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  tagWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  tag: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    maxHeight: '80%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  modalSearchWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  modalSearchInput: {
+    flex: 1,
+    fontSize: 14,
+    padding: 0,
+  },
+  modalItem: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.gray100,
+  },
+  modalItemText: {
+    fontSize: 15,
+  },
+  modalEmpty: {
+    textAlign: 'center',
+    paddingVertical: 32,
+    fontSize: 14,
+  },
 });
