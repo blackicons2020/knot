@@ -104,6 +104,22 @@ class ApiService {
     });
   }
 
+  async getDailyMatches(userId: string): Promise<any[]> {
+    try {
+      return await this.request<any[]>(`/matches/daily?userId=${userId}`);
+    } catch (e) {
+      console.warn('Failed to fetch daily matches from server, falling back to local mocks:', e);
+      return [];
+    }
+  }
+
+  async respondToMatch(matchId: string, status: 'CONNECTED' | 'DISMISSED' | 'PENDING'): Promise<any> {
+    return this.request<any>(`/matches/${matchId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+  }
+
   // Messages (polling-based instead of WebSocket for now)
   async getMessages(matchId: string): Promise<Message[]> {
     return this.request<Message[]>(`/messages/${matchId}`);

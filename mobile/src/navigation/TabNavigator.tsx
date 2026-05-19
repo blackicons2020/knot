@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/HomeScreen';
-import DiscoveryScreen from '../screens/DiscoveryScreen';
-import LikesScreen from '../screens/LikesScreen';
+import InsightsScreen from '../screens/InsightsScreen';
+import AICoachScreen from '../screens/AICoachScreen';
 import MessagesScreen from '../screens/MessagesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Colors } from '../theme/colors';
@@ -23,9 +23,9 @@ interface TabBarIconProps {
 
 function TabBarIcon({ name, focused, isDark }: TabBarIconProps) {
   const iconMap: Record<string, { active: string; inactive: string }> = {
-    Home: { active: 'home', inactive: 'home-outline' },
-    Discovery: { active: 'compass', inactive: 'compass-outline' },
-    Likes: { active: 'heart', inactive: 'heart-outline' },
+    Home: { active: 'compass', inactive: 'compass-outline' },
+    Insights: { active: 'analytics', inactive: 'analytics-outline' },
+    AICoach: { active: 'sparkles', inactive: 'sparkles-outline' },
     Messages: { active: 'chatbubbles', inactive: 'chatbubbles-outline' },
     Profile: { active: 'person', inactive: 'person-outline' },
   };
@@ -67,8 +67,8 @@ export default function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Matches' }} />
-      <Tab.Screen name="Discovery" component={DiscoveryScreen} options={{ tabBarLabel: 'Discover' }} />
-      <Tab.Screen name="Likes" component={LikesScreen} options={{ tabBarLabel: 'Likes' }} />
+      <Tab.Screen name="Insights" component={InsightsScreen} options={{ tabBarLabel: 'Insights' }} />
+      <Tab.Screen name="AICoach" component={AICoachScreen} options={{ tabBarLabel: 'AI Coach' }} />
       <Tab.Screen name="Messages" component={MessagesScreen} options={{ tabBarLabel: 'Chats' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>

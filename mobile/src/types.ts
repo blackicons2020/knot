@@ -15,8 +15,8 @@ export type RootStackParamList = {
 
 export type TabParamList = {
   Home: undefined;
-  Discovery: undefined;
-  Likes: undefined;
+  Insights: undefined;
+  AICoach: undefined;
   Messages: undefined;
   Profile: undefined;
 };
@@ -109,6 +109,11 @@ export interface User {
   subscriptionDate?: string;
   subscriptionAmount?: number;
   subscriptionPeriod?: string;
+  readinessScore?: number;
+  seriousnessLevel?: number;
+  trustScore?: number;
+  personalityArchetype?: string;
+  attachmentStyle?: string;
 }
 
 export interface Match extends User {

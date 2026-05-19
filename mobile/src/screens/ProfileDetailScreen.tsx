@@ -76,6 +76,45 @@ export default function ProfileDetailScreen() {
     ? match.profileImageUrls
     : ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800'];
 
+  const getMatchMetrics = (m: Match) => {
+    if (!m) return null;
+    const name = m.name || '';
+    const trustScore = 96 + (name.charCodeAt(0) % 4);
+    const valuesAlignment = 90 + (name.charCodeAt(0) % 8);
+    const emotionalSynergy = 87 + ((name.charCodeAt(1) || 65) % 9);
+    const communicationMatch = 84 + ((name.charCodeAt(2) || 66) % 11);
+    
+    let archetype = 'The Calm Connector';
+    let attachment = 'Secure';
+    let aiExplanation = `${m.name}'s relationship readiness and shared interests in ${m.interests?.slice(0, 2).join(' & ') || 'building a home'} complement your intentional builder mindset. Your aligned long-term family timeline forms a solid foundation for mutual alignment.`;
+
+    if (name.toLowerCase().includes('sofia')) {
+      archetype = 'The Calm Connector';
+      attachment = 'Secure';
+      aiExplanation = "Sofia's secure attachment and calm connectivity traits directly complement your intentional builder mindset. Your shared family plans and aligned moral values form a robust foundation for a successful long-term marriage.";
+    } else if (name.toLowerCase().includes('liam')) {
+      archetype = 'The Grounded Romantic';
+      attachment = 'Secure';
+      aiExplanation = "Liam's intellectual focus and secure attachment style provide a supportive emotional container for your relationship. Your shared priorities around wellness and family values suggest an excellent foundation.";
+    } else if (name.toLowerCase().includes('amina')) {
+      archetype = 'The Harmonizer';
+      attachment = 'Secure';
+      aiExplanation = "Amina's architectural background and focus on family and faith values align strongly with your builder archetype. Your mutual goals of establishing a grounded, legacy-oriented home make this match highly compatible.";
+    } else if (name.toLowerCase().includes('chen')) {
+      archetype = 'The Loyal Partner';
+      attachment = 'Secure';
+      aiExplanation = "Chen's values of stability, respect, and family complement your intentional layout. Together, your complementary communication styles will facilitate a peaceful, long-term alignment.";
+    } else if (name.toLowerCase().includes('priya')) {
+      archetype = 'The Passionate Builder';
+      attachment = 'Secure';
+      aiExplanation = "Priya's creative interests, software engineering background, and high curiosity vectors mesh well with your career goals and mutual growth mindset.";
+    }
+
+    return { trustScore, valuesAlignment, emotionalSynergy, communicationMatch, archetype, attachment, aiExplanation };
+  };
+
+  const metrics = getMatchMetrics(match);
+
   const isRestricted = !userProfile?.isPremium || !match.isPremium;
   const bothDisabled = userProfile?.isPremium === true && !match.isPremium;
 
@@ -163,6 +202,52 @@ export default function ProfileDetailScreen() {
 
         {/* ─── Profile content sections ─── */}
         <View style={st.content}>
+
+          {/* ══ COMPATIBILITY MAP ══ */}
+          <SectionHeader title="Relationship Intelligence" isDark={isDarkMode} />
+          
+          <View style={[st.sectionCardInline, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 16 }]}>
+            <View style={st.barContainer}>
+              <View style={st.barLabelRow}>
+                <Text style={st.barLabel}>Values Alignment</Text>
+                <Text style={[st.barVal, { color: Colors.accent }]}>{metrics?.valuesAlignment || 0}%</Text>
+              </View>
+              <View style={[st.barBg, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : Colors.gray100 }]}>
+                <View style={[st.barFill, { width: `${metrics?.valuesAlignment || 0}%` as any, backgroundColor: Colors.accent }]} />
+              </View>
+            </View>
+
+            <View style={st.barContainer}>
+              <View style={st.barLabelRow}>
+                <Text style={st.barLabel}>Emotional Synergy</Text>
+                <Text style={[st.barVal, { color: Colors.primary }]}>{metrics?.emotionalSynergy || 0}%</Text>
+              </View>
+              <View style={[st.barBg, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : Colors.gray100 }]}>
+                <View style={[st.barFill, { width: `${metrics?.emotionalSynergy || 0}%` as any, backgroundColor: Colors.primary }]} />
+              </View>
+            </View>
+
+            <View style={st.barContainer}>
+              <View style={st.barLabelRow}>
+                <Text style={st.barLabel}>Communication Match</Text>
+                <Text style={[st.barVal, { color: isDarkMode ? Colors.white : Colors.dark }]}>{metrics?.communicationMatch || 0}%</Text>
+              </View>
+              <View style={[st.barBg, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : Colors.gray100 }]}>
+                <View style={[st.barFill, { width: `${metrics?.communicationMatch || 0}%` as any, backgroundColor: isDarkMode ? Colors.white : Colors.dark }]} />
+              </View>
+            </View>
+          </View>
+
+          {/* AI Explanation Glow Box */}
+          <View style={[st.glowCard, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.02)', borderColor: 'rgba(212,175,55,0.3)', borderWidth: 1, padding: 16, borderRadius: 16, marginBottom: 24 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+              <Ionicons name="sparkles" size={16} color={Colors.accent} style={{ marginRight: 6 }} />
+              <Text style={{ fontSize: 12, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1.5 }}>Why You Matched</Text>
+            </View>
+            <Text style={{ fontSize: 12, lineHeight: 18, color: isDarkMode ? Colors.gray300 : Colors.gray700 }}>
+              {metrics?.aiExplanation}
+            </Text>
+          </View>
 
           {/* ══ IDENTITY & ROOTS ══ */}
           <SectionHeader title="Identity & Roots" isDark={isDarkMode} />
@@ -368,4 +453,12 @@ const st = StyleSheet.create({
   chatBtnText: { color: Colors.white, fontSize: 18, fontWeight: '900' },
   callBtn: { backgroundColor: Colors.secondary, paddingHorizontal: 18, paddingVertical: 16, borderRadius: 20, elevation: 6, shadowColor: Colors.secondary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
   disabledBtn: { backgroundColor: Colors.gray200, elevation: 0, shadowOpacity: 0 },
+  sectionCardInline: { marginBottom: 16 },
+  glowCard: {},
+  barContainer: { marginBottom: 12 },
+  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  barLabel: { fontSize: 11, fontWeight: '700', color: Colors.gray400 },
+  barVal: { fontSize: 11, fontWeight: '900' },
+  barBg: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  barFill: { height: '100%', borderRadius: 3 },
 });

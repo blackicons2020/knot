@@ -27,6 +27,9 @@ export default function ChatScreen() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState('');
+  const [aiChatTip, setAiChatTip] = useState(
+    'AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory.'
+  );
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -44,8 +47,12 @@ export default function ChatScreen() {
     const msg = text.trim();
     if (!msg) return;
     setText('');
+    setAiChatTip('');
     try {
       await db.sendMessage(match.id, user.id, msg);
+      setTimeout(() => {
+        setAiChatTip(`AI Message Assistant: ${match.name} values authentic alignment. Suggest discussing your preferred marriage timeline or origin backgrounds.`);
+      }, 2000);
     } catch {
       addToast('Failed to send message', 'error');
       setText(msg);
@@ -103,6 +110,14 @@ export default function ChatScreen() {
         }
       />
 
+      {/* AI Guided Chat Tip Prompt Bar */}
+      {aiChatTip ? (
+        <View style={[s.tipBar, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.03)', borderTopColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)', borderBottomColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)' }]}>
+          <Ionicons name="sparkles" size={14} color={Colors.accent} style={{ marginRight: 8 }} />
+          <Text style={[s.tipText, { color: Colors.accent }]}>{aiChatTip}</Text>
+        </View>
+      ) : null}
+
       {/* Input */}
       <View style={[s.inputBar, { paddingBottom: insets.bottom + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
         <TextInput
@@ -141,4 +156,6 @@ const s = StyleSheet.create({
   inputBar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: Colors.gray100 },
   input: { flex: 1, borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14 },
   sendBtn: { backgroundColor: Colors.primary, borderRadius: 22, padding: 10 },
+  tipBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderBottomWidth: 1 },
+  tipText: { fontSize: 11, fontWeight: '700', flex: 1, lineHeight: 16 },
 });

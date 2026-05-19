@@ -68,7 +68,7 @@ export default function OnboardingScreen() {
     originCity: '',
     religion: '',
     personalValues: [],
-  });
+  } as any);
 
   // AI Interview State
   const [messages, setMessages] = useState<Array<{ role: 'ai' | 'user'; text: string }>>([
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
   },
   chatBox: {
     borderWidth: 1,
-    borderRadius: BorderRadius.xxl,
+    borderRadius: BorderRadius.lg,
     height: 520,
     marginTop: Spacing.lg,
     overflow: 'hidden',

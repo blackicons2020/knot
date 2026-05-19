@@ -8,10 +8,10 @@ import { ToastProvider } from './src/contexts/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 function AppContent() {
-  const { theme } = useTheme();
+  const { isDarkMode } = useTheme();
   return (
     <>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
       <AppNavigator />
     </>
   );
