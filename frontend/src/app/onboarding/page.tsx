@@ -377,7 +377,7 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* Current Residence Location Selectors (Reordered to Country, City, State) */}
+              {/* Current Residence Location Selectors (Reordered to Country, State, City) */}
               <div className="pt-2 border-t border-white/5 space-y-3">
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Current Residence Location</span>
                 <div className="grid grid-cols-3 gap-2">
@@ -397,16 +397,6 @@ export default function Onboarding() {
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    <input
-                      type="text"
-                      value={residenceCity}
-                      onChange={(e) => setResidenceCity(e.target.value)}
-                      placeholder="City"
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
                   </div>
                   <div>
                     <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
@@ -435,10 +425,20 @@ export default function Onboarding() {
                       />
                     )}
                   </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    <input
+                      type="text"
+                      value={residenceCity}
+                      onChange={(e) => setResidenceCity(e.target.value)}
+                      placeholder="City"
+                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Heritage & Origin Location Selectors (Reordered to Country, City, State) */}
+              {/* Heritage & Origin Location Selectors (Reordered to Country, State, City) */}
               <div className="pt-2 border-t border-white/5 space-y-3">
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Heritage & Origin</span>
                 <div className="grid grid-cols-3 gap-2">
@@ -458,16 +458,6 @@ export default function Onboarding() {
                         <option key={c} value={c}>{c}</option>
                       ))}
                     </select>
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    <input
-                      type="text"
-                      value={originCity}
-                      onChange={(e) => setOriginCity(e.target.value)}
-                      placeholder="City"
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
                   </div>
                   <div>
                     <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
@@ -495,6 +485,16 @@ export default function Onboarding() {
                         className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
                       />
                     )}
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    <input
+                      type="text"
+                      value={originCity}
+                      onChange={(e) => setOriginCity(e.target.value)}
+                      placeholder="City"
+                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
                   </div>
                 </div>
               </div>

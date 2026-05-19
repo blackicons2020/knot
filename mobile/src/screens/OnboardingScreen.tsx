@@ -331,17 +331,6 @@ export default function OnboardingScreen() {
         <Text style={styles.subSectionTitle}>{title}</Text>
         {renderDropdownField('Country', countryVal, 'Select country', COUNTRIES, setCountry)}
         
-        <View style={{ marginBottom: 12 }}>
-          <Text style={styles.label}>City / Town</Text>
-          <TextInput
-            style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-            value={cityVal}
-            onChangeText={setCity}
-            placeholder="Type city / town"
-            placeholderTextColor={Colors.gray400}
-          />
-        </View>
-
         {states.length > 0 ? (
           renderDropdownField('State / Province / Region', stateVal, 'Select state / province', states, setState)
         ) : (
@@ -356,6 +345,17 @@ export default function OnboardingScreen() {
             />
           </View>
         )}
+
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.label}>City / Town</Text>
+          <TextInput
+            style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+            value={cityVal}
+            onChangeText={setCity}
+            placeholder="Type city / town"
+            placeholderTextColor={Colors.gray400}
+          />
+        </View>
       </View>
     );
   };
