@@ -133,8 +133,7 @@ export default function Dashboard() {
   };
 
   const handleConnect = () => {
-    setConnectedMatchName(activeMatch.name);
-    setShowMatchModal(true);
+    setActiveTab("matchProfile");
   };
 
   const handlePaystackCheckout = () => {
@@ -402,6 +401,96 @@ export default function Dashboard() {
                   >
                     Connect <Heart className="w-4 h-4" />
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MATCH PROFILE DETAIL */}
+          {activeTab === "matchProfile" && activeMatch && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <button 
+                onClick={() => setActiveTab("matches")}
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" /> Back to Curated Match
+              </button>
+              
+              <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
+                <div className="relative h-64 md:h-80">
+                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-8">
+                    <h2 className="text-4xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h2>
+                    <p className="text-[#D4AF37] font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.location}</p>
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-8">
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-gray-300">Archetype: {activeMatch.archetype}</span>
+                    <span className="px-4 py-2 rounded-full bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Attachment: {activeMatch.attachment}</span>
+                    <span className="px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">Trust Score: {activeMatch.trustScore}%</span>
+                    <span className="px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">Readiness: {activeMatch.readiness}%</span>
+                  </div>
+
+                  {/* Bio */}
+                  <div>
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">About Me</h3>
+                    <p className="text-gray-200 leading-relaxed font-serif text-lg italic">"{activeMatch.bio}"</p>
+                  </div>
+
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Education</h4>
+                      <p className="text-sm text-white font-medium">B.Sc Architecture</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Religion</h4>
+                      <p className="text-sm text-white font-medium">{activeMatch.religion}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Marital Status</h4>
+                      <p className="text-sm text-white font-medium">Never Married</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Smoking</h4>
+                      <p className="text-sm text-white font-medium">Non-smoker</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Drinking</h4>
+                      <p className="text-sm text-white font-medium">Socially</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Timeline</h4>
+                      <p className="text-sm text-white font-medium">1-2 Years</p>
+                    </div>
+                  </div>
+
+                  {/* Values */}
+                  <div>
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Core Values</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {activeMatch.values.map(v => (
+                        <span key={v} className="px-3 py-1.5 rounded-md bg-white/5 text-xs font-medium text-gray-300">{v}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-6 border-t border-white/10 flex gap-4">
+                    <button 
+                      onClick={() => {
+                        setActiveChatId(activeMatch.id);
+                        setActiveTab("messages");
+                      }}
+                      className="flex-1 py-4 rounded-xl text-sm font-black rose-glow-btn text-white flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare className="w-5 h-5" /> Start Chat
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
