@@ -4,7 +4,10 @@ import axios from 'axios';
 @Injectable()
 export class AIService {
   private readonly logger = new Logger(AIService.name);
-  private readonly aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+  private get aiServiceUrl(): string {
+    const url = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    return url.startsWith('http') ? url : `https://${url}`;
+  }
 
   async calculateCompatibility(userA: any, userB: any): Promise<any> {
     try {

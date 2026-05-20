@@ -11,7 +11,7 @@ services:
         fromService:
           type: web
           name: knot-backend-core
-          property: host
+          property: url
 
   # NestJS Core Backend Gateway
   - type: web
@@ -36,7 +36,7 @@ services:
         fromService:
           type: web
           name: knot-backend-ai
-          property: host
+          property: url
       - key: JWT_SECRET
         generateValue: true
 
