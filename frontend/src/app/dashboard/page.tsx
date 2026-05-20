@@ -418,7 +418,7 @@ export default function Dashboard() {
               
               <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
                 <div className="relative h-64 md:h-80">
-                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover" />
+                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover object-top" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-8">
                     <h2 className="text-4xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h2>
@@ -452,7 +452,7 @@ export default function Dashboard() {
                       <p className="text-sm text-white font-medium">{activeMatch.religion}</p>
                     </div>
                     <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Marital Status</h4>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Marriage History</h4>
                       <p className="text-sm text-white font-medium">Never Married</p>
                     </div>
                     <div>
