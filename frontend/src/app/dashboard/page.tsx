@@ -81,21 +81,34 @@ export default function Dashboard() {
     "AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory."
   );
 
-  const handleSendCoachMessage = () => {
+  const handleSendCoachMessage = async () => {
     if (!coachInput.trim()) return;
-    setCoachMessages(prev => [...prev, { role: "user", text: coachInput }]);
+    
     const userQ = coachInput;
+    const updatedMessages = [...coachMessages, { role: "user", text: userQ }];
+    setCoachMessages(updatedMessages);
     setCoachInput("");
 
-    setTimeout(() => {
-      let aiResponse = "As your relationship coach, I recommend focusing on emotional availability. In serious partnerships, alignment on family structures and timelines resolves 80% of conflict early.";
-      if (userQ.toLowerCase().includes("date")) {
-        aiResponse = "For a successful first date, choose a quiet, premium environment like a botanical garden or a quiet lounge. Ask open-ended questions like: 'What does a fulfilling life look like for you in five years?'";
-      } else if (userQ.toLowerCase().includes("relocate")) {
-        aiResponse = "Discussing relocation requires collaborative transparency. Emphasize that your primary goal is finding mutual alignment where both partners feel emotionally safe, productive, and connected to family circles.";
+    // Optional: Set a typing state if desired, here we just await fetch
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/ai/coach`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationHistory: updatedMessages.slice(0, -1),
+          userProfile: { name: "Web User", age: 30, bio: "Seeking a serious partner." },
+          currentMessage: userQ,
+        })
+      });
+      const data = await res.json();
+      if (data.response) {
+        setCoachMessages(prev => [...prev, { role: "ai", text: data.response }]);
+      } else {
+        throw new Error("No response");
       }
-      setCoachMessages(prev => [...prev, { role: "ai", text: aiResponse }]);
-    }, 1000);
+    } catch (e) {
+      setCoachMessages(prev => [...prev, { role: "ai", text: "I'm having a little trouble connecting with my insights right now." }]);
+    }
   };
 
   const handleSendChatMessage = () => {
@@ -622,6 +635,44 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
+
+              {/* Full Profile Detail Section */}
+              <div className="pt-6 border-t border-white/5 space-y-8">
+                <div className="space-y-4">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Psychological Profile</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5 text-xs text-gray-300 font-medium">✔ The Intentional Builder</span>
+                    <span className="px-3 py-1.5 rounded-full bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-xs text-[#D4AF37] font-medium">✔ Secure Attachment</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Bio & Intentions</h4>
+                  <p className="text-sm text-gray-300 leading-relaxed font-sans">
+                    Software engineer passionate about building a meaningful legacy. I value transparency, emotional availability, and structured growth. Looking for a partner who shares my vision for a stable, loving family and mutual continuous improvement.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Religion</div>
+                    <div className="text-sm text-white font-bold">Christian</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Core Values</div>
+                    <div className="text-sm text-white font-bold">Faith, Growth, Family</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Readiness</div>
+                    <div className="text-sm text-[#10B981] font-bold">94% (Elite)</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Trust Score</div>
+                    <div className="text-sm text-[#10B981] font-bold">98% (Verified)</div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 

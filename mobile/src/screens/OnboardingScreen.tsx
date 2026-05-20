@@ -23,7 +23,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
-import { RootStackParamList, User } from '../types';
+import { RootStackParamList, User, MaritalStatus, SmokingHabits, DrinkingHabits, ChildrenPreference, WillingToRelocate } from '../types';
 import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE } from '../services/locationData';
 import { db } from '../services/apiService';
 
@@ -68,6 +68,16 @@ export default function OnboardingScreen() {
     originCity: '',
     religion: '',
     personalValues: [],
+    nationality: '',
+    languages: [],
+    maritalStatus: MaritalStatus.NeverMarried,
+    smoking: SmokingHabits.NonSmoker,
+    drinking: DrinkingHabits.Never,
+    childrenStatus: 'No kids',
+    marriageTimeline: 'Within 1-2 years',
+    willingToRelocate: WillingToRelocate.Maybe,
+    childrenPreference: ChildrenPreference.OpenToChildren,
+    idealPartnerTraits: [],
   } as any);
 
   // AI Interview State
@@ -587,6 +597,68 @@ export default function OnboardingScreen() {
 
             {renderLocationGroup('residence', 'Current Residence')}
             {renderLocationGroup('origin', 'Heritage & Origin')}
+
+            {/* Lifestyle & Expectations */}
+            <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200, paddingTop: 16 }}>
+              <Text style={[styles.subSectionTitle, { color: Colors.primary, marginBottom: 16 }]}>Lifestyle & Expectations</Text>
+              
+              <View style={{ marginBottom: 12 }}>
+                <Text style={styles.label}>Nationality</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={form.nationality}
+                  onChangeText={(v) => set('nationality', v)}
+                  placeholder="e.g. American/Nigerian"
+                  placeholderTextColor={Colors.gray400}
+                />
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <Text style={styles.label}>Languages Spoken</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={form.languages?.join(', ')}
+                  onChangeText={(v) => set('languages', v.split(',').map(s => s.trim()).filter(Boolean))}
+                  placeholder="e.g. English, Yoruba, Spanish"
+                  placeholderTextColor={Colors.gray400}
+                />
+              </View>
+
+              {renderDropdownField('Marriage History', form.maritalStatus, 'Select history', Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
+              
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  {renderDropdownField('Smoking', form.smoking, 'Select', Object.values(SmokingHabits), (v) => set('smoking', v))}
+                </View>
+                <View style={{ flex: 1 }}>
+                  {renderDropdownField('Drinking', form.drinking, 'Select', Object.values(DrinkingHabits), (v) => set('drinking', v))}
+                </View>
+              </View>
+
+              {renderDropdownField('Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
+              
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  {renderDropdownField('Vow Timeline', form.marriageTimeline, 'Timeline', ['ASAP', '1-2 years', '3+ years', 'Not sure'], (v) => set('marriageTimeline', v))}
+                </View>
+                <View style={{ flex: 1 }}>
+                  {renderDropdownField('Relocation', form.willingToRelocate, 'Relocate', Object.values(WillingToRelocate), (v) => set('willingToRelocate', v))}
+                </View>
+              </View>
+
+              {renderDropdownField('Children Intent', form.childrenPreference, 'Select intent', Object.values(ChildrenPreference), (v) => set('childrenPreference', v))}
+
+              <View style={{ marginBottom: 12 }}>
+                <Text style={styles.label}>Ideal Partner Traits</Text>
+                <TextInput
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                  value={form.idealPartnerTraits?.join(', ')}
+                  onChangeText={(v) => set('idealPartnerTraits', v.split(',').map(s => s.trim()).filter(Boolean))}
+                  placeholder="e.g. Kind, Ambitious, Family-oriented"
+                  placeholderTextColor={Colors.gray400}
+                />
+              </View>
+            </View>
 
             {/* Selfie Upload */}
             <View style={styles.uploadSection}>

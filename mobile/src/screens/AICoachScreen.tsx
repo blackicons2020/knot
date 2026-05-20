@@ -6,8 +6,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import AppHeader from '../components/AppHeader';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
+import { api } from '../services/apiService';
 
 interface CoachMsg {
   role: 'ai' | 'user';
@@ -16,6 +18,7 @@ interface CoachMsg {
 
 export default function AICoachScreen() {
   const { isDarkMode } = useTheme();
+  const { userProfile } = useAuth();
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
 
@@ -34,27 +37,26 @@ export default function AICoachScreen() {
     }
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text) return;
 
-    setMessages((prev) => [...prev, { role: 'user', text }]);
+    const newMessages: CoachMsg[] = [...messages, { role: 'user', text }];
+    setMessages(newMessages);
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      let reply = 'As your relationship coach, I recommend focusing on emotional availability. In serious partnerships, alignment on family structures and timelines resolves 80% of conflict early.';
+    try {
+      // Send previous messages (excluding the new user msg) + current msg
+      const history = messages.map(m => ({ role: m.role, text: m.text }));
+      const result = await api.getCoachResponse(history, userProfile || { name: 'User' }, text);
       
-      const query = text.toLowerCase();
-      if (query.includes('date')) {
-        reply = "For a successful first date, choose a quiet, premium environment like a botanical garden or a quiet lounge. Ask open-ended questions like: 'What does a fulfilling life look like for you in five years?'";
-      } else if (query.includes('relocate')) {
-        reply = 'Discussing relocation requires collaborative transparency. Emphasize that your primary goal is finding mutual alignment where both partners feel emotionally safe, productive, and connected to family circles.';
-      }
-
-      setMessages((prev) => [...prev, { role: 'ai', text: reply }]);
+      setMessages([...newMessages, { role: 'ai', text: result.response }]);
+    } catch (error) {
+      setMessages([...newMessages, { role: 'ai', text: "I'm having a little trouble connecting with my insights right now. Let's try again in a moment." }]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const renderItem = ({ item }: { item: CoachMsg }) => {

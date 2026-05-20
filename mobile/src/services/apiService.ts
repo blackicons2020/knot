@@ -110,6 +110,13 @@ class ApiService {
     });
   }
 
+  async getCoachResponse(history: Array<{ role: string; text: string }>, profile: any, message: string): Promise<{ response: string }> {
+    return this.request<{ response: string }>('/ai/coach', {
+      method: 'POST',
+      body: JSON.stringify({ conversationHistory: history, userProfile: profile, currentMessage: message }),
+    });
+  }
+
   async updatePremiumStatus(uid: string, isPremium: boolean): Promise<void> {
     await this.request(`/users/${uid}`, {
       method: 'PUT',

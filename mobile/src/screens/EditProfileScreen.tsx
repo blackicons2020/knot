@@ -218,7 +218,7 @@ export default function EditProfileScreen() {
               <TextInput style={inputStyle} value={String(form.age)} onChangeText={(v) => set('age', parseInt(v) || 0)} keyboardType="numeric" />
             </View>
             <View style={st.col}>
-              {renderSelect('Marital Status', form.maritalStatus, Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
+              {renderSelect('Marriage History', form.maritalStatus, Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
             </View>
           </View>
         </View>

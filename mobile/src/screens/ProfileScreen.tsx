@@ -17,29 +17,23 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 /* ── Reusable sub-components ─────────────────────────────── */
 
-function DataItem({ label, value, isDark }: { label: string; value?: string | null; isDark: boolean }) {
+function DataItem({ label, value }: { label: string; value?: string | null }) {
   return (
     <View style={st.dataItem}>
       <Text style={st.dataLabel}>{label}</Text>
       {value ? (
-        <Text style={[st.dataValue, { color: isDark ? Colors.gray200 : Colors.black }]}>{value}</Text>
+        <Text style={[st.dataValue, { color: Colors.gray200 }]}>{value}</Text>
       ) : (
-        <Text style={[st.dataValue, { color: isDark ? Colors.gray600 : Colors.gray300, fontStyle: 'italic' }]}>Not specified</Text>
+        <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not specified</Text>
       )}
     </View>
   );
 }
 
-function Chip({ text, variant, isDark }: { text: string; variant: 'neutral' | 'brand'; isDark: boolean }) {
-  const bg = variant === 'brand'
-    ? (isDark ? 'rgba(244,196,48,0.1)' : Colors.light)
-    : (isDark ? Colors.gray800 : Colors.gray100);
-  const fg = variant === 'brand'
-    ? (isDark ? Colors.accent : Colors.primary)
-    : (isDark ? Colors.gray300 : Colors.gray700);
-  const borderColor = variant === 'brand'
-    ? (isDark ? 'rgba(244,196,48,0.2)' : 'rgba(74,13,103,0.1)')
-    : 'transparent';
+function Chip({ text, variant }: { text: string; variant: 'neutral' | 'brand' }) {
+  const bg = variant === 'brand' ? 'rgba(212,175,55,0.1)' : Colors.gray800;
+  const fg = variant === 'brand' ? Colors.accent : Colors.gray300;
+  const borderColor = variant === 'brand' ? 'rgba(212,175,55,0.3)' : 'transparent';
   return (
     <View style={[st.chip, { backgroundColor: bg, borderColor, borderWidth: variant === 'brand' ? 1 : 0 }]}>
       <Text style={[st.chipText, { color: fg }]}>{text}</Text>
@@ -47,16 +41,16 @@ function Chip({ text, variant, isDark }: { text: string; variant: 'neutral' | 'b
   );
 }
 
-function SectionHeader({ title, isDark }: { title: string; isDark: boolean }) {
+function SectionHeader({ title }: { title: string }) {
   return (
-    <View style={[st.sectionHeaderWrap, { borderBottomColor: isDark ? Colors.gray800 : Colors.gray100 }]}>
-      <Text style={[st.sectionHeader, { color: isDark ? Colors.white : Colors.dark }]}>{title}</Text>
+    <View style={st.sectionHeaderWrap}>
+      <Text style={st.sectionHeader}>{title}</Text>
     </View>
   );
 }
 
-function Divider({ isDark }: { isDark: boolean }) {
-  return <View style={[st.divider, { backgroundColor: isDark ? Colors.gray800 : Colors.gray200 }]} />;
+function Divider() {
+  return <View style={st.divider} />;
 }
 
 /* ── Main Screen ──────────────────────────────────────────── */
@@ -64,7 +58,7 @@ function Divider({ isDark }: { isDark: boolean }) {
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { userProfile } = useAuth();
-  const { isDarkMode } = useTheme();
+  // We ignore isDarkMode because this screen uses a bespoke dark/gold theme exclusively.
 
   if (!userProfile) return null;
 
@@ -76,7 +70,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.white }]}
+      style={[st.root, { backgroundColor: Colors.dark }]}
       contentContainerStyle={{ paddingBottom: 100 }}
     >
       <AppHeader />
@@ -84,59 +78,53 @@ export default function ProfileScreen() {
       <View style={st.heroWrap}>
         <Image source={{ uri: photo }} style={st.heroImage} />
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.25)', 'rgba(0,0,0,0.8)']}
+          colors={['transparent', 'rgba(19,22,32,0.4)', Colors.dark]}
           style={StyleSheet.absoluteFillObject}
         />
         <View style={st.heroContent}>
-          <View style={st.heroNameRow}>
-            <Text style={st.heroName}>{userProfile.name}, {userProfile.age}</Text>
-            {userProfile.isVerified && (
-              <View style={st.verifiedBadge}>
-                <Ionicons name="checkmark" size={14} color={Colors.dark} />
-              </View>
-            )}
-          </View>
+          <Text style={st.heroName}>{userProfile.name}, {userProfile.age}</Text>
           <Text style={st.heroLocation}>{locationText.toUpperCase()}</Text>
+          {userProfile.isVerified && (
+            <View style={st.verifiedRow}>
+              <Ionicons name="checkmark-circle" size={16} color={Colors.accent} />
+              <Text style={st.verifiedText}>VERIFIED IDENTITY</Text>
+            </View>
+          )}
+          <Text style={st.heroSubtitle}>
+            Where true relationship leads to <Text style={{ color: Colors.accent }}>vow</Text>
+          </Text>
         </View>
       </View>
 
       {/* ─── Quick action buttons (overlapping hero) ─── */}
       <View style={st.actionsRow}>
         <TouchableOpacity
-          style={[st.actionBtnSmall, {
-            backgroundColor: isDarkMode ? Colors.gray800 : Colors.white,
-            borderColor: isDarkMode ? Colors.gray700 : Colors.gray100,
-          }]}
+          style={st.actionBtnSmall}
           onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}
         >
-          <Ionicons name="camera-outline" size={24} color={isDarkMode ? Colors.gray400 : Colors.gray400} />
-          <Text style={[st.actionLabelSmall, { color: isDarkMode ? Colors.gray500 : Colors.gray400 }]}>Gallery</Text>
+          <Ionicons name="camera-outline" size={24} color={Colors.gray400} />
+          <Text style={st.actionLabelSmall}>Gallery</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[st.actionBtnLarge, { backgroundColor: isDarkMode ? Colors.accent : Colors.primary }]}
+          style={st.actionBtnLarge}
           onPress={() => navigation.navigate('EditProfile', { user: userProfile })}
         >
-          <Ionicons name="pencil" size={28} color={isDarkMode ? Colors.dark : Colors.white} />
-          <Text style={[st.actionLabelLarge, { color: isDarkMode ? Colors.dark : Colors.white }]}>Edit Profile</Text>
+          <Ionicons name="pencil" size={28} color={Colors.dark} />
+          <Text style={st.actionLabelLarge}>Edit Profile</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[st.actionBtnSmall, {
-            backgroundColor: userProfile.isVerified ? (isDarkMode ? 'rgba(34,197,94,0.1)' : '#F0FFF4') : (isDarkMode ? Colors.gray800 : Colors.white),
-            borderColor: userProfile.isVerified ? Colors.success : (isDarkMode ? Colors.gray700 : Colors.gray100),
-          }]}
+          style={[st.actionBtnSmall, userProfile.isVerified && st.actionBtnSmallVerified]}
           onPress={() => navigation.navigate('Verification', { user: userProfile })}
           disabled={userProfile.isVerified}
         >
           {userProfile.isVerified ? (
-            <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
+            <Ionicons name="checkmark-circle" size={24} color={Colors.accent} />
           ) : (
-            <Ionicons name="shield-checkmark-outline" size={24} color={isDarkMode ? Colors.gray500 : Colors.secondary} />
+            <Ionicons name="shield-checkmark-outline" size={24} color={Colors.gray400} />
           )}
-          <Text style={[st.actionLabelSmall, {
-            color: userProfile.isVerified ? Colors.success : Colors.gray400,
-          }]}>
+          <Text style={[st.actionLabelSmall, userProfile.isVerified && { color: Colors.accent }]}>
             {userProfile.isVerified ? 'Verified' : 'Verify ID'}
           </Text>
         </TouchableOpacity>
@@ -145,7 +133,7 @@ export default function ProfileScreen() {
       {/* ─── Admin button ─── */}
       {isAdmin && (
         <TouchableOpacity
-          style={[st.adminBtn, { backgroundColor: isDarkMode ? Colors.gray900 : Colors.dark }]}
+          style={st.adminBtn}
           onPress={() => navigation.navigate('Admin')}
         >
           <Ionicons name="shield-checkmark" size={22} color={Colors.accent} />
@@ -157,83 +145,80 @@ export default function ProfileScreen() {
       <View style={st.content}>
 
         {/* ══ IDENTITY & ROOTS ══ */}
-        <SectionHeader title="Identity & Roots" isDark={isDarkMode} />
+        <SectionHeader title="Identity & Roots" />
 
         <View style={st.row2}>
           <View style={st.col}>
-            <DataItem label="Marital Status" value={userProfile.maritalStatus} isDark={isDarkMode} />
+            <DataItem label="Marriage History" value={userProfile.maritalStatus} />
           </View>
           <View style={st.col}>
-            <DataItem label="Occupation" value={userProfile.occupation} isDark={isDarkMode} />
+            <DataItem label="Occupation" value={userProfile.occupation} />
           </View>
         </View>
 
         {/* Location card */}
-        <View style={[st.locationCard, {
-          backgroundColor: isDarkMode ? 'rgba(0,0,0,0.25)' : Colors.gray50,
-          borderColor: isDarkMode ? Colors.gray800 : Colors.gray100,
-        }]}>
-          <Text style={[st.locationLabel, { color: isDarkMode ? Colors.accent : Colors.primary }]}>Current Residence</Text>
+        <View style={st.locationCard}>
+          <Text style={st.locationLabel}>Current Residence</Text>
           <View style={st.row3}>
             <View style={st.col3}>
-              <DataItem label="Country" value={userProfile.residenceCountry} isDark={isDarkMode} />
+              <DataItem label="Country" value={userProfile.residenceCountry} />
             </View>
             <View style={st.col3}>
-              <DataItem label="State" value={userProfile.residenceState} isDark={isDarkMode} />
+              <DataItem label="State" value={userProfile.residenceState} />
             </View>
             <View style={st.col3}>
-              <DataItem label="City" value={userProfile.residenceCity} isDark={isDarkMode} />
+              <DataItem label="City" value={userProfile.residenceCity} />
             </View>
           </View>
 
-          <Divider isDark={isDarkMode} />
+          <Divider />
 
-          <Text style={[st.locationLabel, { color: isDarkMode ? Colors.accent : Colors.primary }]}>Heritage & Origin</Text>
+          <Text style={st.locationLabel}>Heritage & Origin</Text>
           <View style={st.row3}>
             <View style={st.col3}>
-              <DataItem label="Country" value={userProfile.originCountry} isDark={isDarkMode} />
+              <DataItem label="Country" value={userProfile.originCountry} />
             </View>
             <View style={st.col3}>
-              <DataItem label="State" value={userProfile.originState} isDark={isDarkMode} />
+              <DataItem label="State" value={userProfile.originState} />
             </View>
             <View style={st.col3}>
-              <DataItem label="City" value={userProfile.originCity} isDark={isDarkMode} />
+              <DataItem label="City" value={userProfile.originCity} />
             </View>
           </View>
 
-          <DataItem label="Cultural Identity" value={userProfile.culturalBackground} isDark={isDarkMode} />
+          <DataItem label="Cultural Identity" value={userProfile.culturalBackground} />
         </View>
 
-        <DataItem label="Registry Bio" value={userProfile.bio} isDark={isDarkMode} />
+        <DataItem label="Registry Bio" value={userProfile.bio} />
 
         <View style={[st.row2, { marginTop: 8 }]}>
           <View style={st.col}>
-            <DataItem label="Nationality" value={userProfile.nationality} isDark={isDarkMode} />
+            <DataItem label="Nationality" value={userProfile.nationality} />
           </View>
           <View style={st.col}>
-            <DataItem label="Languages" value={userProfile.languages?.join(', ')} isDark={isDarkMode} />
+            <DataItem label="Languages" value={userProfile.languages?.join(', ')} />
           </View>
         </View>
 
-        <Divider isDark={isDarkMode} />
+        <Divider />
 
         {/* ══ LIFESTYLE & BELIEFS ══ */}
-        <SectionHeader title="Lifestyle & Beliefs" isDark={isDarkMode} />
+        <SectionHeader title="Lifestyle & Beliefs" />
 
         <View style={st.row2}>
           <View style={st.col}>
-            <DataItem label="Faith/Religion" value={userProfile.religion} isDark={isDarkMode} />
+            <DataItem label="Faith/Religion" value={userProfile.religion} />
           </View>
           <View style={st.col}>
-            <DataItem label="Smoking" value={userProfile.smoking} isDark={isDarkMode} />
+            <DataItem label="Smoking" value={userProfile.smoking} />
           </View>
         </View>
         <View style={st.row2}>
           <View style={st.col}>
-            <DataItem label="Drinking" value={userProfile.drinking} isDark={isDarkMode} />
+            <DataItem label="Drinking" value={userProfile.drinking} />
           </View>
           <View style={st.col}>
-            <DataItem label="Children" value={userProfile.childrenStatus || 'No kids'} isDark={isDarkMode} />
+            <DataItem label="Children" value={userProfile.childrenStatus || 'No kids'} />
           </View>
         </View>
 
@@ -241,36 +226,36 @@ export default function ProfileScreen() {
           <Text style={st.dataLabel}>Core Life Values</Text>
           <View style={st.chipRow}>
             {(userProfile.personalValues?.length ?? 0) > 0 ? (
-              userProfile.personalValues.map(v => <Chip key={v} text={v} variant="neutral" isDark={isDarkMode} />)
+              userProfile.personalValues.map(v => <Chip key={v} text={v} variant="neutral" />)
             ) : (
-              <Text style={[st.dataValue, { color: Colors.gray300, fontStyle: 'italic' }]}>Not listed</Text>
+              <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
             )}
           </View>
         </View>
 
-        <Divider isDark={isDarkMode} />
+        <Divider />
 
         {/* ══ MARRIAGE EXPECTATIONS ══ */}
-        <SectionHeader title="Marriage Expectations" isDark={isDarkMode} />
+        <SectionHeader title="Marriage Expectations" />
 
         <View style={st.row2}>
           <View style={st.col}>
-            <DataItem label="Vow Timeline" value={userProfile.marriageTimeline} isDark={isDarkMode} />
+            <DataItem label="Vow Timeline" value={userProfile.marriageTimeline} />
           </View>
           <View style={st.col}>
-            <DataItem label="Relocation" value={userProfile.willingToRelocate} isDark={isDarkMode} />
+            <DataItem label="Relocation" value={userProfile.willingToRelocate} />
           </View>
         </View>
         <View style={st.row2}>
           <View style={st.col}>
-            <DataItem label="Children Intent" value={userProfile.childrenPreference} isDark={isDarkMode} />
+            <DataItem label="Children Intent" value={userProfile.childrenPreference} />
           </View>
           <View style={st.col}>
             <DataItem label="Partner Age" value={
               userProfile.preferredPartnerAgeRange
                 ? `${userProfile.preferredPartnerAgeRange[0]} - ${userProfile.preferredPartnerAgeRange[1]} years`
                 : undefined
-            } isDark={isDarkMode} />
+            } />
           </View>
         </View>
 
@@ -278,14 +263,14 @@ export default function ProfileScreen() {
           <Text style={st.dataLabel}>Ideal Partner Traits</Text>
           <View style={st.chipRow}>
             {(userProfile.idealPartnerTraits?.length ?? 0) > 0 ? (
-              userProfile.idealPartnerTraits.map(t => <Chip key={t} text={t} variant="brand" isDark={isDarkMode} />)
+              userProfile.idealPartnerTraits.map(t => <Chip key={t} text={t} variant="brand" />)
             ) : (
-              <Text style={[st.dataValue, { color: Colors.gray300, fontStyle: 'italic' }]}>Not listed</Text>
+              <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
             )}
           </View>
         </View>
 
-        <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} isDark={isDarkMode} />
+        <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} />
 
       </View>
     </ScrollView>
@@ -298,34 +283,40 @@ const st = StyleSheet.create({
   root: { flex: 1 },
 
   /* Hero */
-  heroWrap: { height: 280, position: 'relative' },
+  heroWrap: { height: 380, position: 'relative' },
   heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  heroContent: { position: 'absolute', bottom: 48, left: 24, right: 24 },
-  heroNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  heroName: { fontSize: 32, fontWeight: '900', color: Colors.white, letterSpacing: -1 },
-  verifiedBadge: { backgroundColor: Colors.accent, borderRadius: 14, padding: 4, elevation: 4 },
-  heroLocation: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.8)', letterSpacing: 2, marginTop: 4 },
+  heroContent: { position: 'absolute', bottom: 60, left: 24, right: 24 },
+  heroName: { fontSize: 36, fontWeight: '900', color: Colors.white, letterSpacing: -1, marginBottom: 4 },
+  heroLocation: { fontSize: 13, fontWeight: '700', color: Colors.gray300, letterSpacing: 3, marginBottom: 12 },
+  verifiedRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  verifiedText: { fontSize: 10, fontWeight: '900', color: Colors.accent, letterSpacing: 2 },
+  heroSubtitle: { fontSize: 14, fontWeight: '500', color: Colors.gray200, fontStyle: 'italic', letterSpacing: 0.5 },
 
   /* Action buttons */
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: -36, marginBottom: 24, paddingHorizontal: 24, zIndex: 20 },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: -40, marginBottom: 32, paddingHorizontal: 24, zIndex: 20 },
   actionBtnSmall: {
-    width: 80, height: 80, borderRadius: 16, alignItems: 'center', justifyContent: 'center',
-    elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8,
-    borderWidth: 1,
+    width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: Colors.darkCard,
+    borderWidth: 1, borderColor: Colors.darkBorder,
+    elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
+  },
+  actionBtnSmallVerified: {
+    backgroundColor: 'rgba(212,175,55,0.1)',
+    borderColor: 'rgba(212,175,55,0.3)',
   },
   actionBtnLarge: {
-    width: 112, height: 112, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-    elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 12,
-    transform: [{ scale: 1.05 }],
+    width: 100, height: 100, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: Colors.accent,
+    elevation: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12,
   },
-  actionLabelSmall: { fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 4 },
-  actionLabelLarge: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 4 },
+  actionLabelSmall: { fontSize: 9, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 6 },
+  actionLabelLarge: { fontSize: 11, fontWeight: '900', color: Colors.dark, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 8 },
 
   /* Admin */
   adminBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
     marginHorizontal: 24, marginBottom: 24, padding: 18, borderRadius: 28,
-    elevation: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder,
   },
   adminBtnText: { fontSize: 12, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 2 },
 
@@ -333,29 +324,29 @@ const st = StyleSheet.create({
   content: { paddingHorizontal: 24 },
 
   /* Section header */
-  sectionHeaderWrap: { paddingTop: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: Colors.gray100, marginBottom: 16 },
-  sectionHeader: { fontSize: 18, fontWeight: '900', color: Colors.dark, letterSpacing: -0.5, textTransform: 'uppercase' },
+  sectionHeaderWrap: { paddingTop: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder, marginBottom: 20 },
+  sectionHeader: { fontSize: 18, fontWeight: '900', color: Colors.white, letterSpacing: 2, textTransform: 'uppercase' },
 
   /* Data items */
-  dataItem: { marginBottom: 16 },
-  dataLabel: { fontSize: 10, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 4 },
-  dataValue: { fontSize: 14, fontWeight: '500', lineHeight: 22 },
+  dataItem: { marginBottom: 20 },
+  dataLabel: { fontSize: 10, fontWeight: '900', color: Colors.gray500, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 },
+  dataValue: { fontSize: 15, fontWeight: '500', lineHeight: 22 },
 
   /* Grid rows */
-  row2: { flexDirection: 'row', gap: 24, marginBottom: 16 },
+  row2: { flexDirection: 'row', gap: 24, marginBottom: 4 },
   row3: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   col: { flex: 1 },
   col3: { flex: 1 },
 
   /* Location card */
-  locationCard: { padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 16 },
-  locationLabel: { fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8 },
+  locationCard: { padding: 20, borderRadius: 20, backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder, marginBottom: 24 },
+  locationLabel: { fontSize: 10, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 },
 
   /* Chips */
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
-  chipText: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
+  chipText: { fontSize: 11, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 },
 
   /* Divider */
-  divider: { height: 1, marginVertical: 8 },
+  divider: { height: 1, backgroundColor: Colors.darkBorder, marginVertical: 12 },
 });
