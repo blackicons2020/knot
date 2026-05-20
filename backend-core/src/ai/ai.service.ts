@@ -5,7 +5,7 @@ import axios from 'axios';
 export class AIService {
   private readonly logger = new Logger(AIService.name);
   private get aiServiceUrl(): string {
-    const url = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+    const url = process.env.AI_SERVICE_URL || 'https://knot-backend-ai.onrender.com';
     return url.startsWith('http') ? url : `https://${url}`;
   }
 
