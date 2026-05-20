@@ -339,25 +339,9 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
               {/* Profile Card */}
               <div className="md:col-span-7 glass-card rounded-[32px] overflow-hidden border border-white/10 p-6 space-y-6">
-                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden group">
-                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95 transition-all duration-500" />
+                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden">
+                  <img src={activeMatch.imageUrls[0]} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
                   
-                  {activeMatch.imageUrls.length > 1 && (
-                    <>
-                      <button onClick={() => setActiveMatchImageIndex(prev => prev > 0 ? prev - 1 : activeMatch.imageUrls.length - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                      <button onClick={() => setActiveMatchImageIndex(prev => prev < activeMatch.imageUrls.length - 1 ? prev + 1 : 0)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                      <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5 px-4 z-10">
-                        {activeMatch.imageUrls.map((_, i) => (
-                          <div key={i} className={`h-1 flex-1 rounded-full ${i === activeMatchImageIndex ? 'bg-white' : 'bg-white/30'}`} />
-                        ))}
-                      </div>
-                    </>
-                  )}
-
                   <div className="absolute top-8 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 z-10">
                     <ShieldCheck className="w-3.5 h-3.5" /> Trust {activeMatch.trustScore}%
                   </div>
@@ -452,8 +436,8 @@ export default function Dashboard() {
               </button>
               
               <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
-                <div className="relative h-64 md:h-80 group">
-                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover object-top transition-all duration-500" />
+                <div className="relative h-[400px] md:h-[500px] group">
+                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover object-center transition-all duration-500" />
                   
                   {activeMatch.imageUrls.length > 1 && (
                     <>
