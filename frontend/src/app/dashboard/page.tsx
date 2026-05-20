@@ -6,7 +6,7 @@ import {
   Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
   Settings, LogOut, Send, AlertTriangle, Shield, CheckCircle2,
   TrendingUp, Award, Activity, Compass, BrainCircuit, HeartHandshake,
-  Menu, X, ArrowLeft
+  Menu, X, ArrowLeft, ChevronLeft, ChevronRight, Image as ImageIcon, Camera
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -43,7 +43,11 @@ export default function Dashboard() {
       readiness: 92,
       values: ["Faith", "Children", "Altruism"],
       aiExplanation: "Sophia's secure attachment and calm connectivity traits directly complement your intentional builder mindset. Your shared family plans and aligned moral values form a robust foundation for a successful long-term marriage.",
-      imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"
+      imageUrls: [
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=600&q=80"
+      ]
     },
     {
       id: "m2",
@@ -59,12 +63,25 @@ export default function Dashboard() {
       readiness: 94,
       values: ["Nature", "Simplicity", "Loyalty"],
       aiExplanation: "Chloe's grounded nature and shared interest in long-term legacy complement your builder archetype, making for a peaceful, synergistic partnership.",
-      imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
+      imageUrls: [
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80"
+      ]
     }
   ];
 
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const activeMatch = mockMatches[currentMatchIndex];
+  const [activeMatchImageIndex, setActiveMatchImageIndex] = useState(0);
+
+  // User Photos State
+  const [userPhotos, setUserPhotos] = useState([
+    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
+    "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&q=80"
+  ]);
+  const [primaryPhotoIndex, setPrimaryPhotoIndex] = useState(0);
 
   // AI Coach State
   const [coachMessages, setCoachMessages] = useState([
@@ -127,6 +144,7 @@ export default function Dashboard() {
   const handlePass = () => {
     if (currentMatchIndex < mockMatches.length - 1) {
       setCurrentMatchIndex(prev => prev + 1);
+      setActiveMatchImageIndex(0);
     } else {
       alert("You have reviewed all daily matches. More matches will be curated for you tomorrow!");
     }
@@ -321,12 +339,29 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
               {/* Profile Card */}
               <div className="md:col-span-7 glass-card rounded-[32px] overflow-hidden border border-white/10 p-6 space-y-6">
-                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden">
-                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
-                  <div className="absolute top-4 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5">
+                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden group">
+                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95 transition-all duration-500" />
+                  
+                  {activeMatch.imageUrls.length > 1 && (
+                    <>
+                      <button onClick={() => setActiveMatchImageIndex(prev => prev > 0 ? prev - 1 : activeMatch.imageUrls.length - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => setActiveMatchImageIndex(prev => prev < activeMatch.imageUrls.length - 1 ? prev + 1 : 0)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                      <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5 px-4 z-10">
+                        {activeMatch.imageUrls.map((_, i) => (
+                          <div key={i} className={`h-1 flex-1 rounded-full ${i === activeMatchImageIndex ? 'bg-white' : 'bg-white/30'}`} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="absolute top-8 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 z-10">
                     <ShieldCheck className="w-3.5 h-3.5" /> Trust {activeMatch.trustScore}%
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10">
                     <h3 className="text-2xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h3>
                     <p className="text-xs text-[#D4AF37] font-semibold">{activeMatch.occupation} • {activeMatch.location}</p>
                   </div>
@@ -417,10 +452,27 @@ export default function Dashboard() {
               </button>
               
               <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
-                <div className="relative h-64 md:h-80">
-                  <img src={activeMatch.imageUrl} alt={activeMatch.name} className="w-full h-full object-cover object-top" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-8">
+                <div className="relative h-64 md:h-80 group">
+                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover object-top transition-all duration-500" />
+                  
+                  {activeMatch.imageUrls.length > 1 && (
+                    <>
+                      <button onClick={() => setActiveMatchImageIndex(prev => prev > 0 ? prev - 1 : activeMatch.imageUrls.length - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => setActiveMatchImageIndex(prev => prev < activeMatch.imageUrls.length - 1 ? prev + 1 : 0)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                      <div className="absolute top-4 left-0 right-0 flex justify-center gap-2 px-8 z-10">
+                        {activeMatch.imageUrls.map((_, i) => (
+                          <div key={i} className={`h-1.5 flex-1 rounded-full ${i === activeMatchImageIndex ? 'bg-white shadow-lg shadow-white/50' : 'bg-white/30'}`} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none z-0" />
+                  <div className="absolute bottom-0 left-0 p-8 z-10">
                     <h2 className="text-4xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h2>
                     <p className="text-[#D4AF37] font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.location}</p>
                   </div>
@@ -696,18 +748,36 @@ export default function Dashboard() {
           {/* TAB 5: MY PROFILE */}
           {activeTab === "profile" && (
             <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6 pb-6 border-b border-white/5">
-                <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 text-3xl font-black flex-shrink-0">G</div>
-                <div>
-                  <h3 className="text-xl font-bold">Gabriel, 29</h3>
-                  <p className="text-xs text-gray-400">Software Engineer • Boston, MA</p>
-                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-6 border-b border-white/5">
+                {/* Profile User Info & Edit Card */}
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-4 flex flex-col justify-center">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
+                    <div className="relative group w-20 h-20 flex-shrink-0">
+                      <div className="w-20 h-20 rounded-full bg-[#2D1B4E] border border-white/10 flex items-center justify-center text-gray-300 text-3xl font-black overflow-hidden relative">
+                        {userPhotos.length > 0 ? (
+                          <img src={userPhotos[primaryPhotoIndex]} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          "G"
+                        )}
+                      </div>
+                      <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <span className="text-[9px] font-bold text-white uppercase tracking-wider text-center">Update<br/>Photo</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Gabriel, 29</h3>
+                      <p className="text-xs text-gray-400">Software Engineer • Boston, MA</p>
+                      <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
+                    </div>
+                  </div>
+                  <button className="w-full mt-2 py-2.5 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:bg-white/20 transition-colors flex items-center justify-center gap-2">
+                    <Settings className="w-3.5 h-3.5" /> Edit Profile Data
+                  </button>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
-                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Identity Verification</h4>
+                {/* Identity Verification */}
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3 flex flex-col justify-center">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black mb-1">Identity Verification</h4>
                   <div className="flex items-center justify-between text-xs">
                     <span>Government ID Scan</span>
                     <span className="text-[#10B981] font-bold">Approved</span>
@@ -716,37 +786,49 @@ export default function Dashboard() {
                     <span>Liveness Selfie Match</span>
                     <span className="text-[#10B981] font-bold">Approved</span>
                   </div>
+                  <div className="mt-3 p-2.5 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20 text-[10px] text-[#10B981] font-black text-center uppercase tracking-wide">
+                    Identity Verified
+                  </div>
                 </div>
+              </div>
 
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
-                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Membership Subscription</h4>
-                  {isPremium ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span>Active Plan</span>
-                        <span className="text-[#D4AF37] font-bold">Premium Alignment (Live)</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span>Renews On</span>
-                        <span className="text-gray-400">June 16, 2026</span>
-                      </div>
-                      <div className="mt-2 p-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[10px] text-[#D4AF37] font-black text-center uppercase tracking-wide">
-                        🌟 Premium Membership Active
+              {/* My Photos Section */}
+              <div className="pt-6 border-t border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">My Photos</h4>
+                  <span className="text-[10px] text-gray-500 font-bold">{userPhotos.length} / 6 Uploaded</span>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {userPhotos.map((photo, idx) => (
+                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 group">
+                      <img src={photo} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                      {idx === primaryPhotoIndex && (
+                        <div className="absolute top-2 left-2 bg-[#D4AF37] px-2 py-0.5 rounded-md text-[8px] font-black uppercase text-black">
+                          Primary
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                        {idx !== primaryPhotoIndex && (
+                          <button onClick={() => setPrimaryPhotoIndex(idx)} className="text-[9px] font-bold bg-white/20 hover:bg-white/40 px-3 py-1.5 rounded-full text-white uppercase tracking-wider">
+                            Make Primary
+                          </button>
+                        )}
+                        <button onClick={() => {
+                          const newPhotos = userPhotos.filter((_, i) => i !== idx);
+                          setUserPhotos(newPhotos);
+                          if (primaryPhotoIndex === idx) setPrimaryPhotoIndex(0);
+                          else if (primaryPhotoIndex > idx) setPrimaryPhotoIndex(prev => prev - 1);
+                        }} className="text-[9px] font-bold text-red-400 hover:text-red-300 uppercase tracking-wider">
+                          Remove
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between text-xs">
-                        <span>Active Plan</span>
-                        <span className="text-gray-400 font-bold">Base Member</span>
-                      </div>
-                      <button
-                        onClick={handlePaystackCheckout}
-                        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] text-[#0A0E14] font-black text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                      >
-                        <Sparkles className="w-4 h-4" /> Upgrade to Premium
-                      </button>
-                    </div>
+                  ))}
+                  {userPhotos.length < 6 && (
+                    <button className="aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 transition-all">
+                      <Camera className="w-6 h-6 text-gray-400" />
+                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Add Photo</span>
+                    </button>
                   )}
                 </div>
               </div>
@@ -805,6 +887,41 @@ export default function Dashboard() {
                     <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Trust Score</div>
                     <div className="text-sm text-[#10B981] font-bold">98% (Verified)</div>
                   </div>
+                </div>
+              </div>
+
+              {/* Membership Subscription (Moved to Bottom) */}
+              <div className="pt-6 border-t border-white/5">
+                <div className="p-6 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black mb-2">Membership Subscription</h4>
+                  {isPremium ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Active Plan</span>
+                        <span className="text-[#D4AF37] font-bold">Premium Alignment (Live)</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Renews On</span>
+                        <span className="text-gray-400">June 16, 2026</span>
+                      </div>
+                      <div className="mt-2 p-2.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[10px] text-[#D4AF37] font-black text-center uppercase tracking-wide">
+                        🌟 Premium Membership Active
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between text-xs">
+                        <span>Active Plan</span>
+                        <span className="text-gray-400 font-bold">Base Member</span>
+                      </div>
+                      <button
+                        onClick={handlePaystackCheckout}
+                        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] text-[#0A0E14] font-black text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" /> Upgrade to Premium
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
