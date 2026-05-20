@@ -69,7 +69,7 @@ export default function OnboardingScreen() {
     religion: '',
     personalValues: [],
     nationality: '',
-    languages: [],
+    languagesSpoken: [],
     maritalStatus: MaritalStatus.NeverMarried,
     smoking: SmokingHabits.NonSmoker,
     drinking: DrinkingHabits.Never,
@@ -617,8 +617,8 @@ export default function OnboardingScreen() {
                 <Text style={styles.label}>Languages Spoken</Text>
                 <TextInput
                   style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.languages?.join(', ')}
-                  onChangeText={(v) => set('languages', v.split(',').map(s => s.trim()).filter(Boolean))}
+                  value={form.languagesSpoken?.join(', ')}
+                  onChangeText={(v) => set('languagesSpoken', v.split(',').map(s => s.trim()).filter(Boolean))}
                   placeholder="e.g. English, Yoruba, Spanish"
                   placeholderTextColor={Colors.gray400}
                 />

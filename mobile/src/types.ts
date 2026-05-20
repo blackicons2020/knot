@@ -89,7 +89,7 @@ export interface User {
   originState: string;
   originCity: string;
   education: string;
-  languages: string[];
+  languagesSpoken: string[];
   religion: string;
   culturalBackground: string;
   personalValues: string[];

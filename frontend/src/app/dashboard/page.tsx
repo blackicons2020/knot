@@ -467,6 +467,32 @@ export default function Dashboard() {
                       <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Timeline</h4>
                       <p className="text-sm text-white font-medium">1-2 Years</p>
                     </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Heritage & Origin</h4>
+                      <p className="text-sm text-white font-medium">USA, Massachusetts</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Languages Spoken</h4>
+                      <p className="text-sm text-white font-medium">English, Spanish</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Children Intent</h4>
+                      <p className="text-sm text-white font-medium">Open to children</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Relocation</h4>
+                      <p className="text-sm text-white font-medium">Maybe</p>
+                    </div>
+                  </div>
+
+                  {/* Ideal Partner Traits */}
+                  <div>
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Ideal Partner Traits</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Emotionally Available</span>
+                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Faithful</span>
+                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Adventurous</span>
+                    </div>
                   </div>
 
                   {/* Values */}
@@ -750,6 +776,26 @@ export default function Dashboard() {
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                     <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Core Values</div>
                     <div className="text-sm text-white font-bold">Faith, Growth, Family</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Heritage & Origin</div>
+                    <div className="text-sm text-white font-bold">USA, New York</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Languages Spoken</div>
+                    <div className="text-sm text-white font-bold">English</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Children Intent</div>
+                    <div className="text-sm text-white font-bold">Wants children</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Relocation</div>
+                    <div className="text-sm text-white font-bold">Maybe</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5 sm:col-span-2">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Ideal Partner Traits</div>
+                    <div className="text-sm text-[#D4AF37] font-bold">Emotionally Available, Loyal, Driven</div>
                   </div>
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                     <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Readiness</div>

@@ -196,7 +196,7 @@ export default function ProfileScreen() {
             <DataItem label="Nationality" value={userProfile.nationality} />
           </View>
           <View style={st.col}>
-            <DataItem label="Languages" value={userProfile.languages?.join(', ')} />
+            <DataItem label="Languages" value={userProfile.languagesSpoken?.join(', ')} />
           </View>
         </View>
 

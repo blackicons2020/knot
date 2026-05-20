@@ -18,6 +18,7 @@ model User {
   education            String    @default("")
   religion             String    @default("")
   culturalBackground   String    @default("")
+  languagesSpoken      String[]  @default([])
   
   // Lifestyle & Commitment Preferences
   smoking              String    @default("Non-smoker")

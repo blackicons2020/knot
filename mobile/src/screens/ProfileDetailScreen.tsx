@@ -288,7 +288,7 @@ export default function ProfileDetailScreen() {
 
           <View style={st.row2}>
             <View style={st.col}><DataItem label="Nationality" value={match.nationality} isDark={isDarkMode} /></View>
-            <View style={st.col}><DataItem label="Languages" value={match.languages?.join(', ')} isDark={isDarkMode} /></View>
+            <View style={st.col}><DataItem label="Languages" value={match.languagesSpoken?.join(', ')} isDark={isDarkMode} /></View>
           </View>
 
           <Divider isDark={isDarkMode} />
