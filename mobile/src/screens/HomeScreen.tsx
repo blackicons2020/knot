@@ -111,7 +111,9 @@ export default function HomeScreen() {
   };
 
   const handleConnect = () => {
-    setShowMatchModal(true);
+    if (activeMatch) {
+      navigation.navigate('ProfileDetail', { match: activeMatch });
+    }
   };
 
   const startConversation = () => {
