@@ -845,6 +845,7 @@ export default function Dashboard() {
 
               {/* Full Profile Detail Section */}
               <div className="pt-6 border-t border-white/5 space-y-8">
+                {/* 1. Psychological Profile (Requested to keep) */}
                 <div className="space-y-4">
                   <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Psychological Profile</h4>
                   <div className="flex flex-wrap gap-2">
@@ -852,50 +853,138 @@ export default function Dashboard() {
                     <span className="px-3 py-1.5 rounded-full bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-xs text-[#D4AF37] font-medium">✔ Secure Attachment</span>
                   </div>
                 </div>
-                
+
+                {/* 2. Identity & Roots */}
                 <div className="space-y-4">
-                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black">Bio & Intentions</h4>
-                  <p className="text-sm text-gray-300 leading-relaxed font-sans">
-                    Software engineer passionate about building a meaningful legacy. I value transparency, emotional availability, and structured growth. Looking for a partner who shares my vision for a stable, loving family and mutual continuous improvement.
-                  </p>
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black border-b border-white/5 pb-2">Identity & Roots</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Marriage History</div>
+                      <div className="text-sm text-white font-bold">Never married</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Occupation</div>
+                      <div className="text-sm text-white font-bold">Software Engineer</div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-[#121721] border border-white/10">
+                    <h5 className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-black mb-3">Current Residence</h5>
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Country</div><div className="text-sm text-white font-bold">USA</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">State</div><div className="text-sm text-white font-bold">Massachusetts</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">City</div><div className="text-sm text-white font-bold">Boston</div></div>
+                    </div>
+                    
+                    <div className="h-px bg-white/5 my-4" />
+                    
+                    <h5 className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-black mb-3">Heritage & Origin</h5>
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Country</div><div className="text-sm text-white font-bold">USA</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">State</div><div className="text-sm text-white font-bold">New York</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">City</div><div className="text-sm text-white font-bold">New York City</div></div>
+                    </div>
+                    
+                    <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Cultural Identity</div><div className="text-sm text-white font-bold">African-American</div></div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Registry Bio</div>
+                    <div className="text-sm text-white leading-relaxed">Software engineer passionate about building a meaningful legacy. I value transparency, emotional availability, and structured growth. Looking for a partner who shares my vision for a stable, loving family and mutual continuous improvement.</div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Nationality</div>
+                      <div className="text-sm text-white font-bold">American</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Languages Spoken</div>
+                      <div className="text-sm text-white font-bold">English, Spanish</div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Religion</div>
-                    <div className="text-sm text-white font-bold">Christian</div>
+                {/* 3. Lifestyle & Beliefs */}
+                <div className="space-y-4">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black border-b border-white/5 pb-2">Lifestyle & Beliefs</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Faith/Religion</div>
+                      <div className="text-sm text-white font-bold">Christian</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Smoking</div>
+                      <div className="text-sm text-white font-bold">Never</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Drinking</div>
+                      <div className="text-sm text-white font-bold">Socially</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Children</div>
+                      <div className="text-sm text-white font-bold">No kids</div>
+                    </div>
                   </div>
+                  
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Core Values</div>
-                    <div className="text-sm text-white font-bold">Faith, Growth, Family</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-2">Core Life Values</div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Faith</span>
+                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Growth</span>
+                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Family</span>
+                    </div>
                   </div>
+                </div>
+
+                {/* 4. Marriage Expectations */}
+                <div className="space-y-4">
+                  <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black border-b border-white/5 pb-2">Marriage Expectations</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Vow Timeline</div>
+                      <div className="text-sm text-white font-bold">1-2 years</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Relocation</div>
+                      <div className="text-sm text-white font-bold">Maybe</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Children Intent</div>
+                      <div className="text-sm text-white font-bold">Wants children</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Partner Age</div>
+                      <div className="text-sm text-white font-bold">25 - 30 years</div>
+                    </div>
+                  </div>
+
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Heritage & Origin</div>
-                    <div className="text-sm text-white font-bold">USA, New York</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-2">Ideal Partner Traits</div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">Emotionally Available</span>
+                      <span className="px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">Loyal</span>
+                      <span className="px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] font-bold uppercase tracking-wider">Driven</span>
+                    </div>
                   </div>
+
                   <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Languages Spoken</div>
-                    <div className="text-sm text-white font-bold">English</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Registry Expectations</div>
+                    <div className="text-sm text-white leading-relaxed">Looking for someone who is ready to settle down, has done their emotional work, and is excited to build a legacy based on mutual respect and shared faith.</div>
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Children Intent</div>
-                    <div className="text-sm text-white font-bold">Wants children</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Relocation</div>
-                    <div className="text-sm text-white font-bold">Maybe</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5 sm:col-span-2">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Ideal Partner Traits</div>
-                    <div className="text-sm text-[#D4AF37] font-bold">Emotionally Available, Loyal, Driven</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Readiness</div>
-                    <div className="text-sm text-[#10B981] font-bold">94% (Elite)</div>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Trust Score</div>
-                    <div className="text-sm text-[#10B981] font-bold">98% (Verified)</div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Readiness</div>
+                      <div className="text-sm text-[#10B981] font-bold">94% (Elite)</div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Trust Score</div>
+                      <div className="text-sm text-[#10B981] font-bold">98% (Verified)</div>
+                    </div>
                   </div>
                 </div>
               </div>

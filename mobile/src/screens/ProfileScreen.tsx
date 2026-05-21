@@ -144,6 +144,20 @@ export default function ProfileScreen() {
       {/* ─── Content ─── */}
       <View style={st.content}>
 
+        {/* ══ PSYCHOLOGICAL PROFILE ══ */}
+        {(userProfile.personalityArchetype || userProfile.attachmentStyle) && (
+          <>
+            <SectionHeader title="Psychological Profile" />
+            <View style={st.dataItem}>
+              <View style={st.chipRow}>
+                {userProfile.personalityArchetype && <Chip text={`✔ ${userProfile.personalityArchetype}`} variant="brand" />}
+                {userProfile.attachmentStyle && <Chip text={`✔ ${userProfile.attachmentStyle}`} variant="neutral" />}
+              </View>
+            </View>
+            <Divider />
+          </>
+        )}
+
         {/* ══ IDENTITY & ROOTS ══ */}
         <SectionHeader title="Identity & Roots" />
 
@@ -271,6 +285,16 @@ export default function ProfileScreen() {
         </View>
 
         <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} />
+
+        {/* ══ PLATFORM SCORES ══ */}
+        <View style={[st.row2, { marginTop: 16 }]}>
+          <View style={st.col}>
+            <DataItem label="Readiness" value={userProfile.readinessScore ? `${userProfile.readinessScore}% (Elite)` : 'Not calculated'} />
+          </View>
+          <View style={st.col}>
+            <DataItem label="Trust Score" value={userProfile.trustScore ? `${userProfile.trustScore}% (Verified)` : 'Not calculated'} />
+          </View>
+        </View>
 
       </View>
     </ScrollView>
