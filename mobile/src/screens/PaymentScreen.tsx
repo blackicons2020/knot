@@ -3,6 +3,7 @@ import {
   StyleSheet, Text, TouchableOpacity, View, Modal, SafeAreaView, ActivityIndicator,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -151,34 +152,39 @@ export default function PaymentScreen() {
 
       <View style={{ flex: 1, padding: Spacing.md }}>
         {/* Main premium card */}
-        <View style={s.premiumCard}>
+        <LinearGradient
+          colors={isDarkMode ? ['#1E1233', '#0F091A'] : [Colors.primary, '#8C52FF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[s.premiumCard, isDarkMode && { borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.3)' }]}
+        >
           <View style={s.premiumBadge}>
             <Text style={s.premiumBadgeText}>Localized Registry</Text>
           </View>
-          <Text style={s.premiumTitle}>Knot Premium</Text>
+          <Text style={[s.premiumTitle, isDarkMode && { color: Colors.accent }]}>Knot Premium</Text>
           <Text style={s.premiumSub}>Access the Global Directory</Text>
 
           {/* Month selector */}
-          <View style={s.selectorBox}>
-            <Text style={s.selectorLabel}>Select Commitment Duration</Text>
+          <View style={[s.selectorBox, isDarkMode && { backgroundColor: 'rgba(212, 175, 55, 0.05)', borderColor: 'rgba(212, 175, 55, 0.2)' }]}>
+            <Text style={[s.selectorLabel, isDarkMode && { color: Colors.accent }]}>Select Commitment Duration</Text>
             <View style={s.selectorRow}>
-              <TouchableOpacity style={s.selectorBtn} onPress={dec}>
+              <TouchableOpacity style={[s.selectorBtn, isDarkMode && { backgroundColor: 'rgba(212, 175, 55, 0.1)', borderColor: 'rgba(212, 175, 55, 0.2)' }]} onPress={dec}>
                 <Text style={s.selectorBtnText}>−</Text>
               </TouchableOpacity>
               <View style={s.selectorCenter}>
                 <Text style={s.selectorNum}>{months}</Text>
-                <Text style={s.selectorUnit}>{months === 1 ? 'Month' : 'Months'}</Text>
+                <Text style={[s.selectorUnit, isDarkMode && { color: 'rgba(255,255,255,0.7)' }]}>{months === 1 ? 'Month' : 'Months'}</Text>
               </View>
-              <TouchableOpacity style={s.selectorBtn} onPress={inc}>
+              <TouchableOpacity style={[s.selectorBtn, isDarkMode && { backgroundColor: 'rgba(212, 175, 55, 0.1)', borderColor: 'rgba(212, 175, 55, 0.2)' }]} onPress={inc}>
                 <Ionicons name="add" size={24} color={Colors.white} />
               </TouchableOpacity>
             </View>
-            <View style={s.selectorDivider} />
-            <Text style={s.totalLabel}>Total Registry Fee</Text>
-            <Text style={s.totalAmount}>{totalFormatted}</Text>
-            <Text style={s.rateNote}>Local Rate: {monthlyFormatted}/mo</Text>
+            <View style={[s.selectorDivider, isDarkMode && { backgroundColor: 'rgba(212, 175, 55, 0.2)' }]} />
+            <Text style={[s.totalLabel, isDarkMode && { color: 'rgba(255,255,255,0.7)' }]}>Total Registry Fee</Text>
+            <Text style={[s.totalAmount, isDarkMode && { color: Colors.accent }]}>{totalFormatted}</Text>
+            <Text style={[s.rateNote, isDarkMode && { color: 'rgba(255,255,255,0.5)' }]}>Local Rate: {monthlyFormatted}/mo</Text>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Benefits */}
         <View style={[s.benefitsCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
@@ -200,15 +206,22 @@ export default function PaymentScreen() {
 
       {/* Bottom action */}
       <View style={[s.footer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-        <TouchableOpacity style={[s.payBtn, processing && { opacity: 0.6 }]} onPress={handlePayment} disabled={processing}>
-          {processing ? (
-            <Text style={s.payBtnText}>Verifying...</Text>
-          ) : (
-            <>
-              <Ionicons name="lock-closed" size={18} color={Colors.accent} />
-              <Text style={s.payBtnText}>Upgrade for {totalFormatted}</Text>
-            </>
-          )}
+        <TouchableOpacity style={{ width: '100%' }} onPress={handlePayment} disabled={processing}>
+          <LinearGradient
+            colors={processing ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[s.payBtn, processing && { opacity: 0.6 }]}
+          >
+            {processing ? (
+              <Text style={s.payBtnText}>Verifying...</Text>
+            ) : (
+              <>
+                <Ionicons name="lock-closed" size={18} color={Colors.white} />
+                <Text style={s.payBtnText}>Upgrade for {totalFormatted}</Text>
+              </>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
         <Text style={s.secureNote}>Secure Checkout</Text>
       </View>
@@ -220,7 +233,7 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.gray200 },
   headerTitle: { fontSize: 16, fontWeight: '900', textTransform: 'uppercase', letterSpacing: -0.5 },
-  premiumCard: { backgroundColor: Colors.primary, borderRadius: 32, padding: 32, alignItems: 'center', marginBottom: 16, overflow: 'hidden' },
+  premiumCard: { borderRadius: 32, padding: 32, alignItems: 'center', marginBottom: 16, overflow: 'hidden' },
   premiumBadge: { backgroundColor: Colors.accent, paddingHorizontal: 16, paddingVertical: 4, borderRadius: 20, marginBottom: 16 },
   premiumBadgeText: { fontSize: 10, fontWeight: '900', color: Colors.dark, textTransform: 'uppercase', letterSpacing: 2 },
   premiumTitle: { fontSize: 30, fontWeight: '900', color: Colors.white, letterSpacing: -1 },
@@ -246,7 +259,7 @@ const s = StyleSheet.create({
   footnoteBox: { paddingVertical: 16, alignItems: 'center' },
   footnoteText: { fontSize: 10, fontWeight: '700', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center', lineHeight: 16 },
   footer: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: Colors.gray100, alignItems: 'center' },
-  payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: Colors.primary, width: '100%', paddingVertical: 18, borderRadius: BorderRadius.lg, elevation: 6 },
+  payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', paddingVertical: 18, borderRadius: BorderRadius.lg, elevation: 6 },
   payBtnText: { color: Colors.white, fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 3 },
   secureNote: { fontSize: 8, fontWeight: '900', color: Colors.gray300, textTransform: 'uppercase', letterSpacing: 3, marginTop: 12 },
 });
