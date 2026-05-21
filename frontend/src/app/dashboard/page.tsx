@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { 
   Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
@@ -16,6 +16,16 @@ export default function Dashboard() {
   const [activeChatId, setActiveChatId] = useState<string | null>("m1");
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [connectedMatchName, setConnectedMatchName] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(() => {
+    if (activeTab === "coach" || activeTab === "messages") {
+      scrollToBottom();
+    }
+  }, [coachMessages, chatMessages, activeTab]);
 
   // Pre-load Paystack inline script for instant ready state on mobile/web
   useEffect(() => {
@@ -631,6 +641,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
 
               <div className="p-4 bg-[#121721]/90 border-t border-white/5 flex items-center gap-2">
@@ -700,6 +711,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* AI Safety/Prompt Indicator */}

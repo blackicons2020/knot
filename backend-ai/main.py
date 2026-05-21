@@ -199,7 +199,7 @@ def coach_respond(request: CoachRequest):
         USER'S CURRENT MESSAGE:
         "{request.current_message}"
 
-        Provide a supportive, wise, emotionally secure response (150-250 words) that guides the user toward relationship maturity, emotional safety, and healthy communication. Keep your tone premium, mature, and deeply human.
+        Provide a supportive, wise, emotionally secure, and concise response (max 2-3 sentences, 30-50 words) that guides the user toward relationship maturity, emotional safety, and healthy communication. Keep your tone premium, mature, deeply human, and brief.
         """
         
         response = model.generate_content(prompt)
