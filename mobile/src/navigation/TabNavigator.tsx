@@ -49,7 +49,8 @@ export default function TabNavigator() {
         tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: isDarkMode ? Colors.dark : Colors.white,
-          borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray100,
+          borderTopColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.gray100,
+          borderTopWidth: 1,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
         },
