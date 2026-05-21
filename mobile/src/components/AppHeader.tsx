@@ -33,13 +33,13 @@ export default function AppHeader() {
           <KnotLogo size="md" />
           <View style={st.headerActions}>
             <TouchableOpacity style={st.headerBtn}>
-              <Ionicons name="options" size={18} color={isDarkMode ? Colors.accent : Colors.gray400} />
+              <Ionicons name="options" size={18} color={Colors.gray400} />
             </TouchableOpacity>
             <TouchableOpacity onPress={toggleTheme} style={st.headerBtn}>
               <Ionicons
                 name={isDarkMode ? 'sunny' : 'moon'}
                 size={18}
-                color={isDarkMode ? Colors.accent : Colors.gray400}
+                color={Colors.gray400}
               />
             </TouchableOpacity>
           </View>
