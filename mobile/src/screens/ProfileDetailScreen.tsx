@@ -191,10 +191,16 @@ export default function ProfileDetailScreen() {
             </Text>
             {!userProfile?.isPremium && (
               <TouchableOpacity
-                style={st.upgradeBtn}
                 onPress={() => navigation.navigate('Payment', { user: userProfile! })}
               >
-                <Text style={st.upgradeBtnText}>Upgrade Now</Text>
+                <LinearGradient
+                  colors={[Colors.primary, '#8C52FF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={st.upgradeBtn}
+                >
+                  <Text style={st.upgradeBtnText}>Upgrade Now</Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </View>
@@ -361,7 +367,7 @@ export default function ProfileDetailScreen() {
         borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray100,
       }]}>
         <TouchableOpacity
-          style={[st.chatBtn, bothDisabled && st.disabledBtn]}
+          style={{ flex: 1 }}
           disabled={bothDisabled}
           onPress={() => {
             if (!userProfile?.isPremium) {
@@ -371,21 +377,15 @@ export default function ProfileDetailScreen() {
             }
           }}
         >
-          <Ionicons name="chatbubbles" size={22} color={bothDisabled ? Colors.gray400 : Colors.white} />
-          <Text style={[st.chatBtnText, bothDisabled && { color: Colors.gray400 }]}>Chats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[st.callBtn, bothDisabled && st.disabledBtn]}
-          disabled={bothDisabled}
-          onPress={() => {
-            if (!userProfile?.isPremium) {
-              navigation.navigate('Payment', { user: userProfile! });
-            } else {
-              navigation.navigate('VideoCall', { match, user: userProfile! });
-            }
-          }}
-        >
-          <Ionicons name="videocam" size={28} color={bothDisabled ? Colors.gray400 : Colors.white} />
+          <LinearGradient
+            colors={bothDisabled ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[st.chatBtn, bothDisabled && st.disabledBtn]}
+          >
+            <Ionicons name="chatbubbles" size={22} color={bothDisabled ? Colors.gray400 : Colors.white} />
+            <Text style={[st.chatBtnText, bothDisabled && { color: Colors.gray400 }]}>Chats</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -414,7 +414,7 @@ const st = StyleSheet.create({
   restrictedBox: { marginHorizontal: 32, padding: 16, borderRadius: 20, borderWidth: 1, alignItems: 'center', marginBottom: 16 },
   restrictedTitle: { fontSize: 10, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8 },
   restrictedBody: { fontSize: 12, textAlign: 'center', marginBottom: 12, lineHeight: 18 },
-  upgradeBtn: { backgroundColor: Colors.primary, paddingHorizontal: 28, paddingVertical: 10, borderRadius: 24, elevation: 4, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+  upgradeBtn: { paddingHorizontal: 28, paddingVertical: 10, borderRadius: 24, elevation: 4, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
   upgradeBtnText: { color: Colors.white, fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 },
 
   /* Content area */
@@ -449,10 +449,9 @@ const st = StyleSheet.create({
 
   /* Bottom action bar */
   actionBar: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', gap: 16, paddingHorizontal: 24, paddingTop: 16, borderTopWidth: 1 },
-  chatBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: 20, elevation: 6, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+  chatBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 16, borderRadius: 20, elevation: 6, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
   chatBtnText: { color: Colors.white, fontSize: 18, fontWeight: '900' },
-  callBtn: { backgroundColor: Colors.secondary, paddingHorizontal: 18, paddingVertical: 16, borderRadius: 20, elevation: 6, shadowColor: Colors.secondary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
-  disabledBtn: { backgroundColor: Colors.gray200, elevation: 0, shadowOpacity: 0 },
+  disabledBtn: { elevation: 0, shadowOpacity: 0 },
   sectionCardInline: { marginBottom: 16 },
   glowCard: {},
   barContainer: { marginBottom: 12 },
