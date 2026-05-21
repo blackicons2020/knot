@@ -285,7 +285,26 @@ export default function ProfileScreen() {
               <DataItem label="Trust Score" hideValue />
               <Text style={st.scoreTextGreen}>{userProfile.trustScore ? `${userProfile.trustScore}% (Verified)` : 'Not calculated'}</Text>
             </GlassCard>
-          </View>
+        </View>
+
+        {/* Membership Subscription */}
+        <View style={st.sectionBlock}>
+          <SectionHeader title="Membership Subscription" />
+          <GlassCard style={st.gridItemFull}>
+            <View style={st.planRow}>
+              <Text style={st.planLabel}>Active Plan</Text>
+              <Text style={st.planValue}>{userProfile.isPremium ? 'Premium Member' : 'Base Member'}</Text>
+            </View>
+            {!userProfile.isPremium && (
+              <TouchableOpacity 
+                style={st.upgradeBtn}
+                onPress={() => navigation.navigate('Payment', { user: userProfile })}
+              >
+                <Ionicons name="sparkles" size={16} color={Colors.dark} />
+                <Text style={st.upgradeBtnText}>UPGRADE TO PREMIUM</Text>
+              </TouchableOpacity>
+            )}
+          </GlassCard>
         </View>
 
         </View>
@@ -370,4 +389,11 @@ const st = StyleSheet.create({
 
   /* Divider */
   divider: { height: 1, backgroundColor: 'rgba(255, 255, 255, 0.05)', marginVertical: 16 },
+
+  /* Subscription */
+  planRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  planLabel: { fontSize: 12, fontWeight: '700', color: Colors.gray400 },
+  planValue: { fontSize: 12, fontWeight: '900', color: Colors.white },
+  upgradeBtn: { backgroundColor: Colors.accent, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: 12, gap: 8 },
+  upgradeBtnText: { color: Colors.dark, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
 });
