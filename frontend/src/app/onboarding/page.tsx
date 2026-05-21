@@ -130,7 +130,7 @@ export default function Onboarding() {
     }
   }, [isIdScanModalOpen, isCameraActive]);
 
-  // Liveness Simulator Automation
+  // Liveness Real Webcam Capture
   const startLivenessScanner = () => {
     setIsLivenessModalOpen(true);
     setIsCameraActive(true);
@@ -148,17 +148,30 @@ export default function Onboarding() {
         setTimeout(() => {
           setLivenessState("complete");
           setLivenessPrompt("Liveness Confirmed! Biometric face scan complete.");
-          setProfilePicture(BIOMETRIC_SELFIE_SVG);
+          
+          // Capture the actual webcam frame
+          if (videoRef.current) {
+            const canvas = document.createElement("canvas");
+            canvas.width = videoRef.current.videoWidth || 640;
+            canvas.height = videoRef.current.videoHeight || 480;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+              setProfilePicture(dataUrl);
+            }
+          }
           
           setTimeout(() => {
             setIsLivenessModalOpen(false);
+            setIsCameraActive(false);
           }, 1500);
         }, 2000);
       }, 2000);
     }, 2000);
   };
 
-  // ID Card Simulator Automation
+  // ID Card Real Webcam Capture
   const startIdScanner = () => {
     setIsIdScanModalOpen(true);
     setIsCameraActive(true);
@@ -172,10 +185,23 @@ export default function Onboarding() {
       setTimeout(() => {
         setIdScanState("complete");
         setIdScanPrompt("ID Scan Complete! OCR match succeeded.");
-        setGovernmentId(BIOMETRIC_ID_SVG);
+        
+        // Capture the actual webcam frame
+        if (videoRef.current) {
+          const canvas = document.createElement("canvas");
+          canvas.width = videoRef.current.videoWidth || 640;
+          canvas.height = videoRef.current.videoHeight || 480;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+            setGovernmentId(dataUrl);
+          }
+        }
 
         setTimeout(() => {
           setIsIdScanModalOpen(false);
+          setIsCameraActive(false);
         }, 1500);
       }, 2000);
     }, 2000);

@@ -311,19 +311,6 @@ class VerifyRequest(BaseModel):
 @app.post("/onboarding/verify")
 def verify_onboarding_documents(request: VerifyRequest):
     try:
-        # Check if they are simulation images
-        is_selfie_sim = "image/svg+xml" in request.selfie_url or "BIOMETRIC_SELFIE" in request.selfie_url or "unsplash.com" in request.selfie_url
-        is_id_sim = "image/svg+xml" in request.id_url or "BIOMETRIC_ID" in request.id_url or "unsplash.com" in request.id_url
-        
-        if is_selfie_sim and is_id_sim:
-            return {
-                "success": True,
-                "confidenceScore": 98,
-                "ocrName": request.user_name,
-                "ocrAge": request.user_age,
-                "details": "Simulation verification approved."
-            }
-
         model = genai.GenerativeModel("gemini-1.5-flash")
         
         selfie_part = load_image_from_url(request.selfie_url)
@@ -370,9 +357,9 @@ def verify_onboarding_documents(request: VerifyRequest):
     except Exception as e:
         logger.error(f"Error in document verification: {str(e)}")
         return {
-            "success": True,
-            "confidenceScore": 95,
-            "ocrName": request.user_name,
-            "ocrAge": request.user_age,
-            "details": f"Verification approved via default fallback due to processing error: {str(e)}"
+            "success": False,
+            "confidenceScore": 0,
+            "ocrName": "",
+            "ocrAge": 0,
+            "details": f"Verification failed. Please ensure your images are clear and valid. Details: {str(e)}"
         }
