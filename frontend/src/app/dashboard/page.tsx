@@ -414,7 +414,7 @@ export default function Dashboard() {
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10">
                     <h3 className="text-2xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h3>
-                    <p className="text-xs text-[#D4AF37] font-semibold">{activeMatch.occupation} • {activeMatch.location}</p>
+                    <p className="text-xs text-gray-400 font-semibold">{activeMatch.occupation} • {activeMatch.location}</p>
                   </div>
                 </div>
 
@@ -525,7 +525,7 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none z-0" />
                   <div className="absolute bottom-0 left-0 p-8 z-10">
                     <h2 className="text-4xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h2>
-                    <p className="text-[#D4AF37] font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.location}</p>
+                    <p className="text-gray-400 font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.location}</p>
                   </div>
                 </div>
 
