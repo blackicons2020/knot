@@ -36,12 +36,32 @@ export default function Dashboard() {
       occupation: "Pediatrician",
       religion: "Christian",
       location: "Boston, MA",
+      residenceCountry: "USA",
+      residenceState: "Massachusetts",
+      residenceCity: "Boston",
+      originCountry: "USA",
+      originState: "New York",
+      originCity: "Manhattan",
+      culturalBackground: "European-American",
+      nationality: "American",
+      languagesSpoken: ["English", "Spanish"],
+      maritalStatus: "Never Married",
+      smoking: "Non-smoker",
+      drinking: "Socially",
+      childrenStatus: "None",
+      childrenPreference: "Open to children",
+      marriageTimeline: "1-2 Years",
+      willingToRelocate: "Maybe",
+      preferredPartnerAgeRange: [27, 35],
+      idealPartnerTraits: ["Emotionally Available", "Faithful", "Adventurous"],
+      marriageExpectations: "Looking for a grounded relationship built on mutual trust, shared family values, and a timeline of 1-2 years before marriage.",
       bio: "Committed to growth, faith, and building a secure loving home. Looking for a partner who is emotionally available and loves traveling.",
       archetype: "The Calm Connector",
       attachment: "Secure",
       trustScore: 98,
       readiness: 92,
       values: ["Faith", "Children", "Altruism"],
+      personalValues: ["Faith", "Children", "Altruism", "Honesty"],
       aiExplanation: "Sophia's secure attachment and calm connectivity traits directly complement your intentional builder mindset. Your shared family plans and aligned moral values form a robust foundation for a successful long-term marriage.",
       imageUrls: [
         "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80",
@@ -56,12 +76,32 @@ export default function Dashboard() {
       occupation: "Landscape Architect",
       religion: "Christian",
       location: "Boston, MA",
+      residenceCountry: "USA",
+      residenceState: "Massachusetts",
+      residenceCity: "Boston",
+      originCountry: "USA",
+      originState: "Colorado",
+      originCity: "Denver",
+      culturalBackground: "European-American",
+      nationality: "American",
+      languagesSpoken: ["English"],
+      maritalStatus: "Never Married",
+      smoking: "Non-smoker",
+      drinking: "Rarely",
+      childrenStatus: "None",
+      childrenPreference: "Open to children",
+      marriageTimeline: "2-3 Years",
+      willingToRelocate: "Yes",
+      preferredPartnerAgeRange: [26, 32],
+      idealPartnerTraits: ["Grounded", "Loyal", "Kind"],
+      marriageExpectations: "I expect a partner who values quiet reflection, handles conflict gently, and shares my desire to start a family within 3 years.",
       bio: "Passionate about creating harmony in nature and partnerships. Deeply values quiet reflection, regular hikes, and mutual support.",
       archetype: "The Harmonizer",
       attachment: "Secure",
       trustScore: 97,
       readiness: 94,
       values: ["Nature", "Simplicity", "Loyalty"],
+      personalValues: ["Nature", "Simplicity", "Loyalty"],
       aiExplanation: "Chloe's grounded nature and shared interest in long-term legacy complement your builder archetype, making for a peaceful, synergistic partnership.",
       imageUrls: [
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
@@ -501,67 +541,106 @@ export default function Dashboard() {
                     <p className="text-gray-200 leading-relaxed font-serif text-lg italic">"{activeMatch.bio}"</p>
                   </div>
 
-                  {/* Details Grid */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Education</h4>
-                      <p className="text-sm text-white font-medium">B.Sc Architecture</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Religion</h4>
-                      <p className="text-sm text-white font-medium">{activeMatch.religion}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Marriage History</h4>
-                      <p className="text-sm text-white font-medium">Never Married</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Smoking</h4>
-                      <p className="text-sm text-white font-medium">Non-smoker</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Drinking</h4>
-                      <p className="text-sm text-white font-medium">Socially</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Timeline</h4>
-                      <p className="text-sm text-white font-medium">1-2 Years</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Heritage & Origin</h4>
-                      <p className="text-sm text-white font-medium">USA, Massachusetts</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Languages Spoken</h4>
-                      <p className="text-sm text-white font-medium">English, Spanish</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Children Intent</h4>
-                      <p className="text-sm text-white font-medium">Open to children</p>
-                    </div>
-                    <div>
-                      <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Relocation</h4>
-                      <p className="text-sm text-white font-medium">Maybe</p>
+                  {/* ══ IDENTITY & ROOTS ══ */}
+                  <div className="space-y-4 mt-8">
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-white/10 pb-2">Identity & Roots</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Marital Status</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.maritalStatus || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Occupation</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.occupation || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Current Residence</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.residenceCity}, {activeMatch.residenceCountry}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Heritage & Origin</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.originCity}, {activeMatch.originCountry}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Cultural Identity</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.culturalBackground || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Nationality</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.nationality || 'Not specified'}</p>
+                      </div>
+                      <div className="col-span-2 md:col-span-3">
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Languages Spoken</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.languagesSpoken?.join(', ') || 'Not specified'}</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Ideal Partner Traits */}
-                  <div>
-                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Ideal Partner Traits</h3>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Emotionally Available</span>
-                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Faithful</span>
-                      <span className="px-3 py-1.5 rounded-md bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">Adventurous</span>
+                  {/* ══ LIFESTYLE & BELIEFS ══ */}
+                  <div className="space-y-4 mt-8">
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-white/10 pb-2">Lifestyle & Beliefs</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Faith / Religion</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.religion || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Smoking</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.smoking || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Drinking</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.drinking || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Children</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.childrenStatus || 'None'}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Core Life Values</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {activeMatch.personalValues?.map(v => (
+                            <span key={v} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-gray-300">{v}</span>
+                          )) || <p className="text-sm text-gray-500 italic">Not listed</p>}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Values */}
-                  <div>
-                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Core Values</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {activeMatch.values.map(v => (
-                        <span key={v} className="px-3 py-1.5 rounded-md bg-white/5 text-xs font-medium text-gray-300">{v}</span>
-                      ))}
+                  {/* ══ MARRIAGE EXPECTATIONS ══ */}
+                  <div className="space-y-4 mt-8">
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-white/10 pb-2">Marriage Expectations</h3>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Vow Timeline</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.marriageTimeline || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Relocation</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.willingToRelocate || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Children Intent</h4>
+                        <p className="text-sm text-white font-medium">{activeMatch.childrenPreference || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Partner Age</h4>
+                        <p className="text-sm text-white font-medium">
+                          {activeMatch.preferredPartnerAgeRange ? `${activeMatch.preferredPartnerAgeRange[0]} - ${activeMatch.preferredPartnerAgeRange[1]} years` : 'Not specified'}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Ideal Partner Traits</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {activeMatch.idealPartnerTraits?.map(t => (
+                            <span key={t} className="px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">{t}</span>
+                          )) || <p className="text-sm text-gray-500 italic">Not listed</p>}
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Registry Expectations</h4>
+                        <p className="text-sm text-white leading-relaxed">{activeMatch.marriageExpectations || 'Not specified'}</p>
+                      </div>
                     </div>
                   </div>
 
