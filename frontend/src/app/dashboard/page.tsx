@@ -249,31 +249,34 @@ export default function Dashboard() {
         amount: 250000,
         currency: "NGN",
         ref: "KNOT-WEB-" + Date.now(),
-        callback: async (response: any) => {
+        callback: function(response: any) {
           console.log("Paystack payment successful! Reference:", response.reference);
-          try {
-            const verifyRes = await fetch("http://localhost:8080/payments/verify", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                reference: response.reference,
-                userId: "c8b74c0b-426b-4e14-9b2f-768a1d2e3c4d",
-                months: 1,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData && verifyData.success) {
-              setIsPremium(true);
-              alert("🌟 Premium Registry Activated!\n\nWelcome to Premium Alignment. You now have unlimited access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.");
-            } else {
-              alert("Verification Pending: Payment is being processed. Please refresh your profile in a few moments.");
+          // Run async logic inside a standard function to prevent Paystack type-check errors
+          (async () => {
+            try {
+              const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/payments/verify`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  reference: response.reference,
+                  userId: "c8b74c0b-426b-4e14-9b2f-768a1d2e3c4d",
+                  months: 1,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData && verifyData.success) {
+                setIsPremium(true);
+                alert("🌟 Premium Registry Activated!\n\nWelcome to Premium Alignment. You now have unlimited access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.");
+              } else {
+                alert("Verification Pending: Payment is being processed. Please refresh your profile in a few moments.");
+              }
+            } catch (err) {
+              console.error("Verification error:", err);
+              alert("Verification Connection Issue: Your payment was successful, but we couldn't connect to the verification server. Our webhook will automatically verify and upgrade your profile shortly.");
             }
-          } catch (err) {
-            console.error("Verification error:", err);
-            alert("Verification Connection Issue: Your payment was successful, but we couldn't connect to the verification server. Our webhook will automatically verify and upgrade your profile shortly.");
-          }
+          })();
         },
         onClose: () => {
           console.log("Checkout closed.");
