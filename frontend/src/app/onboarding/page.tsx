@@ -28,6 +28,18 @@ export default function Onboarding() {
   const [governmentId, setGovernmentId] = useState<string | null>(null);
   const [verificationStep, setVerificationStep] = useState(0);
 
+  // Lifestyle & Expectations State
+  const [nationality, setNationality] = useState("");
+  const [languagesSpoken, setLanguagesSpoken] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [smoking, setSmoking] = useState("");
+  const [drinking, setDrinking] = useState("");
+  const [childrenStatus, setChildrenStatus] = useState("");
+  const [marriageTimeline, setMarriageTimeline] = useState("");
+  const [willingToRelocate, setWillingToRelocate] = useState("");
+  const [childrenPreference, setChildrenPreference] = useState("");
+  const [idealPartnerTraits, setIdealPartnerTraits] = useState("");
+
   // Advanced Location Dropdowns
   const [residenceCountry, setResidenceCountry] = useState("");
   const [residenceState, setResidenceState] = useState("");
@@ -279,8 +291,8 @@ export default function Onboarding() {
     }
   };
 
-  const handleProcessAIArchetype = async () => {
-    setStep(4); // Trigger Processing
+  const handleProcessAIVerification = async () => {
+    setStep(3); // Trigger Processing
     setVerificationStep(0);
 
     try {
@@ -315,7 +327,7 @@ export default function Onboarding() {
           setVerificationStep(3); // Verifying age alignment
           setTimeout(() => {
             setVerificationStep(4); // Completed
-            setStep(5); // Show results certificate
+            setStep(4); // Proceed to AI Interview
           }, 1800);
         }, 1800);
       }, 1800);
@@ -330,7 +342,7 @@ export default function Onboarding() {
           setVerificationStep(3);
           setTimeout(() => {
             setVerificationStep(4);
-            setStep(5);
+            setStep(4);
           }, 1800);
         }, 1800);
       }, 1800);
@@ -606,6 +618,136 @@ export default function Onboarding() {
                 </div>
               </div>
 
+              {/* Lifestyle & Expectations */}
+              <div className="pt-2 border-t border-white/5 space-y-4">
+                <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Languages Spoken</label>
+                    <input
+                      type="text"
+                      value={languagesSpoken}
+                      onChange={(e) => setLanguagesSpoken(e.target.value)}
+                      placeholder="e.g. English, Spanish"
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
+                    <select
+                      value={maritalStatus}
+                      onChange={(e) => setMaritalStatus(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Select history</option>
+                      <option value="Never married">Never married</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Annulled">Annulled</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Smoking</label>
+                    <select
+                      value={smoking}
+                      onChange={(e) => setSmoking(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Select</option>
+                      <option value="Non-smoker">Non-smoker</option>
+                      <option value="Occasional">Occasional</option>
+                      <option value="Smoker">Smoker</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Drinking</label>
+                    <select
+                      value={drinking}
+                      onChange={(e) => setDrinking(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Select</option>
+                      <option value="Never">Never</option>
+                      <option value="Socially">Socially</option>
+                      <option value="Often">Often</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Children Status</label>
+                    <select
+                      value={childrenStatus}
+                      onChange={(e) => setChildrenStatus(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Select status</option>
+                      <option value="No kids">No kids</option>
+                      <option value="Has children">Has children</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Children Intent</label>
+                    <select
+                      value={childrenPreference}
+                      onChange={(e) => setChildrenPreference(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Select intent</option>
+                      <option value="Wants children">Wants children</option>
+                      <option value="Open to children">Open to children</option>
+                      <option value="Does not want children">Does not want children</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Vow Timeline</label>
+                    <select
+                      value={marriageTimeline}
+                      onChange={(e) => setMarriageTimeline(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Timeline</option>
+                      <option value="ASAP">ASAP</option>
+                      <option value="1-2 years">1-2 years</option>
+                      <option value="3+ years">3+ years</option>
+                      <option value="Not sure">Not sure</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Relocation</label>
+                    <select
+                      value={willingToRelocate}
+                      onChange={(e) => setWillingToRelocate(e.target.value)}
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    >
+                      <option value="">Relocate</option>
+                      <option value="Yes">Yes</option>
+                      <option value="Maybe">Maybe</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Ideal Partner Traits</label>
+                  <input
+                    type="text"
+                    value={idealPartnerTraits}
+                    onChange={(e) => setIdealPartnerTraits(e.target.value)}
+                    placeholder="e.g. Kind, Ambitious, Family-oriented (comma separated)"
+                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+              </div>
+
               {/* Selfie Picture Verification with Live Camera simulation */}
               <div className="pt-2 border-t border-white/5">
                 <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Selfie Picture Verification</label>
@@ -620,6 +762,7 @@ export default function Onboarding() {
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap gap-2">
                       <button
+                        type="button"
                         onClick={startLivenessScanner}
                         className="px-4 py-2 bg-[#D4AF37]/15 border border-[#D4AF37]/35 rounded-xl text-xs font-black text-[#D4AF37] hover:bg-[#D4AF37]/25 transition-all flex items-center gap-1.5"
                       >
@@ -668,6 +811,7 @@ export default function Onboarding() {
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap gap-2">
                       <button
+                        type="button"
                         onClick={startIdScanner}
                         className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 transition-colors flex items-center gap-1.5"
                       >
@@ -704,17 +848,17 @@ export default function Onboarding() {
             </div>
 
             <button 
-              onClick={handleNextStep}
+              onClick={handleProcessAIVerification}
               disabled={!name || !email || !profilePicture || !governmentId || !residenceCountry || !originCountry}
               className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
             >
-              Continue to AI Interview
+              Verify Identity & Documents
             </button>
           </div>
         )}
 
-        {/* Step 3: Conversational AI Onboarding Interview */}
-        {step === 3 && (
+        {/* Step 3: Futuristic AI Identity & Document Verification Scan */}
+        {step === 4 && (
           <div className="glass-card rounded-[32px] border border-white/10 flex flex-col h-[500px] overflow-hidden">
             {/* Header */}
             <div className="p-4 bg-[#121721]/90 border-b border-white/5 flex items-center gap-3">
@@ -758,10 +902,10 @@ export default function Onboarding() {
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === "" ? (
                 <button 
-                  onClick={handleProcessAIArchetype}
+                  onClick={() => setStep(5)}
                   className="px-5 py-3 rounded-full text-xs font-black rose-glow-btn text-white flex items-center gap-1.5"
                 >
-                  Analyze <Sparkles className="w-3.5 h-3.5" />
+                  Generate Registry <Sparkles className="w-3.5 h-3.5" />
                 </button>
               ) : (
                 <button 
@@ -775,8 +919,8 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 4: Futuristic AI Identity & Document Verification Scan */}
-        {step === 4 && (
+        {/* Step 4: Conversational AI Onboarding Interview */}
+        {step === 3 && (
           <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/20 space-y-8 max-w-xl mx-auto overflow-hidden relative">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-serif font-black text-white">AI Biometric Liveness & ID Match</h2>
@@ -1080,8 +1224,10 @@ export default function Onboarding() {
       )}
 
       {/* Footer */}
-      <footer className="text-center text-[10px] text-gray-600 uppercase tracking-widest">
-        Secured Relationship Encryption • KNOT Platform
+      <footer className="w-full text-center py-6 mt-auto">
+        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+          FRAUD-PROOF | AI MATCHMAKING | HIGH-TRUST
+        </p>
       </footer>
     </div>
   );

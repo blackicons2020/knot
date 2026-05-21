@@ -297,8 +297,8 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleProcessAIArchetype = async () => {
-    setStep(4);
+  const handleProcessAIVerification = async () => {
+    setStep(3);
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
@@ -344,7 +344,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4); // Approval
             setTimeout(() => {
-              setStep(5); // Certificate page
+              setStep(4); // Go to Interview next!
             }, 1200);
           }, 1500);
         }, 1500);
@@ -361,7 +361,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4);
             setTimeout(() => {
-              setStep(5);
+              setStep(4);
             }, 1200);
           }, 1500);
         }, 1500);
@@ -467,14 +467,13 @@ export default function OnboardingScreen() {
   return (
     <KeyboardAvoidingView style={[styles.root, bgStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* Header bar (only show in early steps) */}
-      {step < 4 && (
+      {step < 3 && (
         <View style={[styles.headerRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
           <View>
             <Text style={styles.headerSubtitle}>KNOT Registry</Text>
             <Text style={[styles.headerTitle, textStyle]}>
               {step === 1 && 'Cinematic Setup'}
-              {step === 2 && 'Identity Details'}
-              {step === 3 && 'AI Guide Interview'}
+              {step === 2 && 'Personal Essentials'}
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
@@ -503,13 +502,18 @@ export default function OnboardingScreen() {
               <Text style={styles.actionButtonText}>Begin Registry Setup</Text>
               <Ionicons name="arrow-forward" size={18} color={Colors.white} />
             </TouchableOpacity>
+            
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+              <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: Colors.gray500, fontWeight: 'bold' }}>
+                FRAUD-PROOF | AI MATCHMAKING | HIGH-TRUST
+              </Text>
+            </View>
           </View>
         )}
 
         {/* Step 2: Essentials Form & Uploads */}
         {step === 2 && (
           <View style={styles.formContainer}>
-            <Text style={[styles.formTitle, textStyle]}>Personal Essentials</Text>
             
             <Text style={styles.label}>Full Name</Text>
             <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
@@ -602,17 +606,6 @@ export default function OnboardingScreen() {
             <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200, paddingTop: 16 }}>
               <Text style={[styles.subSectionTitle, { color: Colors.primary, marginBottom: 16 }]}>Lifestyle & Expectations</Text>
               
-              <View style={{ marginBottom: 12 }}>
-                <Text style={styles.label}>Nationality</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.nationality}
-                  onChangeText={(v) => set('nationality', v)}
-                  placeholder="e.g. American/Nigerian"
-                  placeholderTextColor={Colors.gray400}
-                />
-              </View>
-
               <View style={{ marginBottom: 12 }}>
                 <Text style={styles.label}>Languages Spoken</Text>
                 <TextInput
@@ -713,17 +706,17 @@ export default function OnboardingScreen() {
 
             <TouchableOpacity
               style={[styles.actionButton, { marginTop: 24, opacity: (!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
-              onPress={() => setStep(3)}
+              onPress={handleProcessAIVerification}
               disabled={!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri}
             >
-              <Text style={styles.actionButtonText}>Continue to AI Interview</Text>
+              <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
               <Ionicons name="arrow-forward" size={18} color={Colors.white} />
             </TouchableOpacity>
           </View>
         )}
 
         {/* Step 3: Conversational AI Interview */}
-        {step === 3 && (
+        {step === 4 && (
           <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
             <View style={[styles.chatHeader, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
               <View style={[styles.botAvatar, { backgroundColor: Colors.accent + '1A', borderColor: Colors.accent + '2B' }]}>
@@ -771,8 +764,8 @@ export default function OnboardingScreen() {
                 placeholderTextColor={Colors.gray400}
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === '' ? (
-                <TouchableOpacity style={styles.analyzeBtn} onPress={handleProcessAIArchetype}>
-                  <Text style={styles.analyzeBtnText}>Analyze</Text>
+                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(5)}>
+                  <Text style={styles.analyzeBtnText}>Generate Registry</Text>
                   <Ionicons name="sparkles" size={14} color={Colors.white} />
                 </TouchableOpacity>
               ) : (
@@ -785,7 +778,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 4: Futuristic AI Identity & Biometric Match Scanner */}
-        {step === 4 && (
+        {step === 3 && (
           <View style={[styles.scannerContainer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent + '33' }]}>
             <Text style={[styles.scannerTitle, textStyle]}>AI Biometric Liveness & ID Match</Text>
             <Text style={styles.scannerSubtitle}>Secure Verification Session In Progress</Text>

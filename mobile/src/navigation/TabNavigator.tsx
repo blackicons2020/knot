@@ -69,7 +69,7 @@ export default function TabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Matches' }} />
       <Tab.Screen name="Insights" component={InsightsScreen} options={{ tabBarLabel: 'Insights' }} />
       <Tab.Screen name="AICoach" component={AICoachScreen} options={{ tabBarLabel: 'AI Coach' }} />
-      <Tab.Screen name="Messages" component={MessagesScreen} options={{ tabBarLabel: 'Chats' }} />
+      <Tab.Screen name="Messages" component={MessagesScreen} options={{ tabBarLabel: 'Messages' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>
   );
