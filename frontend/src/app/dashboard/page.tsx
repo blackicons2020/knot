@@ -599,14 +599,7 @@ export default function Dashboard() {
                         <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Children</h4>
                         <p className="text-sm text-white font-medium">{activeMatch.childrenStatus || 'None'}</p>
                       </div>
-                      <div className="col-span-2">
-                        <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Core Life Values</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {activeMatch.personalValues?.map(v => (
-                            <span key={v} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-gray-300">{v}</span>
-                          )) || <p className="text-sm text-gray-500 italic">Not listed</p>}
-                        </div>
-                      </div>
+
                     </div>
                   </div>
 
@@ -1011,14 +1004,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-2">Core Life Values</div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Faith</span>
-                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Growth</span>
-                      <span className="px-3 py-1.5 rounded-full bg-[#121721] text-gray-300 text-[10px] font-bold uppercase tracking-wider">Family</span>
-                    </div>
-                  </div>
+
                 </div>
 
                 {/* 4. Marriage Expectations */}

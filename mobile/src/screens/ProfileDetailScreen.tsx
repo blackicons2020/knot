@@ -311,16 +311,6 @@ export default function ProfileDetailScreen() {
             <View style={st.col}><DataItem label="Children" value={match.childrenStatus || 'None'} isDark={isDarkMode} /></View>
           </View>
 
-          <View style={st.dataItem}>
-            <Text style={st.dataLabel}>Core Life Values</Text>
-            <View style={st.chipRow}>
-              {(match.personalValues?.length ?? 0) > 0 ? (
-                match.personalValues.map(v => <Chip key={v} text={v} variant="neutral" isDark={isDarkMode} />)
-              ) : (
-                <Text style={[st.dataValue, { color: Colors.gray300, fontStyle: 'italic' }]}>Not listed</Text>
-              )}
-            </View>
-          </View>
 
           <Divider isDark={isDarkMode} />
 
