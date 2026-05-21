@@ -54,8 +54,8 @@ export default function AppHeader() {
           ))}
         </View>
       </View>
-      <Text style={[st.tagline, { color: Colors.accent }]}>
-        Fraud-Proof | AI Matchmaking | High-Trust
+      <Text style={[st.tagline, { color: Colors.gray400 }]}>
+        Fraud-Proof   AI Matchmaking   High-Trust
       </Text>
     </View>
   );
