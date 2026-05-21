@@ -155,7 +155,9 @@ export default function HomeScreen() {
         {/* Curated Match Hero Card */}
         <View style={[st.heroCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
           <View style={st.heroImageWrap}>
-            <Image source={{ uri: photos[photoIndex] }} style={st.heroImage} />
+            <View style={StyleSheet.absoluteFillObject}>
+              <Image source={{ uri: photos[photoIndex] }} style={st.heroImage} />
+            </View>
             
             {/* Trust badge */}
             <View style={st.trustBadge}>
@@ -186,13 +188,13 @@ export default function HomeScreen() {
 
             {/* Bottom Gradient overlay */}
             <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.85)']}
-              style={StyleSheet.absoluteFillObject}
+              colors={['transparent', 'rgba(0,0,0,0.9)']}
+              style={[StyleSheet.absoluteFillObject, { top: '50%' }]}
               pointerEvents="none"
             />
 
             {/* Overlay Info */}
-            <View style={st.heroInfoOverlay}>
+            <View style={st.heroInfoOverlay} pointerEvents="none">
               <View style={st.nameRow}>
                 <Text style={st.heroName}>{activeMatch.name}, {activeMatch.age}</Text>
                 {activeMatch.isVerified && (
@@ -221,9 +223,9 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Bio */}
-            <Text style={[st.bioText, { color: isDarkMode ? Colors.gray400 : Colors.gray600 }]}>
-              "{activeMatch.bio || activeMatch.marriageExpectations}"
+            {/* Bio / Registry Expectations */}
+            <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600 }]}>
+              {activeMatch.marriageExpectations || activeMatch.bio}
             </Text>
           </View>
         </View>
@@ -278,12 +280,19 @@ export default function HomeScreen() {
 
         {/* Actions */}
         <View style={st.actionsRow}>
-          <TouchableOpacity style={[st.actionBtnPass, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray300 }]} onPress={handlePass}>
-            <Text style={[st.actionBtnPassText, { color: isDarkMode ? Colors.gray300 : Colors.gray600 }]}>Pass</Text>
+          <TouchableOpacity style={st.actionBtnPass} onPress={handlePass}>
+            <Text style={st.actionBtnPassText}>Pass</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={st.actionBtnConnect} onPress={handleConnect}>
-            <Text style={st.actionBtnConnectText}>Connect</Text>
-            <Ionicons name="heart" size={16} color={Colors.white} />
+          <TouchableOpacity onPress={handleConnect} style={{ flex: 1 }}>
+            <LinearGradient
+              colors={[Colors.primary, '#8C52FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={st.actionBtnConnect}
+            >
+              <Text style={st.actionBtnConnectText}>Connect</Text>
+              <Ionicons name="heart-outline" size={18} color={Colors.white} />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -393,7 +402,7 @@ const st = StyleSheet.create({
   tagText: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
   tagBrand: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: 'rgba(212,175,55,0.2)' },
   tagBrandText: { fontSize: 10, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1 },
-  bioText: { fontSize: 12, lineHeight: 18, fontStyle: 'italic' },
+  bioText: { fontSize: 13, lineHeight: 20, marginTop: Spacing.sm },
 
   /* Compatibility Profile Card */
   sectionCard: {
@@ -423,11 +432,11 @@ const st = StyleSheet.create({
   glowBody: { fontSize: 12, lineHeight: 18 },
 
   /* Actions */
-  actionsRow: { flexDirection: 'row', gap: 12, marginTop: Spacing.sm },
-  actionBtnPass: { flex: 1, paddingVertical: 14, borderRadius: BorderRadius.full, borderWidth: 1, alignItems: 'center' },
-  actionBtnPassText: { fontSize: 13, fontWeight: '700' },
-  actionBtnConnect: { flex: 1, paddingVertical: 14, borderRadius: BorderRadius.full, backgroundColor: Colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  actionBtnConnectText: { fontSize: 13, fontWeight: '900', color: Colors.white },
+  actionsRow: { flexDirection: 'row', gap: 16, marginTop: Spacing.sm, paddingBottom: Spacing.md },
+  actionBtnPass: { flex: 1, paddingVertical: 14, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: '#374151', backgroundColor: '#191E2E', alignItems: 'center', justifyContent: 'center' },
+  actionBtnPassText: { fontSize: 15, fontWeight: '700', color: Colors.white },
+  actionBtnConnect: { paddingVertical: 14, borderRadius: BorderRadius.full, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  actionBtnConnectText: { fontSize: 15, fontWeight: '900', color: Colors.white },
 
   /* Mutual Match Modal */
   modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', alignItems: 'center', justifyContent: 'center', padding: Spacing.lg },
