@@ -3,7 +3,7 @@ export const Colors = {
   primary: '#E27D8D',     // Rose / Pink
   secondary: '#E25C70',   // Deep Rose
   accent: '#D4AF37',      // Gold / Brass
-  dark: '#131620',        // Warm Slate Blue/Navy Background
+  dark: '#0A0E14',        // Deep Space Black Background
   light: '#F8F9FA',       // Premium Light Neutral
 
   // Neutrals
@@ -21,9 +21,9 @@ export const Colors = {
   gray900: '#111827',
 
   // Dark mode surfaces
-  darkSurface: '#191E2E', // Slate Card background
-  darkCard: '#1C2237',    // Slate Secondary
-  darkBorder: '#2B3347',  // Premium subtle border
+  darkSurface: '#10141C', // Very slightly lighter than dark
+  darkCard: 'rgba(255, 255, 255, 0.05)',    // Translucent glass card
+  darkBorder: 'rgba(255, 255, 255, 0.05)',  // Translucent glass border
 
   // Status
   success: '#22C55E',

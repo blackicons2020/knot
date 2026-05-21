@@ -17,21 +17,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const systemScheme = useColorScheme();
 
   useEffect(() => {
-    AsyncStorage.getItem('knot_theme').then(saved => {
-      if (saved !== null) {
-        setIsDarkMode(saved === 'dark');
-      } else {
-        setIsDarkMode(true);
-      }
-    });
+    setIsDarkMode(true);
+    AsyncStorage.setItem('knot_theme', 'dark');
   }, []);
 
   const toggleTheme = () => {
-    setIsDarkMode(prev => {
-      const next = !prev;
-      AsyncStorage.setItem('knot_theme', next ? 'dark' : 'light');
-      return next;
-    });
+    // Disabled: App is forced to dark mode
+    setIsDarkMode(true);
   };
 
   return (
