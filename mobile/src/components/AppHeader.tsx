@@ -54,8 +54,8 @@ export default function AppHeader() {
           ))}
         </View>
       </View>
-      <Text style={[st.tagline, { color: isDarkMode ? Colors.accent : Colors.secondary }]}>
-        Where true relationship leads to vow
+      <Text style={[st.tagline, { color: Colors.accent }]}>
+        Fraud-Proof | AI Matchmaking | High-Trust
       </Text>
     </View>
   );
@@ -90,7 +90,6 @@ const st = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     fontWeight: '900',
-    fontStyle: 'italic',
     letterSpacing: -0.3,
     paddingVertical: 6,
   },

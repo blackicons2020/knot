@@ -83,13 +83,12 @@ export default function ProfileScreen() {
     : `${userProfile.city || ''}, ${userProfile.country || ''}`.replace(/^, |, $/g, '');
 
   return (
-    <ScrollView
-      style={st.root}
-      contentContainerStyle={{ paddingBottom: 100 }}
-    >
+    <View style={st.root}>
       <AppHeader />
-      
-      <View style={st.content}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <View style={st.content}>
         
         {/* ─── 1. Header Cards ─── */}
         <View style={st.headerGrid}>
@@ -289,8 +288,9 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
