@@ -18,16 +18,14 @@ export default function AppHeader() {
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
-    <View style={{
-      backgroundColor: isDarkMode ? Colors.dark + 'F2' : Colors.white + 'F2',
-      borderBottomWidth: 1,
-      borderBottomColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.gray100,
-    }}>
+    <View>
       <View
         style={[
           st.header,
           {
             paddingTop: insets.top + 12,
+            backgroundColor: isDarkMode ? Colors.dark + 'F2' : Colors.white + 'F2',
+            borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100,
           },
         ]}
       >
@@ -67,6 +65,7 @@ const st = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: 8,
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
