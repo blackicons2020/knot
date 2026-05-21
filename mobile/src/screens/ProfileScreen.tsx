@@ -286,6 +286,7 @@ export default function ProfileScreen() {
               <Text style={st.scoreTextGreen}>{userProfile.trustScore ? `${userProfile.trustScore}% (Verified)` : 'Not calculated'}</Text>
             </GlassCard>
         </View>
+        </View>
 
         {/* Membership Subscription */}
         <View style={st.sectionBlock}>
