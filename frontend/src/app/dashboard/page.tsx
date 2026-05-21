@@ -17,21 +17,6 @@ export default function Dashboard() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [connectedMatchName, setConnectedMatchName] = useState("");
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  };
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (activeTab === "coach" || activeTab === "messages") {
-        scrollToBottom();
-      }
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [coachMessages, chatMessages, activeTab]);
-
   // Pre-load Paystack inline script for instant ready state on mobile/web
   useEffect(() => {
     if (!(window as any).PaystackPop) {
@@ -112,6 +97,21 @@ export default function Dashboard() {
   const [aiChatTip, setAiChatTip] = useState(
     "AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory."
   );
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (activeTab === "coach" || activeTab === "messages") {
+        scrollToBottom();
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
+  }, [coachMessages, chatMessages, activeTab]);
 
   const handleSendCoachMessage = async () => {
     if (!coachInput.trim()) return;
