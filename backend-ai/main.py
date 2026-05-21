@@ -92,7 +92,7 @@ def read_root():
 @app.post("/compatibility", response_model=CompatibilityResponse)
 def calculate_compatibility(request: CompatibilityRequest):
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-1.5-flash")
         
         prompt = f"""
         You are an Elite AI Matchmaking Research Engineer and Behavioral Psychology Expert.
@@ -182,7 +182,7 @@ def extract_interview_data(request: InterviewExtractRequest):
 @app.post("/coach/respond")
 def coach_respond(request: CoachRequest):
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-1.5-flash")
         
         history = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.conversation_history])
         
@@ -211,7 +211,7 @@ def coach_respond(request: CoachRequest):
 @app.post("/moderation/check")
 def check_moderation(request: ModerationRequest):
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-1.5-flash")
         
         formatted_messages = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.messages])
         
