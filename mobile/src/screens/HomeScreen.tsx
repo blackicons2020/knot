@@ -385,7 +385,7 @@ const st = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   heroName: { fontSize: 26, fontWeight: '900', color: Colors.white, letterSpacing: -0.5 },
   verifiedBadge: { backgroundColor: Colors.accent, borderRadius: 10, padding: 3 },
-  heroSubtitle: { fontSize: 13, fontWeight: '700', color: Colors.accent, marginTop: 4 },
+  heroSubtitle: { fontSize: 13, fontWeight: '700', color: Colors.gray400, marginTop: 4 },
   cardContent: { padding: Spacing.md },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Spacing.sm },
   tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full },
