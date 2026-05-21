@@ -86,27 +86,44 @@ export default function VerificationScreen() {
 
   const handleVerify = () => {
     setStep('verifying');
-    setTimeout(async () => {
+    
+    // Use an async IIFE to avoid mixing setTimeout and async/await weirdly,
+    // or just run it directly.
+    (async () => {
       try {
         // Upload selfie and ID photo to server
         let uploadedSelfie = selfie;
         let uploadedId = idPhoto;
         if (selfie) {
-          try { uploadedSelfie = await db.uploadPhoto(selfie); } catch { /* keep local */ }
+          try { uploadedSelfie = await db.uploadPhoto(selfie); } catch (e) { console.warn("Failed to upload selfie", e); }
         }
         if (idPhoto) {
-          try { uploadedId = await db.uploadPhoto(idPhoto); } catch { /* keep local */ }
+          try { uploadedId = await db.uploadPhoto(idPhoto); } catch (e) { console.warn("Failed to upload id", e); }
         }
-        const updated = { ...user, isVerified: true };
-        await db.saveUser(updated);
-        setUserProfile(updated);
-        setStep('success');
-        setTimeout(() => navigation.goBack(), 2500);
-      } catch {
-        Alert.alert('Error', 'Verification failed. Please try again.');
+
+        // Call the strict AI backend verification endpoint
+        const verificationResult = await db.verifyOnboarding(
+          uploadedSelfie || "", 
+          uploadedId || "", 
+          user.name || "Unknown", 
+          user.age || 0
+        );
+
+        if (verificationResult.success) {
+          const updated = { ...user, isVerified: true };
+          await db.saveUser(updated);
+          setUserProfile(updated);
+          setStep('success');
+          setTimeout(() => navigation.goBack(), 2500);
+        } else {
+          Alert.alert('Verification Failed', verificationResult.details || 'Your document or selfie could not be verified.');
+          setStep('id_review');
+        }
+      } catch (e) {
+        Alert.alert('Error', 'Verification failed due to a network or server error. Please try again.');
         setStep('id_review');
       }
-    }, 3000);
+    })();
   };
 
   if (step === 'verifying') {
