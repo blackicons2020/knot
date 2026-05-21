@@ -92,7 +92,7 @@ def read_root():
 @app.post("/compatibility", response_model=CompatibilityResponse)
 def calculate_compatibility(request: CompatibilityRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         prompt = f"""
         You are an Elite AI Matchmaking Research Engineer and Behavioral Psychology Expert.
@@ -136,7 +136,7 @@ def calculate_compatibility(request: CompatibilityRequest):
 @app.post("/interview/extract")
 def extract_interview_data(request: InterviewExtractRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         formatted_transcript = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.transcript])
         
@@ -182,7 +182,7 @@ def extract_interview_data(request: InterviewExtractRequest):
 @app.post("/coach/respond")
 def coach_respond(request: CoachRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         history = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.conversation_history])
         
@@ -211,7 +211,7 @@ def coach_respond(request: CoachRequest):
 @app.post("/moderation/check")
 def check_moderation(request: ModerationRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         formatted_messages = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.messages])
         
@@ -257,7 +257,7 @@ class ValidationRequest(BaseModel):
 @app.post("/onboarding/validate")
 def validate_onboarding_answer(request: ValidationRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"""
         You are KNOT's Trust & Safety Validation AI.
         Your task is to analyze a user's answer to a serious relationship/marriage onboarding question and determine if it is a genuine, thoughtful response or if it is a joke, nonsense, spam, keyboard mash, or too short/evasive to be useful.
@@ -311,7 +311,7 @@ class VerifyRequest(BaseModel):
 @app.post("/onboarding/verify")
 def verify_onboarding_documents(request: VerifyRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
         selfie_part = load_image_from_url(request.selfie_url)
         id_part = load_image_from_url(request.id_url)
