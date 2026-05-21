@@ -19,12 +19,17 @@ export default function Dashboard() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   };
   useEffect(() => {
-    if (activeTab === "coach" || activeTab === "messages") {
-      scrollToBottom();
-    }
+    const timeoutId = setTimeout(() => {
+      if (activeTab === "coach" || activeTab === "messages") {
+        scrollToBottom();
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [coachMessages, chatMessages, activeTab]);
 
   // Pre-load Paystack inline script for instant ready state on mobile/web
@@ -145,9 +150,18 @@ export default function Dashboard() {
     setAiChatTip(""); // Remove tip once sent
 
     setTimeout(() => {
-      // Simulate real-time response
-      setChatMessages(prev => [...prev, { sender: "Sophia", text: "That sounds wonderful! I actually think communication is key. We should talk more about our goals." }]);
-      setAiChatTip("AI Message Assistant: Sophia is expressing strong communicative openness. Share a story of a major life goal you achieved recently.");
+      const sophiaResponses = [
+        "That sounds wonderful! I actually think communication is key. We should talk more about our goals.",
+        "Oh, I completely agree with you on that. It's so refreshing to hear.",
+        "Haha, that's exactly what I was thinking! Tell me more.",
+        "I've never looked at it that way before, but it makes perfect sense.",
+        "That's so interesting. What made you feel that way?",
+        "I love that we're on the same page. Alignment is really important to me."
+      ];
+      const randomResponse = sophiaResponses[Math.floor(Math.random() * sophiaResponses.length)];
+
+      setChatMessages(prev => [...prev, { sender: "Sophia", text: randomResponse }]);
+      setAiChatTip("AI Message Assistant: Sophia is highly engaged. Keep the conversation flowing naturally.");
     }, 1500);
   };
 
