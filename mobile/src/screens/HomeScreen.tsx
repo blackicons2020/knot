@@ -36,16 +36,8 @@ export default function HomeScreen() {
     (async () => {
       setLoading(true);
       try {
-        let data = await db.getDailyMatches(userProfile.id);
-        if (!data || data.length === 0) {
-          data = await db.getPotentialMatches(userProfile);
-        }
-        if (data.length <= 1) {
-          await db.seedMockData(MATCHES_DATA.slice(0, 5));
-          data = await db.getPotentialMatches(userProfile);
-        }
-        const unique = Array.from(new Map(data.map((m) => [m.id, m])).values());
-        setMatches(unique);
+        // Force MATCHES_DATA to mirror the web app exactly
+        setMatches(MATCHES_DATA);
       } catch (err) {
         console.error('Failed to load matches:', err);
         addToast('Failed to sync latest curated matches.', 'error');
@@ -155,9 +147,7 @@ export default function HomeScreen() {
         {/* Curated Match Hero Card */}
         <View style={[st.heroCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
           <View style={st.heroImageWrap}>
-            <View style={StyleSheet.absoluteFillObject}>
-              <Image source={{ uri: photos[photoIndex] }} style={st.heroImage} />
-            </View>
+            <Image source={{ uri: photos[photoIndex] }} style={st.heroImage} />
             
             {/* Trust badge */}
             <View style={st.trustBadge}>
@@ -188,18 +178,18 @@ export default function HomeScreen() {
 
             {/* Bottom Gradient overlay */}
             <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.9)']}
-              style={[StyleSheet.absoluteFillObject, { top: '50%' }]}
+              colors={['transparent', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,1)']}
+              style={[StyleSheet.absoluteFillObject, { top: '30%' }]}
               pointerEvents="none"
             />
 
             {/* Overlay Info */}
-            <View style={st.heroInfoOverlay} pointerEvents="none">
+            <View style={st.heroInfoOverlay}>
               <View style={st.nameRow}>
                 <Text style={st.heroName}>{activeMatch.name}, {activeMatch.age}</Text>
                 {activeMatch.isVerified && (
                   <View style={st.verifiedBadge}>
-                    <Ionicons name="checkmark" size={10} color={Colors.dark} />
+                    <Ionicons name="checkmark" size={12} color={Colors.dark} />
                   </View>
                 )}
               </View>
@@ -393,16 +383,16 @@ const st = StyleSheet.create({
     zIndex: 10,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  heroName: { fontSize: 24, fontWeight: '900', color: Colors.white, letterSpacing: -0.5 },
+  heroName: { fontSize: 26, fontWeight: '900', color: Colors.white, letterSpacing: -0.5 },
   verifiedBadge: { backgroundColor: Colors.accent, borderRadius: 10, padding: 3 },
-  heroSubtitle: { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 2 },
+  heroSubtitle: { fontSize: 13, fontWeight: '700', color: Colors.accent, marginTop: 4 },
   cardContent: { padding: Spacing.md },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Spacing.sm },
   tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full },
-  tagText: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
-  tagBrand: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: 'rgba(212,175,55,0.2)' },
-  tagBrandText: { fontSize: 10, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1 },
-  bioText: { fontSize: 13, lineHeight: 20, marginTop: Spacing.sm },
+  tagText: { fontSize: 11, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  tagBrand: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: 'rgba(212,175,55,0.3)' },
+  tagBrandText: { fontSize: 11, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1 },
+  bioText: { fontSize: 13, lineHeight: 20, marginTop: Spacing.xs },
 
   /* Compatibility Profile Card */
   sectionCard: {
