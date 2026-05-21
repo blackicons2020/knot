@@ -2,55 +2,70 @@ import React from 'react';
 import {
   Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import AppHeader from '../components/AppHeader';
-import { Colors, Spacing, BorderRadius } from '../theme/colors';
+import { Colors } from '../theme/colors';
 import { RootStackParamList } from '../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 /* ── Reusable sub-components ─────────────────────────────── */
 
-function DataItem({ label, value }: { label: string; value?: string | null }) {
+function DataItem({ label, value, isBold, hideValue }: { label: string; value?: string | null; isBold?: boolean; hideValue?: boolean }) {
   return (
     <View style={st.dataItem}>
       <Text style={st.dataLabel}>{label}</Text>
-      {value ? (
-        <Text style={[st.dataValue, { color: Colors.gray200 }]}>{value}</Text>
-      ) : (
-        <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not specified</Text>
+      {!hideValue && (
+        value ? (
+          <Text style={[st.dataValue, isBold && { fontWeight: 'bold' }]}>{value}</Text>
+        ) : (
+          <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not specified</Text>
+        )
       )}
     </View>
   );
 }
 
-function Chip({ text, variant }: { text: string; variant: 'neutral' | 'brand' }) {
-  const bg = variant === 'brand' ? 'rgba(212,175,55,0.1)' : Colors.gray800;
-  const fg = variant === 'brand' ? Colors.accent : Colors.gray300;
-  const borderColor = variant === 'brand' ? 'rgba(212,175,55,0.3)' : 'transparent';
+function Chip({ text, variant }: { text: string; variant: 'neutral' | 'brand' | 'glass' }) {
+  let bg = 'rgba(255,255,255,0.05)';
+  let fg = Colors.gray300;
+  let borderColor = 'rgba(255,255,255,0.05)';
+
+  if (variant === 'brand') {
+    bg = 'rgba(212,175,55,0.1)';
+    fg = Colors.accent;
+    borderColor = 'rgba(212,175,55,0.3)';
+  } else if (variant === 'neutral') {
+    bg = 'rgba(45,27,78,0.3)'; // purple glass
+    fg = Colors.accent;
+    borderColor = 'rgba(212,175,55,0.2)';
+  }
+
   return (
-    <View style={[st.chip, { backgroundColor: bg, borderColor, borderWidth: variant === 'brand' ? 1 : 0 }]}>
+    <View style={[st.chip, { backgroundColor: bg, borderColor, borderWidth: 1 }]}>
       <Text style={[st.chipText, { color: fg }]}>{text}</Text>
     </View>
   );
 }
 
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({ title, hideBorder }: { title: string; hideBorder?: boolean }) {
   return (
-    <View style={st.sectionHeaderWrap}>
+    <View style={[st.sectionHeaderWrap, !hideBorder && { borderBottomWidth: 1 }]}>
       <Text style={st.sectionHeader}>{title}</Text>
     </View>
   );
 }
 
-function Divider() {
-  return <View style={st.divider} />;
+function GlassCard({ children, style }: { children: React.ReactNode; style?: any }) {
+  return (
+    <View style={[st.glassCard, style]}>
+      {children}
+    </View>
+  );
 }
 
 /* ── Main Screen ──────────────────────────────────────────── */
@@ -58,7 +73,6 @@ function Divider() {
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { userProfile } = useAuth();
-  // We ignore isDarkMode because this screen uses a bespoke dark/gold theme exclusively.
 
   if (!userProfile) return null;
 
@@ -70,229 +84,208 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={[st.root, { backgroundColor: Colors.dark }]}
+      style={st.root}
       contentContainerStyle={{ paddingBottom: 100 }}
     >
       <AppHeader />
-      {/* ─── Hero image with gradient ─── */}
-      <View style={st.heroWrap}>
-        <Image source={{ uri: photo }} style={st.heroImage} />
-        <LinearGradient
-          colors={['transparent', 'rgba(19,22,32,0.4)', Colors.dark]}
-          style={StyleSheet.absoluteFillObject}
-        />
-        <View style={st.heroContent}>
-          <Text style={st.heroName}>{userProfile.name}, {userProfile.age}</Text>
-          <Text style={st.heroLocation}>{locationText.toUpperCase()}</Text>
-          {userProfile.isVerified && (
-            <View style={st.verifiedRow}>
-              <Ionicons name="checkmark-circle" size={16} color={Colors.accent} />
-              <Text style={st.verifiedText}>VERIFIED IDENTITY</Text>
-            </View>
-          )}
-          <Text style={st.heroSubtitle}>
-            Where true relationship leads to <Text style={{ color: Colors.accent }}>vow</Text>
-          </Text>
-        </View>
-      </View>
-
-      {/* ─── Quick action buttons (overlapping hero) ─── */}
-      <View style={st.actionsRow}>
-        <TouchableOpacity
-          style={st.actionBtnSmall}
-          onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}
-        >
-          <Ionicons name="camera-outline" size={24} color={Colors.gray400} />
-          <Text style={st.actionLabelSmall}>Gallery</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={st.actionBtnLarge}
-          onPress={() => navigation.navigate('EditProfile', { user: userProfile })}
-        >
-          <Ionicons name="pencil" size={28} color={Colors.dark} />
-          <Text style={st.actionLabelLarge}>Edit Profile</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[st.actionBtnSmall, userProfile.isVerified && st.actionBtnSmallVerified]}
-          onPress={() => navigation.navigate('Verification', { user: userProfile })}
-          disabled={userProfile.isVerified}
-        >
-          {userProfile.isVerified ? (
-            <Ionicons name="checkmark-circle" size={24} color={Colors.accent} />
-          ) : (
-            <Ionicons name="shield-checkmark-outline" size={24} color={Colors.gray400} />
-          )}
-          <Text style={[st.actionLabelSmall, userProfile.isVerified && { color: Colors.accent }]}>
-            {userProfile.isVerified ? 'Verified' : 'Verify ID'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ─── Admin button ─── */}
-      {isAdmin && (
-        <TouchableOpacity
-          style={st.adminBtn}
-          onPress={() => navigation.navigate('Admin')}
-        >
-          <Ionicons name="shield-checkmark" size={22} color={Colors.accent} />
-          <Text style={st.adminBtnText}>Registry Command Center</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* ─── Content ─── */}
+      
       <View style={st.content}>
-
-        {/* ══ PSYCHOLOGICAL PROFILE ══ */}
-        {(userProfile.personalityArchetype || userProfile.attachmentStyle) && (
-          <>
-            <SectionHeader title="Psychological Profile" />
-            <View style={st.dataItem}>
-              <View style={st.chipRow}>
-                {userProfile.personalityArchetype && <Chip text={`✔ ${userProfile.personalityArchetype}`} variant="brand" />}
-                {userProfile.attachmentStyle && <Chip text={`✔ ${userProfile.attachmentStyle}`} variant="neutral" />}
+        
+        {/* ─── 1. Header Cards ─── */}
+        <View style={st.headerGrid}>
+          {/* User Info Card */}
+          <GlassCard style={st.userInfoCard}>
+            <View style={st.userRow}>
+              <View style={st.avatarContainer}>
+                <Image source={{ uri: photo }} style={st.avatar} />
+                <TouchableOpacity style={st.avatarOverlay} onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}>
+                  <Ionicons name="camera" size={16} color={Colors.white} />
+                  <Text style={st.avatarOverlayText}>UPDATE</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={st.userInfoText}>
+                <Text style={st.userName}>{userProfile.name}, {userProfile.age}</Text>
+                <Text style={st.userLocation}>{userProfile.occupation} • {locationText}</Text>
+                {userProfile.isVerified && (
+                  <View style={st.verifiedBadge}>
+                    <Text style={st.verifiedBadgeText}>Verified Registry Member</Text>
+                  </View>
+                )}
               </View>
             </View>
-            <Divider />
-          </>
+            <TouchableOpacity style={st.editBtn} onPress={() => navigation.navigate('EditProfile', { user: userProfile })}>
+              <Ionicons name="settings-outline" size={14} color={Colors.gray300} />
+              <Text style={st.editBtnText}>Edit Profile Data</Text>
+            </TouchableOpacity>
+          </GlassCard>
+
+          {/* Identity Verification Card */}
+          <GlassCard style={st.verificationCard}>
+            <Text style={st.verifTitle}>Identity Verification</Text>
+            <View style={st.verifRow}>
+              <Text style={st.verifLabel}>Government ID Scan</Text>
+              <Text style={st.verifStatus}>Approved</Text>
+            </View>
+            <View style={st.verifRow}>
+              <Text style={st.verifLabel}>Liveness Selfie Match</Text>
+              <Text style={st.verifStatus}>Approved</Text>
+            </View>
+            <View style={st.verifCompleteBadge}>
+              <Text style={st.verifCompleteText}>Identity Verified</Text>
+            </View>
+          </GlassCard>
+        </View>
+
+        {/* ─── 2. My Photos ─── */}
+        <View style={st.sectionBlock}>
+          <View style={st.photosHeader}>
+            <Text style={st.sectionHeader}>My Photos</Text>
+            <Text style={st.photosCount}>{userProfile.profileImageUrls?.length || 0} / 6 Uploaded</Text>
+          </View>
+          <View style={st.photosGrid}>
+            {userProfile.profileImageUrls?.map((url, idx) => (
+              <View key={idx} style={st.photoWrapper}>
+                <Image source={{ uri: url }} style={st.photoImage} />
+                {idx === 0 && (
+                  <View style={st.primaryBadge}>
+                    <Text style={st.primaryBadgeText}>Primary</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+            {(userProfile.profileImageUrls?.length || 0) < 6 && (
+              <TouchableOpacity 
+                style={st.addPhotoBtn} 
+                onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}
+              >
+                <Ionicons name="camera-outline" size={24} color={Colors.gray400} />
+                <Text style={st.addPhotoText}>Add Photo</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* ─── 3. Profile Detail Section ─── */}
+        
+        {/* Psychological Profile */}
+        {(userProfile.personalityArchetype || userProfile.attachmentStyle) && (
+          <View style={st.sectionBlock}>
+            <SectionHeader title="Psychological Profile" hideBorder />
+            <View style={st.chipRow}>
+              {userProfile.personalityArchetype && <Chip text={`✔ ${userProfile.personalityArchetype}`} variant="brand" />}
+              {userProfile.attachmentStyle && <Chip text={`✔ ${userProfile.attachmentStyle}`} variant="neutral" />}
+            </View>
+          </View>
         )}
 
-        {/* ══ IDENTITY & ROOTS ══ */}
-        <SectionHeader title="Identity & Roots" />
-
-        <View style={st.row2}>
-          <View style={st.col}>
-            <DataItem label="Marriage History" value={userProfile.maritalStatus} />
+        {/* Bio */}
+        {userProfile.bio && (
+          <View style={st.sectionBlock}>
+            <SectionHeader title="Bio & Intentions" hideBorder />
+            <Text style={st.bioText}>{userProfile.bio}</Text>
           </View>
-          <View style={st.col}>
-            <DataItem label="Occupation" value={userProfile.occupation} />
-          </View>
-        </View>
+        )}
 
-        {/* Location card */}
-        <View style={st.locationCard}>
-          <Text style={st.locationLabel}>Current Residence</Text>
-          <View style={st.row3}>
-            <View style={st.col3}>
-              <DataItem label="Country" value={userProfile.residenceCountry} />
+        {/* Identity & Roots */}
+        <View style={st.sectionBlock}>
+          <SectionHeader title="Identity & Roots" />
+          
+          <View style={st.grid2}>
+            <GlassCard style={st.gridItem}><DataItem label="Marriage History" value={userProfile.maritalStatus} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Occupation" value={userProfile.occupation} isBold /></GlassCard>
+          </View>
+
+          <GlassCard style={[st.gridItemFull, { marginBottom: 16 }]}>
+            <Text style={st.cardSectionTitle}>Current Residence</Text>
+            <View style={st.grid3}>
+              <View style={st.col3}><DataItem label="Country" value={userProfile.residenceCountry} isBold /></View>
+              <View style={st.col3}><DataItem label="State" value={userProfile.residenceState} isBold /></View>
+              <View style={st.col3}><DataItem label="City" value={userProfile.residenceCity} isBold /></View>
             </View>
-            <View style={st.col3}>
-              <DataItem label="State" value={userProfile.residenceState} />
+            
+            <View style={st.divider} />
+            
+            <Text style={st.cardSectionTitle}>Heritage & Origin</Text>
+            <View style={st.grid3}>
+              <View style={st.col3}><DataItem label="Country" value={userProfile.originCountry} isBold /></View>
+              <View style={st.col3}><DataItem label="State" value={userProfile.originState} isBold /></View>
+              <View style={st.col3}><DataItem label="City" value={userProfile.originCity} isBold /></View>
             </View>
-            <View style={st.col3}>
-              <DataItem label="City" value={userProfile.residenceCity} />
+            <View style={{ marginTop: 12 }}>
+              <DataItem label="Cultural Identity" value={userProfile.culturalBackground} isBold />
             </View>
+          </GlassCard>
+
+          <View style={st.grid2}>
+            <GlassCard style={st.gridItem}><DataItem label="Nationality" value={userProfile.nationality} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Languages Spoken" value={userProfile.languagesSpoken?.join(', ')} isBold /></GlassCard>
           </View>
+        </View>
 
-          <Divider />
-
-          <Text style={st.locationLabel}>Heritage & Origin</Text>
-          <View style={st.row3}>
-            <View style={st.col3}>
-              <DataItem label="Country" value={userProfile.originCountry} />
+        {/* Lifestyle & Beliefs */}
+        <View style={st.sectionBlock}>
+          <SectionHeader title="Lifestyle & Beliefs" />
+          
+          <View style={st.grid2}>
+            <GlassCard style={st.gridItem}><DataItem label="Faith/Religion" value={userProfile.religion} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Smoking" value={userProfile.smoking} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Drinking" value={userProfile.drinking} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Children" value={userProfile.childrenStatus || 'No kids'} isBold /></GlassCard>
+          </View>
+          
+          <GlassCard style={st.gridItemFull}>
+            <Text style={st.dataLabel}>Core Life Values</Text>
+            <View style={st.chipRow}>
+              {(userProfile.personalValues?.length ?? 0) > 0 ? (
+                userProfile.personalValues.map(v => <Chip key={v} text={v} variant="glass" />)
+              ) : (
+                <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
+              )}
             </View>
-            <View style={st.col3}>
-              <DataItem label="State" value={userProfile.originState} />
+          </GlassCard>
+        </View>
+
+        {/* Marriage Expectations */}
+        <View style={st.sectionBlock}>
+          <SectionHeader title="Marriage Expectations" />
+          
+          <View style={st.grid2}>
+            <GlassCard style={st.gridItem}><DataItem label="Vow Timeline" value={userProfile.marriageTimeline} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Relocation" value={userProfile.willingToRelocate} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}><DataItem label="Children Intent" value={userProfile.childrenPreference} isBold /></GlassCard>
+            <GlassCard style={st.gridItem}>
+              <DataItem label="Partner Age" value={
+                userProfile.preferredPartnerAgeRange
+                  ? `${userProfile.preferredPartnerAgeRange[0]} - ${userProfile.preferredPartnerAgeRange[1]} years`
+                  : undefined
+              } isBold />
+            </GlassCard>
+          </View>
+
+          <GlassCard style={[st.gridItemFull, { marginBottom: 16 }]}>
+            <Text style={st.dataLabel}>Ideal Partner Traits</Text>
+            <View style={st.chipRow}>
+              {(userProfile.idealPartnerTraits?.length ?? 0) > 0 ? (
+                userProfile.idealPartnerTraits.map(t => <Chip key={t} text={t} variant="brand" />)
+              ) : (
+                <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
+              )}
             </View>
-            <View style={st.col3}>
-              <DataItem label="City" value={userProfile.originCity} />
-            </View>
-          </View>
+          </GlassCard>
 
-          <DataItem label="Cultural Identity" value={userProfile.culturalBackground} />
-        </View>
+          <GlassCard style={[st.gridItemFull, { marginBottom: 16 }]}>
+            <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} />
+          </GlassCard>
 
-        <DataItem label="Registry Bio" value={userProfile.bio} />
-
-        <View style={[st.row2, { marginTop: 8 }]}>
-          <View style={st.col}>
-            <DataItem label="Nationality" value={userProfile.nationality} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Languages" value={userProfile.languagesSpoken?.join(', ')} />
-          </View>
-        </View>
-
-        <Divider />
-
-        {/* ══ LIFESTYLE & BELIEFS ══ */}
-        <SectionHeader title="Lifestyle & Beliefs" />
-
-        <View style={st.row2}>
-          <View style={st.col}>
-            <DataItem label="Faith/Religion" value={userProfile.religion} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Smoking" value={userProfile.smoking} />
-          </View>
-        </View>
-        <View style={st.row2}>
-          <View style={st.col}>
-            <DataItem label="Drinking" value={userProfile.drinking} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Children" value={userProfile.childrenStatus || 'No kids'} />
-          </View>
-        </View>
-
-        <View style={st.dataItem}>
-          <Text style={st.dataLabel}>Core Life Values</Text>
-          <View style={st.chipRow}>
-            {(userProfile.personalValues?.length ?? 0) > 0 ? (
-              userProfile.personalValues.map(v => <Chip key={v} text={v} variant="neutral" />)
-            ) : (
-              <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
-            )}
-          </View>
-        </View>
-
-        <Divider />
-
-        {/* ══ MARRIAGE EXPECTATIONS ══ */}
-        <SectionHeader title="Marriage Expectations" />
-
-        <View style={st.row2}>
-          <View style={st.col}>
-            <DataItem label="Vow Timeline" value={userProfile.marriageTimeline} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Relocation" value={userProfile.willingToRelocate} />
-          </View>
-        </View>
-        <View style={st.row2}>
-          <View style={st.col}>
-            <DataItem label="Children Intent" value={userProfile.childrenPreference} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Partner Age" value={
-              userProfile.preferredPartnerAgeRange
-                ? `${userProfile.preferredPartnerAgeRange[0]} - ${userProfile.preferredPartnerAgeRange[1]} years`
-                : undefined
-            } />
-          </View>
-        </View>
-
-        <View style={st.dataItem}>
-          <Text style={st.dataLabel}>Ideal Partner Traits</Text>
-          <View style={st.chipRow}>
-            {(userProfile.idealPartnerTraits?.length ?? 0) > 0 ? (
-              userProfile.idealPartnerTraits.map(t => <Chip key={t} text={t} variant="brand" />)
-            ) : (
-              <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
-            )}
-          </View>
-        </View>
-
-        <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} />
-
-        {/* ══ PLATFORM SCORES ══ */}
-        <View style={[st.row2, { marginTop: 16 }]}>
-          <View style={st.col}>
-            <DataItem label="Readiness" value={userProfile.readinessScore ? `${userProfile.readinessScore}% (Elite)` : 'Not calculated'} />
-          </View>
-          <View style={st.col}>
-            <DataItem label="Trust Score" value={userProfile.trustScore ? `${userProfile.trustScore}% (Verified)` : 'Not calculated'} />
+          <View style={st.grid2}>
+            <GlassCard style={st.gridItem}>
+              <DataItem label="Readiness" hideValue />
+              <Text style={st.scoreTextGreen}>{userProfile.readinessScore ? `${userProfile.readinessScore}% (Elite)` : 'Not calculated'}</Text>
+            </GlassCard>
+            <GlassCard style={st.gridItem}>
+              <DataItem label="Trust Score" hideValue />
+              <Text style={st.scoreTextGreen}>{userProfile.trustScore ? `${userProfile.trustScore}% (Verified)` : 'Not calculated'}</Text>
+            </GlassCard>
           </View>
         </View>
 
@@ -304,73 +297,77 @@ export default function ProfileScreen() {
 /* ── Styles ───────────────────────────────────────────────── */
 
 const st = StyleSheet.create({
-  root: { flex: 1 },
-
-  /* Hero */
-  heroWrap: { height: 380, position: 'relative' },
-  heroImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  heroContent: { position: 'absolute', bottom: 60, left: 24, right: 24 },
-  heroName: { fontSize: 36, fontWeight: '900', color: Colors.white, letterSpacing: -1, marginBottom: 4 },
-  heroLocation: { fontSize: 13, fontWeight: '700', color: Colors.gray300, letterSpacing: 3, marginBottom: 12 },
-  verifiedRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
-  verifiedText: { fontSize: 10, fontWeight: '900', color: Colors.accent, letterSpacing: 2 },
-  heroSubtitle: { fontSize: 14, fontWeight: '500', color: Colors.gray200, fontStyle: 'italic', letterSpacing: 0.5 },
-
-  /* Action buttons */
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: -40, marginBottom: 32, paddingHorizontal: 24, zIndex: 20 },
-  actionBtnSmall: {
-    width: 72, height: 72, borderRadius: 20, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: Colors.darkCard,
-    borderWidth: 1, borderColor: Colors.darkBorder,
-    elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8,
+  root: { flex: 1, backgroundColor: '#0A0E14' },
+  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40 },
+  
+  /* Glass Card Base */
+  glassCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
   },
-  actionBtnSmallVerified: {
-    backgroundColor: 'rgba(212,175,55,0.1)',
-    borderColor: 'rgba(212,175,55,0.3)',
-  },
-  actionBtnLarge: {
-    width: 100, height: 100, borderRadius: 28, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: Colors.accent,
-    elevation: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12,
-  },
-  actionLabelSmall: { fontSize: 9, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 6 },
-  actionLabelLarge: { fontSize: 11, fontWeight: '900', color: Colors.dark, textTransform: 'uppercase', letterSpacing: 1.5, marginTop: 8 },
 
-  /* Admin */
-  adminBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12,
-    marginHorizontal: 24, marginBottom: 24, padding: 18, borderRadius: 28,
-    backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder,
-  },
-  adminBtnText: { fontSize: 12, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 2 },
+  /* Headers */
+  headerGrid: { gap: 16, marginBottom: 24, paddingBottom: 24, borderBottomWidth: 1, borderBottomColor: 'rgba(255, 255, 255, 0.05)' },
+  userInfoCard: { gap: 16, justifyContent: 'center' },
+  userRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  avatarContainer: { width: 72, height: 72, borderRadius: 36, overflow: 'hidden', position: 'relative' },
+  avatar: { width: '100%', height: '100%' },
+  avatarOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', paddingVertical: 4 },
+  avatarOverlayText: { fontSize: 8, fontWeight: 'bold', color: Colors.white, marginTop: 1 },
+  userInfoText: { flex: 1 },
+  userName: { fontSize: 18, fontWeight: 'bold', color: Colors.white },
+  userLocation: { fontSize: 11, color: Colors.gray400, marginTop: 4 },
+  verifiedBadge: { marginTop: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: 'rgba(16, 185, 129, 0.25)', alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)' },
+  verifiedBadgeText: { fontSize: 8, fontWeight: '900', color: '#10B981', textTransform: 'uppercase', letterSpacing: 1 },
+  editBtn: { width: '100%', paddingVertical: 10, borderRadius: 12, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  editBtnText: { fontSize: 11, fontWeight: 'bold', color: Colors.gray300 },
 
-  /* Content area */
-  content: { paddingHorizontal: 24 },
+  verificationCard: { gap: 12, justifyContent: 'center' },
+  verifTitle: { fontSize: 11, color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2, fontWeight: '900', marginBottom: 4 },
+  verifRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  verifLabel: { fontSize: 11, color: Colors.gray300 },
+  verifStatus: { fontSize: 11, color: '#10B981', fontWeight: 'bold' },
+  verifCompleteBadge: { marginTop: 8, paddingVertical: 8, borderRadius: 12, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.2)', alignItems: 'center' },
+  verifCompleteText: { fontSize: 9, fontWeight: '900', color: '#10B981', textTransform: 'uppercase', letterSpacing: 1 },
 
-  /* Section header */
-  sectionHeaderWrap: { paddingTop: 8, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: Colors.darkBorder, marginBottom: 20 },
-  sectionHeader: { fontSize: 18, fontWeight: '900', color: Colors.white, letterSpacing: 2, textTransform: 'uppercase' },
+  /* Sections */
+  sectionBlock: { marginBottom: 24, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' },
+  sectionHeaderWrap: { paddingBottom: 12, borderBottomColor: 'rgba(255, 255, 255, 0.05)', marginBottom: 16 },
+  sectionHeader: { fontSize: 11, color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2, fontWeight: '900' },
+  cardSectionTitle: { fontSize: 9, color: Colors.accent, textTransform: 'uppercase', letterSpacing: 2, fontWeight: '900', marginBottom: 12 },
 
-  /* Data items */
-  dataItem: { marginBottom: 20 },
-  dataLabel: { fontSize: 10, fontWeight: '900', color: Colors.gray500, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 },
-  dataValue: { fontSize: 15, fontWeight: '500', lineHeight: 22 },
+  /* Photos */
+  photosHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  photosCount: { fontSize: 9, color: Colors.gray500, fontWeight: 'bold' },
+  photosGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  photoWrapper: { width: '30%', aspectRatio: 1, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' },
+  photoImage: { width: '100%', height: '100%' },
+  primaryBadge: { position: 'absolute', top: 6, left: 6, backgroundColor: Colors.accent, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  primaryBadgeText: { fontSize: 7, fontWeight: '900', textTransform: 'uppercase', color: Colors.dark },
+  addPhotoBtn: { width: '30%', aspectRatio: 1, borderRadius: 16, borderWidth: 2, borderStyle: 'dashed', borderColor: 'rgba(255, 255, 255, 0.2)', alignItems: 'center', justifyContent: 'center', gap: 4 },
+  addPhotoText: { fontSize: 8, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1 },
 
-  /* Grid rows */
-  row2: { flexDirection: 'row', gap: 24, marginBottom: 4 },
-  row3: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  col: { flex: 1 },
+  /* Data Layout */
+  bioText: { fontSize: 13, color: Colors.gray300, lineHeight: 22 },
+  grid2: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 12 },
+  gridItem: { width: '48%', marginBottom: 4 },
+  gridItemFull: { width: '100%', marginBottom: 4 },
+  grid3: { flexDirection: 'row', gap: 8 },
   col3: { flex: 1 },
-
-  /* Location card */
-  locationCard: { padding: 20, borderRadius: 20, backgroundColor: Colors.darkCard, borderWidth: 1, borderColor: Colors.darkBorder, marginBottom: 24 },
-  locationLabel: { fontSize: 10, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 },
+  
+  dataItem: { marginBottom: 0 },
+  dataLabel: { fontSize: 8, fontWeight: '900', color: Colors.gray500, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 6 },
+  dataValue: { fontSize: 13, color: Colors.white },
+  scoreTextGreen: { fontSize: 13, fontWeight: 'bold', color: '#10B981', marginTop: 4 },
 
   /* Chips */
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
-  chipText: { fontSize: 11, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
+  chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+  chipText: { fontSize: 9, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
 
   /* Divider */
-  divider: { height: 1, backgroundColor: Colors.darkBorder, marginVertical: 12 },
+  divider: { height: 1, backgroundColor: 'rgba(255, 255, 255, 0.05)', marginVertical: 16 },
 });
