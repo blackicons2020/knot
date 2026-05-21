@@ -66,7 +66,7 @@ export default function PaymentScreen() {
         setPaystackReference(data.reference);
         setShowWebView(true);
       } else {
-        addToast('Failed to initialize Paystack session. Please try again.', 'error');
+        addToast(data.message || data.error || 'Failed to initialize Paystack session. Please try again.', 'error');
         setProcessing(false);
       }
     } catch (error) {
