@@ -5,7 +5,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import AppHeader from '../components/AppHeader';
 import { Colors } from '../theme/colors';
@@ -72,9 +72,30 @@ function GlassCard({ children, style }: { children: React.ReactNode; style?: any
 
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
-  const { userProfile } = useAuth();
+  const { userProfile, updateProfile } = useAuth();
 
   if (!userProfile) return null;
+
+  const pickMainPhoto = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const newPhoto = result.assets[0].uri;
+      const updatedPhotos = [...(userProfile.profileImageUrls || [])];
+      if (updatedPhotos.length > 0) {
+        updatedPhotos[0] = newPhoto;
+      } else {
+        updatedPhotos.push(newPhoto);
+      }
+      if (updateProfile) {
+        updateProfile({ profileImageUrls: updatedPhotos });
+      }
+    }
+  };
 
   const photo = userProfile.profileImageUrls?.[0] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400';
   const isAdmin = userProfile.id === 'user_0';
@@ -97,7 +118,7 @@ export default function ProfileScreen() {
             <View style={st.userRow}>
               <View style={st.avatarContainer}>
                 <Image source={{ uri: photo }} style={st.avatar} />
-                <TouchableOpacity style={st.avatarOverlay} onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}>
+                <TouchableOpacity style={st.avatarOverlay} onPress={pickMainPhoto}>
                   <Ionicons name="camera" size={16} color={Colors.white} />
                   <Text style={st.avatarOverlayText}>UPDATE</Text>
                 </TouchableOpacity>

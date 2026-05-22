@@ -846,7 +846,17 @@ export default function Dashboard() {
                         )}
                       </div>
                       <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <span className="text-[9px] font-bold text-white uppercase tracking-wider text-center">Update<br/>Photo</span>
+                        <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const newPhotoUrl = URL.createObjectURL(e.target.files[0]);
+                              const newPhotos = [...userPhotos];
+                              newPhotos[primaryPhotoIndex] = newPhotoUrl;
+                              setUserPhotos(newPhotos);
+                            }
+                          }} />
+                          <span className="text-[9px] font-bold text-white uppercase tracking-wider text-center">Update<br/>Photo</span>
+                        </label>
                       </div>
                     </div>
                     <div>
@@ -893,11 +903,7 @@ export default function Dashboard() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                        {idx !== primaryPhotoIndex && (
-                          <button onClick={() => setPrimaryPhotoIndex(idx)} className="text-[9px] font-bold bg-white/20 hover:bg-white/40 px-3 py-1.5 rounded-full text-white uppercase tracking-wider">
-                            Make Primary
-                          </button>
-                        )}
+
                         <button onClick={() => {
                           const newPhotos = userPhotos.filter((_, i) => i !== idx);
                           setUserPhotos(newPhotos);
