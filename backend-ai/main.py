@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 logger = logging.getLogger("knot-ai-service")
 
 # Configure OpenAI client for Grok (xAI)
-API_KEY = os.getenv("GROK_API_KEY") or os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("CEREBRAS_API_KEY") or os.getenv("GROK_API_KEY")
 client = None
 if not API_KEY:
     logger.warning("GROK_API_KEY is not set in environmental variables.")
