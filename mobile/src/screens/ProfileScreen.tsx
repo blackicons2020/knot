@@ -255,16 +255,7 @@ export default function ProfileScreen() {
             <GlassCard style={st.gridItem}><DataItem label="Children" value={userProfile.childrenStatus || 'No kids'} isBold /></GlassCard>
           </View>
           
-          <GlassCard style={st.gridItemFull}>
-            <Text style={st.dataLabel}>Core Life Values</Text>
-            <View style={st.chipRow}>
-              {(userProfile.personalValues?.length ?? 0) > 0 ? (
-                userProfile.personalValues.map(v => <Chip key={v} text={v} variant="glass" />)
-              ) : (
-                <Text style={[st.dataValue, { color: Colors.gray600, fontStyle: 'italic' }]}>Not listed</Text>
-              )}
-            </View>
-          </GlassCard>
+
         </View>
 
         {/* Marriage Expectations */}

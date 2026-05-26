@@ -7,7 +7,7 @@ from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import google.generativeai as genai
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,12 +16,16 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("knot-ai-service")
 
-# Configure Google Gemini
-API_KEY = os.getenv("GEMINI_API_KEY")
+# Configure OpenAI client for Grok (xAI)
+API_KEY = os.getenv("GROK_API_KEY") or os.getenv("GEMINI_API_KEY")
+client = None
 if not API_KEY:
-    logger.warning("GEMINI_API_KEY is not set in environmental variables.")
+    logger.warning("GROK_API_KEY is not set in environmental variables.")
 else:
-    genai.configure(api_key=API_KEY)
+    client = OpenAI(
+    api_key=os.environ.get("GROK_API_KEY") or os.environ.get("GEMINI_API_KEY"),
+    base_url="https://api.groq.com/openai/v1",
+)
 
 app = FastAPI(
     title="KNOT AI Relationship Intelligence Engine",
@@ -75,7 +79,7 @@ class CompatibilityResponse(BaseModel):
     aiExplanation: str
 
 class InterviewExtractRequest(BaseModel):
-    transcript: List[Dict[str, str]] # list of {"role": "user"|"ai", "text": "..."}
+    transcript: List[Dict[str, str]]
 
 class CoachRequest(BaseModel):
     conversation_history: List[Dict[str, str]]
@@ -89,11 +93,19 @@ class ModerationRequest(BaseModel):
 def read_root():
     return {"status": "healthy", "service": "KNOT AI Engine"}
 
+def extract_json(text: str) -> dict:
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return json.loads(text.strip())
+
 @app.post("/compatibility", response_model=CompatibilityResponse)
 def calculate_compatibility(request: CompatibilityRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        
         prompt = f"""
         You are an Elite AI Matchmaking Research Engineer and Behavioral Psychology Expert.
         Analyze the following two profiles for serious marriage compatibility:
@@ -119,16 +131,11 @@ def calculate_compatibility(request: CompatibilityRequest):
         Do not include markdown tags like ```json or anything else. Return raw JSON.
         """
         
-        response = model.generate_content(prompt)
-        # Clean potential markdown wrapping
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        
-        data = json.loads(text.strip())
-        return data
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in compatibility: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -136,8 +143,6 @@ def calculate_compatibility(request: CompatibilityRequest):
 @app.post("/interview/extract")
 def extract_interview_data(request: InterviewExtractRequest):
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        
         formatted_transcript = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.transcript])
         
         prompt = f"""
@@ -166,15 +171,11 @@ def extract_interview_data(request: InterviewExtractRequest):
         Do not include markdown tags like ```json or anything else. Return raw JSON.
         """
         
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-            
-        data = json.loads(text.strip())
-        return data
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in extraction: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -182,8 +183,6 @@ def extract_interview_data(request: InterviewExtractRequest):
 @app.post("/coach/respond")
 def coach_respond(request: CoachRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        
         history = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.conversation_history])
         
         prompt = f"""
@@ -202,8 +201,11 @@ def coach_respond(request: CoachRequest):
         Provide a supportive, wise, emotionally secure, and concise response (max 2-3 sentences, 30-50 words) that guides the user toward relationship maturity, emotional safety, and healthy communication. Keep your tone premium, mature, deeply human, and brief.
         """
         
-        response = model.generate_content(prompt)
-        return {"response": response.text.strip()}
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return {"response": response.choices[0].message.content.strip()}
     except Exception as e:
         logger.error(f"Error in coach response: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -211,8 +213,6 @@ def coach_respond(request: CoachRequest):
 @app.post("/moderation/check")
 def check_moderation(request: ModerationRequest):
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        
         formatted_messages = "\n".join([f"{m.get('role', 'unknown')}: {m.get('text', '')}" for m in request.messages])
         
         prompt = f"""
@@ -237,15 +237,11 @@ def check_moderation(request: ModerationRequest):
         Do not include markdown tags like ```json.
         """
         
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-            
-        data = json.loads(text.strip())
-        return data
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in moderation check: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -257,7 +253,6 @@ class ValidationRequest(BaseModel):
 @app.post("/onboarding/validate")
 def validate_onboarding_answer(request: ValidationRequest):
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"""
         You are KNOT's Trust & Safety Validation AI.
         Your task is to analyze a user's answer to a serious relationship/marriage onboarding question and determine if it is a genuine, thoughtful response or if it is a joke, nonsense, spam, keyboard mash, or too short/evasive to be useful.
@@ -275,13 +270,11 @@ def validate_onboarding_answer(request: ValidationRequest):
         }}
         Do not include markdown tags like ```json.
         """
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-        return json.loads(text.strip())
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error validating onboarding answer: {str(e)}")
         return {"valid": True, "clarification": ""}
@@ -311,8 +304,6 @@ class VerifyRequest(BaseModel):
 @app.post("/onboarding/verify")
 def verify_onboarding_documents(request: VerifyRequest):
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        
         selfie_part = load_image_from_url(request.selfie_url)
         id_part = load_image_from_url(request.id_url)
         
@@ -341,19 +332,31 @@ def verify_onboarding_documents(request: VerifyRequest):
         Do not include markdown tags like ```json.
         """
         
-        response = model.generate_content([
-            prompt,
-            {"mime_type": selfie_part["mime_type"], "data": selfie_part["data"]},
-            {"mime_type": id_part["mime_type"], "data": id_part["data"]}
-        ])
+        response = client.chat.completions.create(
+            model="grok-2-vision-latest",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{selfie_part['mime_type']};base64,{base64.b64encode(selfie_part['data']).decode('utf-8')}"
+                            }
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{id_part['mime_type']};base64,{base64.b64encode(id_part['data']).decode('utf-8')}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
         
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
-            
-        return json.loads(text.strip())
+        return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in document verification: {str(e)}")
         return {

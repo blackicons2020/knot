@@ -148,17 +148,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onEditProfile, onManage
                         <ProfileDataItem label="Drinking" value={user.drinking} />
                         <ProfileDataItem label="Children" value={user.childrenStatus || 'None'} />
                     </div>
-                    <ProfileDataItem label="Core Life Values" value={
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {user.personalValues.length > 0 ? (
-                                user.personalValues.map(v => (
-                                    <span key={v} className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
-                                        {v}
-                                    </span>
-                                ))
-                            ) : 'Not listed'}
-                        </div>
-                    } />
+
                 </ProfileSection>
 
                 <ProfileSection title="Marriage Expectations">

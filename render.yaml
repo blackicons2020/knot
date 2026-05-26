@@ -52,7 +52,7 @@ services:
         value: "8000"
       - key: PYTHON_VERSION
         value: "3.11.9"
-      - key: GEMINI_API_KEY
+      - key: GROK_API_KEY
         sync: false
 
   # Managed Redis (Key Value Service)

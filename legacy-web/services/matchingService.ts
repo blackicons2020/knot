@@ -1,21 +1,25 @@
 
 import { User, Match, SmokingHabits, DrinkingHabits, MaritalStatus, WillingToRelocate, ChildrenPreference } from '../types';
 import { MATCHES_DATA } from '../constants';
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from 'openai';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+const API_KEY = import.meta.env.VITE_GROK_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Only initialize if API key is present to avoid console warnings
-let ai: any = null;
-if (GEMINI_API_KEY) {
-    ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+let ai: OpenAI | null = null;
+if (API_KEY) {
+    ai = new OpenAI({ 
+        apiKey: API_KEY, 
+        baseURL: 'https://api.groq.com/openai/v1',
+        dangerouslyAllowBrowser: true // Required for client-side usage
+    });
 } else {
-    console.warn("[GEMINI] VITE_GEMINI_API_KEY is missing. AI features will use fallbacks.");
+    console.warn("[GROK/GEMINI] API key is missing. AI features will use fallbacks.");
 }
 
-const DEFAULT_MODEL = "gemini-1.5-flash"; // Correct model name
+const DEFAULT_MODEL = "llama-3.3-70b-versatile"; 
 
-const callGeminiWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000): Promise<any> => {
+const callAIWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000): Promise<any> => {
     for (let i = 0; i < retries; i++) {
         try {
             return await fn();
@@ -74,14 +78,17 @@ export const getCompatibilityInsight = async (user: User, match: Match): Promise
     if (!ai) return { score, insight: "Compatible foundation with strong potential in shared values." };
     
     try {
-        const response = await callGeminiWithRetry(() => ai.models.generateContent({
+        const response = await callAIWithRetry(() => ai!.chat.completions.create({
             model: DEFAULT_MODEL,
-            contents: `Analyze compatibility between ${user.name} and ${match.name}. 
-            User: ${user.bio}, ${user.religion}, ${user.personalValues.join(', ')}.
-            Match: ${match.bio}, ${match.religion}, ${match.personalValues.join(', ')}.
-            Provide a 1-sentence insight on why they are a good match for marriage.`,
+            messages: [{
+                role: "user",
+                content: `Analyze compatibility between ${user.name} and ${match.name}. 
+                User: ${user.bio}, ${user.religion}, ${user.personalValues.join(', ')}.
+                Match: ${match.bio}, ${match.religion}, ${match.personalValues.join(', ')}.
+                Provide a 1-sentence insight on why they are a good match for marriage.`
+            }]
         }));
-        return { score, insight: response.text || "Strong potential based on shared registry values." };
+        return { score, insight: response.choices[0].message.content || "Strong potential based on shared registry values." };
     } catch (e) {
         return { score, insight: "Compatible foundation with strong potential in shared values." };
     }
@@ -104,24 +111,32 @@ export const queryGlobalRegistry = async (count: number = 3): Promise<Match[]> =
     if (!ai) return [...MATCHES_DATA].sort(() => 0.5 - Math.random()).slice(0, count);
 
     try {
-        const response = await callGeminiWithRetry(() => ai.models.generateContent({
+        const response = await callAIWithRetry(() => ai!.chat.completions.create({
             model: DEFAULT_MODEL,
-            contents: `Generate ${count} unique, high-quality marriage-oriented user profiles for a global registry.
-            Each profile must be a JSON object with these fields:
-            id (unique string), name, age (22-45), bio, interests (array), profileImageUrls (array of 2 Unsplash URLs), 
-            isVerified (boolean), isPremium (boolean), occupation, city, country, residenceCountry, residenceState, residenceCity, 
-            originCountry, originState, originCity, culturalBackground, marriageExpectations, preferredPartnerAgeRange (array [min, max]), 
-            education, languages (array), religion, personalValues (array), smoking (enum: NonSmoker, Occasional, Regular), 
-            drinking (enum: Never, Socially, Regular), maritalStatus (enum: NeverMarried, Divorced, Widowed), 
-            childrenStatus (string), marriageTimeline (enum: ASAP, 1-2 years, 3+ years, Not sure), 
-            willingToRelocate (enum: Yes, No, Maybe), preferredMarryFrom, childrenPreference (enum: WantsChildren, OpenToChildren, DoesNotWantChildren), 
-            idealPartnerTraits (array), nationality, careerGoals.
-            
-            Return ONLY a JSON array of objects.`,
-            config: { responseMimeType: "application/json" }
+            messages: [{
+                role: "user",
+                content: `Generate ${count} unique, high-quality marriage-oriented user profiles for a global registry.
+                Each profile must be a JSON object with these fields:
+                id (unique string), name, age (22-45), bio, interests (array), profileImageUrls (array of 2 Unsplash URLs), 
+                isVerified (boolean), isPremium (boolean), occupation, city, country, residenceCountry, residenceState, residenceCity, 
+                originCountry, originState, originCity, culturalBackground, marriageExpectations, preferredPartnerAgeRange (array [min, max]), 
+                education, languages (array), religion, personalValues (array), smoking (enum: NonSmoker, Occasional, Regular), 
+                drinking (enum: Never, Socially, Regular), maritalStatus (enum: NeverMarried, Divorced, Widowed), 
+                childrenStatus (string), marriageTimeline (enum: ASAP, 1-2 years, 3+ years, Not sure), 
+                willingToRelocate (enum: Yes, No, Maybe), preferredMarryFrom, childrenPreference (enum: WantsChildren, OpenToChildren, DoesNotWantChildren), 
+                idealPartnerTraits (array), nationality, careerGoals.
+                
+                Return ONLY a JSON array of objects. Do not wrap it in markdown block quotes.`
+            }]
         }));
 
-        const generated = JSON.parse(response.text || "[]");
+        let text = response.choices[0].message.content || "[]";
+        text = text.trim();
+        if (text.startsWith("```json")) text = text.slice(7);
+        else if (text.startsWith("```")) text = text.slice(3);
+        if (text.endsWith("```")) text = text.slice(0, -3);
+
+        const generated = JSON.parse(text.trim() || "[]");
         return generated.map((p: any) => ({
             ...p,
             smoking: p.smoking as SmokingHabits || SmokingHabits.NonSmoker,
@@ -143,14 +158,17 @@ export const generateAIReply = async (user: User, match: Match, lastMessage: str
     if (!ai) return "I appreciate your message. Let's talk more soon.";
 
     try {
-        const response = await callGeminiWithRetry(() => ai.models.generateContent({
+        const response = await callAIWithRetry(() => ai!.chat.completions.create({
             model: DEFAULT_MODEL,
-            contents: `Generate a polite, marriage-oriented reply from ${match.name} to ${user.name}.
-            Context: ${match.name} is a ${match.occupation} from ${match.city}. 
-            Last message from ${user.name}: "${lastMessage}".
-            Keep it under 30 words and respectful.`,
+            messages: [{
+                role: "user",
+                content: `Generate a polite, marriage-oriented reply from ${match.name} to ${user.name}.
+                Context: ${match.name} is a ${match.occupation} from ${match.city}. 
+                Last message from ${user.name}: "${lastMessage}".
+                Keep it under 30 words and respectful.`
+            }]
         }));
-        return response.text || "Thank you for your message. I'd love to learn more about you.";
+        return response.choices[0].message.content || "Thank you for your message. I'd love to learn more about you.";
     } catch (e) {
         return "I appreciate your message. Let's talk more soon.";
     }

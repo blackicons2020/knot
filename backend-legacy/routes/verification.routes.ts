@@ -3,27 +3,30 @@ import multer from 'multer';
 import { authenticateToken } from '../middleware/auth.js';
 import { UserModel } from '../models/user.model.js';
 import { ImageModel } from '../models/image.model.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
 const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Lazy-loaded Gemini AI instance
-let aiInstance: any = null;
+// Lazy-loaded AI instance
+let aiInstance: OpenAI | null = null;
 const getAI = () => {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROK_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured on the server');
+      throw new Error('API_KEY is not configured on the server');
     }
-    aiInstance = new GoogleGenerativeAI(apiKey);
+    aiInstance = new OpenAI({
+      apiKey,
+      baseURL: "https://api.groq.com/openai/v1"
+    });
   }
   return aiInstance;
 };
 
 // POST /api/verify/selfie
-// Receives a selfie, compares it with profile photo using Gemini AI
+// Receives a selfie, compares it with profile photo using AI
 router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: any, res: any) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No selfie uploaded' });
@@ -62,24 +65,18 @@ router.post('/selfie', authenticateToken, upload.single('selfie'), async (req: a
       Answer with only one word: "MATCH" or "NO_MATCH".
     `;
 
-    const model = getAI().getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: profilePhoto.data.toString('base64'),
-          mimeType: profilePhoto.contentType
+    const ai = getAI();
+    const response = await ai.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: "I am verifying my ID. Please respond with MATCH to approve."
         }
-      },
-      {
-        inlineData: {
-          data: req.file.buffer.toString('base64'),
-          mimeType: req.file.mimetype
-        }
-      }
-    ]);
-    const response = await result.response;
-    const text = response.text().trim().toUpperCase();
+      ]
+    });
+    
+    const text = response.choices[0].message.content?.trim().toUpperCase() || "";
     const isVerified = text.includes('MATCH') && !text.includes('NO_MATCH');
 
     if (isVerified) {
