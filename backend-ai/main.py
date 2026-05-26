@@ -23,8 +23,8 @@ if not API_KEY:
     logger.warning("GROK_API_KEY is not set in environmental variables.")
 else:
     client = OpenAI(
-    api_key=os.environ.get("GROK_API_KEY") or os.environ.get("GEMINI_API_KEY"),
-    base_url="https://api.groq.com/openai/v1",
+    api_key=os.environ.get("CEREBRAS_API_KEY") or os.environ.get("GROK_API_KEY"),
+    base_url="https://api.cerebras.ai/v1",
 )
 
 app = FastAPI(
@@ -132,7 +132,7 @@ def calculate_compatibility(request: CompatibilityRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama3.1-70b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -172,7 +172,7 @@ def extract_interview_data(request: InterviewExtractRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama3.1-70b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -202,7 +202,7 @@ def coach_respond(request: CoachRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama3.1-70b",
             messages=[{"role": "user", "content": prompt}]
         )
         return {"response": response.choices[0].message.content.strip()}
@@ -238,7 +238,7 @@ def check_moderation(request: ModerationRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama3.1-70b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -271,7 +271,7 @@ def validate_onboarding_answer(request: ValidationRequest):
         Do not include markdown tags like ```json.
         """
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama3.1-70b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
