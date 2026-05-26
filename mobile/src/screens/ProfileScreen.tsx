@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import AppHeader from '../components/AppHeader';
+import { db } from '../services/databaseService';
 import { Colors } from '../theme/colors';
 import { RootStackParamList } from '../types';
 
@@ -72,7 +73,7 @@ function GlassCard({ children, style }: { children: React.ReactNode; style?: any
 
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
-  const { userProfile, updateProfile } = useAuth();
+  const { userProfile, setUserProfile } = useAuth();
 
   if (!userProfile) return null;
 
@@ -91,8 +92,9 @@ export default function ProfileScreen() {
       } else {
         updatedPhotos.push(newPhoto);
       }
-      if (updateProfile) {
-        updateProfile({ profileImageUrls: updatedPhotos });
+      if (setUserProfile) {
+        setUserProfile({ ...userProfile, profileImageUrls: updatedPhotos });
+        db.saveUser({ ...userProfile, profileImageUrls: updatedPhotos });
       }
     }
   };
