@@ -240,7 +240,9 @@ export default function Onboarding() {
           bio: "", occupation, religion: religionSelect === "Other" ? religionCustom : religionSelect,
           education: "", culturalBackground: "", smoking, drinking, maritalStatus, childrenStatus,
           marriageTimeline, willingToRelocate, childrenPreference, idealPartnerTraits: [],
-          marriageExpectations: "", careerGoals: ""
+          marriageExpectations: "", careerGoals: "",
+          residenceCountry, residenceState, residenceCity,
+          originCountry, originState, originCity
         })
       });
 
