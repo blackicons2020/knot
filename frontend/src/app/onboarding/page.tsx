@@ -315,6 +315,12 @@ export default function Onboarding() {
       });
 
       const res = await verifyRes.json();
+      
+      // Save user profile locally for dashboard prototype
+      localStorage.setItem('knot_userProfile', JSON.stringify({
+        firstName, lastName, dateOfBirth, email, 
+        residenceCity, residenceCountry, occupation
+      }));
 
       if (!res.success) {
         alert(res.details || "The documents could not be verified. Please make sure to upload a clear selfie and a valid government ID.");

@@ -17,6 +17,14 @@ export default function Dashboard() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [connectedMatchName, setConnectedMatchName] = useState("");
 
+  const [userProfile, setUserProfile] = useState<any>(null);
+  useEffect(() => {
+    const localProfile = localStorage.getItem('knot_userProfile');
+    if (localProfile) {
+      try { setUserProfile(JSON.parse(localProfile)); } catch(e){}
+    }
+  }, []);
+
   // Pre-load Paystack inline script for instant ready state on mobile/web
   useEffect(() => {
     if (!(window as any).PaystackPop) {
@@ -70,7 +78,7 @@ export default function Dashboard() {
 
   // Messaging State
   const [chatMessages, setChatMessages] = useState([
-    { sender: "Sophia", text: "Hi! I really liked your thoughts on long-term commitment. How was your weekend?" }
+    { sender: "partner", text: "Hi! I really liked your thoughts on long-term commitment. How was your weekend?" }
   ]);
   const [chatInput, setChatInput] = useState("");
   const [aiChatTip, setAiChatTip] = useState(
@@ -107,7 +115,12 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversationHistory: updatedMessages.slice(0, -1),
-          userProfile: { name: "Web User", age: 30, bio: "Seeking a serious partner." },
+          userProfile: { 
+            firstName: userProfile?.firstName || "Web", 
+            lastName: userProfile?.lastName || "User", 
+            dateOfBirth: userProfile?.dateOfBirth || "1990-01-01", 
+            bio: "Seeking a serious partner." 
+          },
           currentMessage: userQ,
         })
       });
@@ -139,8 +152,8 @@ export default function Dashboard() {
       ];
       const randomResponse = sophiaResponses[Math.floor(Math.random() * sophiaResponses.length)];
 
-      setChatMessages(prev => [...prev, { sender: "Sophia", text: randomResponse }]);
-      setAiChatTip("AI Message Assistant: Sophia is highly engaged. Keep the conversation flowing naturally.");
+      setChatMessages(prev => [...prev, { sender: "partner", text: randomResponse }]);
+      setAiChatTip(`AI Message Assistant: ${activeMatch?.partner?.firstName || "Your match"} is highly engaged. Keep the conversation flowing naturally.`);
     }, 1500);
   };
 
@@ -297,7 +310,7 @@ export default function Dashboard() {
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h5 className="text-xs font-bold text-white leading-none">Gabriel</h5>
+              <h5 className="text-xs font-bold text-white leading-none">{userProfile?.firstName || "Gabriel"}</h5>
               <span className="text-[9px] text-[#10B981] font-bold">Base Trust 98%</span>
             </div>
           </div>
@@ -719,7 +732,7 @@ export default function Dashboard() {
                 >
                   <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
-                    <h5 className="text-xs font-bold text-white">Sophia</h5>
+                    <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Sophia"}</h5>
                     <p className="text-[10px] text-gray-400 truncate">How was your weekend?</p>
                   </div>
                 </button>
@@ -737,7 +750,7 @@ export default function Dashboard() {
                   </button>
                   <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
-                    <h5 className="text-xs font-bold text-white">Sophia</h5>
+                    <h5 className="text-xs font-bold text-white">{m.sender === "me" ? "Me" : activeMatch?.partner?.firstName || "Sophia"}</h5>
                     <span className="text-[9px] text-[#10B981] font-bold">Verified Real Human</span>
                   </div>
                 </div>
@@ -814,8 +827,8 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold">Gabriel, 29</h3>
-                      <p className="text-xs text-gray-400">Software Engineer • Boston, MA</p>
+                      <h3 className="text-xl font-bold">{userProfile ? `${userProfile.firstName}, 29` : "Gabriel, 29"}</h3>
+                      <p className="text-xs text-gray-400">{userProfile?.occupation || "Software Engineer"} • {userProfile?.residenceCity || "Boston"}, {userProfile?.residenceCountry || "MA"}</p>
                       <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
                     </div>
                   </div>
