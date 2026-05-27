@@ -38,6 +38,15 @@ export class AuthService {
         originCountry: dto.originCountry || '',
         originState: dto.originState || '',
         originCity: dto.originCity || '',
+        smoking: dto.smoking || 'Non-smoker',
+        drinking: dto.drinking || 'Never',
+        maritalStatus: dto.maritalStatus || 'Never Married',
+        childrenStatus: dto.childrenStatus || 'No kids',
+        marriageTimeline: dto.marriageTimeline || 'ASAP',
+        willingToRelocate: dto.willingToRelocate || 'Maybe',
+        childrenPreference: dto.childrenPreference || 'Open to children',
+        marriageExpectations: dto.marriageExpectations || '',
+        careerGoals: dto.careerGoals || '',
       },
     });
 
