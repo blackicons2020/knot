@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Param, Put, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -10,11 +11,10 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: any) {
-    // Note: Request would normally carry authenticated user id via Guard. 
-    // For prototype simplicity, we allow id in queries/body or default fallback.
-    return this.usersService.findOne(req.query.id);
+    return this.usersService.findOne(req.user.id);
   }
 
   @Get(':id')

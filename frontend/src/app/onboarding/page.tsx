@@ -21,6 +21,7 @@ export default function Onboarding() {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [religion, setReligion] = useState("");
   const [religionSelect, setReligionSelect] = useState("");
   const [religionCustom, setReligionCustom] = useState("");
@@ -223,6 +224,36 @@ export default function Onboarding() {
 
   const handleNextStep = () => {
     setStep(step + 1);
+  };
+
+  const handleFinalizeRegistration = async () => {
+    try {
+      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8080'
+        : 'https://knot-backend-core.onrender.com';
+        
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName, lastName, dateOfBirth, email, password,
+          bio: "", occupation, religion: religionSelect === "Other" ? religionCustom : religionSelect,
+          education: "", culturalBackground: "", smoking, drinking, maritalStatus, childrenStatus,
+          marriageTimeline, willingToRelocate, childrenPreference, idealPartnerTraits: [],
+          marriageExpectations: "", careerGoals: ""
+        })
+      });
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('knot_token', data.token);
+      }
+      setStep(5);
+    } catch (err) {
+      console.error("Registration failed:", err);
+      // Even if it fails, go to step 5 for prototype continuity
+      setStep(5);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -467,7 +498,7 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* Email & Religion */}
+              {/* Email & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Email Address</label>
@@ -479,6 +510,20 @@ export default function Onboarding() {
                     className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
                   />
                 </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Password</label>
+                  <input 
+                    type="password" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Secure Password" 
+                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+              </div>
+
+              {/* Religion & Occupation */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Religion / Faith</label>
                   <select
@@ -891,7 +936,7 @@ export default function Onboarding() {
 
             <button 
               onClick={handleProcessAIVerification}
-              disabled={!firstName || !lastName || !dateOfBirth || !email || !profilePicture || !governmentId || !residenceCountry || !originCountry}
+              disabled={!firstName || !lastName || !dateOfBirth || !email || !password || !profilePicture || !governmentId || !residenceCountry || !originCountry}
               className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
             >
               Verify Identity & Documents
@@ -944,7 +989,7 @@ export default function Onboarding() {
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === "" ? (
                 <button 
-                  onClick={() => setStep(5)}
+                  onClick={handleFinalizeRegistration}
                   className="px-5 py-3 rounded-full text-xs font-black rose-glow-btn text-white flex items-center gap-1.5"
                 >
                   Generate Registry <Sparkles className="w-3.5 h-3.5" />

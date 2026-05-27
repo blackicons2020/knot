@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   Sparkles, ShieldCheck, Heart, User, Bot, MessageSquare, 
   Settings, LogOut, Send, AlertTriangle, Shield, CheckCircle2,
@@ -17,47 +18,48 @@ export default function Dashboard() {
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [connectedMatchName, setConnectedMatchName] = useState("");
 
+  const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
-  useEffect(() => {
-    const localProfile = localStorage.getItem('knot_userProfile');
-    if (localProfile) {
-      try { setUserProfile(JSON.parse(localProfile)); } catch(e){}
-    }
-  }, []);
-
-  // Pre-load Paystack inline script for instant ready state on mobile/web
-  useEffect(() => {
-    if (!(window as any).PaystackPop) {
-      const script = document.createElement("script");
-      script.src = "https://js.paystack.co/v1/inline.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   const [matches, setMatches] = useState<any[]>([]);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('knot_token');
+      if (!token) {
+        router.push('/onboarding');
+        return;
+      }
+
       try {
-        // Hardcoded user ID for prototype as seen in checkout
-        const userId = "c8b74c0b-426b-4e14-9b2f-768a1d2e3c4d";
         const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
           ? 'http://localhost:8080'
           : 'https://knot-backend-core.onrender.com';
-        const res = await fetch(`${API_URL}/matches/daily?userId=${userId}`);
-        const data = await res.json();
-        setMatches(Array.isArray(data) ? data : []);
+          
+        // Fetch real profile
+        const profileRes = await fetch(`${API_URL}/users/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          setUserProfile(profileData);
+        }
+
+        // Fetch daily matches securely
+        const matchesRes = await fetch(`${API_URL}/matches/daily`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const matchesData = await matchesRes.json();
+        setMatches(Array.isArray(matchesData) ? matchesData : []);
       } catch (err) {
-        console.error("Error fetching matches", err);
+        console.error("Error fetching data", err);
         setMatches([]);
       } finally {
         setIsLoadingMatches(false);
       }
     };
-    fetchMatches();
-  }, []);
+    fetchData();
+  }, [router]);
 
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const activeMatch = matches[currentMatchIndex];
@@ -750,7 +752,7 @@ export default function Dashboard() {
                   </button>
                   <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
-                    <h5 className="text-xs font-bold text-white">{m.sender === "me" ? "Me" : activeMatch?.partner?.firstName || "Sophia"}</h5>
+                    <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Match"}</h5>
                     <span className="text-[9px] text-[#10B981] font-bold">Verified Real Human</span>
                   </div>
                 </div>
