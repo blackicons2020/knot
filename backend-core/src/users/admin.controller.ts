@@ -20,7 +20,6 @@ export class AdminController {
         firstName: true,
         lastName: true,
         role: true,
-        role: true,
         residenceCity: true,
         residenceCountry: true,
         isPremium: true,
