@@ -582,7 +582,7 @@ export default function Dashboard() {
                       <div className="col-span-2">
                         <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Ideal Partner Traits</h4>
                         <div className="flex flex-wrap gap-2">
-                          {activeMatch.idealPartnerTraits?.map(t => (
+                          {activeMatch.idealPartnerTraits?.map((t: string) => (
                             <span key={t} className="px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-xs font-bold text-[#D4AF37]">{t}</span>
                           )) || <p className="text-sm text-gray-500 italic">Not listed</p>}
                         </div>
