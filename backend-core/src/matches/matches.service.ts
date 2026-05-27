@@ -61,8 +61,9 @@ export class MatchesService {
         matchId: match.id,
         partner: {
           id: partner.id,
-          name: partner.name,
-          age: partner.age,
+          firstName: partner.firstName,
+          lastName: partner.lastName,
+          dateOfBirth: partner.dateOfBirth,
           bio: partner.bio,
           occupation: partner.occupation,
           religion: partner.religion,
@@ -112,8 +113,9 @@ export class MatchesService {
         matchId: m.id,
         partner: {
           id: partner.id,
-          name: partner.name,
-          age: partner.age,
+          firstName: partner.firstName,
+          lastName: partner.lastName,
+          dateOfBirth: partner.dateOfBirth,
           bio: partner.bio,
           occupation: partner.occupation,
           trustScore: partner.trustScore,
