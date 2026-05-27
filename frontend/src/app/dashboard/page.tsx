@@ -27,93 +27,32 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Mock Matches Data
-  const mockMatches = [
-    {
-      id: "m1",
-      name: "Sophia",
-      age: 27,
-      occupation: "Pediatrician",
-      religion: "Christian",
-      location: "Boston, MA",
-      residenceCountry: "USA",
-      residenceState: "Massachusetts",
-      residenceCity: "Boston",
-      originCountry: "USA",
-      originState: "New York",
-      originCity: "Manhattan",
-      culturalBackground: "European-American",
-      nationality: "American",
-      languagesSpoken: ["English", "Spanish"],
-      maritalStatus: "Never Married",
-      smoking: "Non-smoker",
-      drinking: "Socially",
-      childrenStatus: "None",
-      childrenPreference: "Open to children",
-      marriageTimeline: "1-2 Years",
-      willingToRelocate: "Maybe",
-      preferredPartnerAgeRange: [27, 35],
-      idealPartnerTraits: ["Emotionally Available", "Faithful", "Adventurous"],
-      marriageExpectations: "Looking for a grounded relationship built on mutual trust, shared family values, and a timeline of 1-2 years before marriage.",
-      bio: "Committed to growth, faith, and building a secure loving home. Looking for a partner who is emotionally available and loves traveling.",
-      archetype: "The Calm Connector",
-      attachment: "Secure",
-      trustScore: 98,
-      readiness: 92,
-      values: ["Faith", "Children", "Altruism"],
-      personalValues: ["Faith", "Children", "Altruism", "Honesty"],
-      aiExplanation: "Sophia's secure attachment and calm connectivity traits directly complement your intentional builder mindset. Your shared family plans and aligned moral values form a robust foundation for a successful long-term marriage.",
-      imageUrls: [
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=600&q=80"
-      ]
-    },
-    {
-      id: "m2",
-      name: "Chloe",
-      age: 26,
-      occupation: "Landscape Architect",
-      religion: "Christian",
-      location: "Boston, MA",
-      residenceCountry: "USA",
-      residenceState: "Massachusetts",
-      residenceCity: "Boston",
-      originCountry: "USA",
-      originState: "Colorado",
-      originCity: "Denver",
-      culturalBackground: "European-American",
-      nationality: "American",
-      languagesSpoken: ["English"],
-      maritalStatus: "Never Married",
-      smoking: "Non-smoker",
-      drinking: "Rarely",
-      childrenStatus: "None",
-      childrenPreference: "Open to children",
-      marriageTimeline: "2-3 Years",
-      willingToRelocate: "Yes",
-      preferredPartnerAgeRange: [26, 32],
-      idealPartnerTraits: ["Grounded", "Loyal", "Kind"],
-      marriageExpectations: "I expect a partner who values quiet reflection, handles conflict gently, and shares my desire to start a family within 3 years.",
-      bio: "Passionate about creating harmony in nature and partnerships. Deeply values quiet reflection, regular hikes, and mutual support.",
-      archetype: "The Harmonizer",
-      attachment: "Secure",
-      trustScore: 97,
-      readiness: 94,
-      values: ["Nature", "Simplicity", "Loyalty"],
-      personalValues: ["Nature", "Simplicity", "Loyalty"],
-      aiExplanation: "Chloe's grounded nature and shared interest in long-term legacy complement your builder archetype, making for a peaceful, synergistic partnership.",
-      imageUrls: [
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80"
-      ]
-    }
-  ];
+  const [matches, setMatches] = useState<any[]>([]);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        // Hardcoded user ID for prototype as seen in checkout
+        const userId = "c8b74c0b-426b-4e14-9b2f-768a1d2e3c4d";
+        const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+          ? 'http://localhost:8080'
+          : 'https://knot-backend-core.onrender.com';
+        const res = await fetch(`${API_URL}/matches/daily?userId=${userId}`);
+        const data = await res.json();
+        setMatches(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching matches", err);
+        setMatches([]);
+      } finally {
+        setIsLoadingMatches(false);
+      }
+    };
+    fetchMatches();
+  }, []);
 
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
-  const activeMatch = mockMatches[currentMatchIndex];
+  const activeMatch = matches[currentMatchIndex];
   const [activeMatchImageIndex, setActiveMatchImageIndex] = useState(0);
 
   // User Photos State
@@ -206,7 +145,7 @@ export default function Dashboard() {
   };
 
   const handlePass = () => {
-    if (currentMatchIndex < mockMatches.length - 1) {
+    if (currentMatchIndex < matches.length - 1) {
       setCurrentMatchIndex(prev => prev + 1);
       setActiveMatchImageIndex(0);
     } else {
@@ -402,19 +341,34 @@ export default function Dashboard() {
         <div className="flex-1 p-4 sm:p-8 max-w-4xl mx-auto w-full">
 
           {/* TAB 1: DAILY MATCHES */}
-          {activeTab === "matches" && activeMatch && (
+          {activeTab === "matches" && isLoadingMatches && (
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+              <Compass className="w-8 h-8 text-[#D4AF37] animate-spin" />
+              <p className="text-sm text-gray-400">Curating your AI matches...</p>
+            </div>
+          )}
+          {activeTab === "matches" && !isLoadingMatches && matches.length === 0 && (
+            <div className="glass-card rounded-[32px] p-12 border border-white/10 text-center space-y-4 flex flex-col items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 mb-4">
+                <Compass className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-white">No matches found yet</h3>
+              <p className="text-sm text-gray-400 max-w-md">Our AI matchmaking cron job curates new compatible partners every 24 hours. Check back soon for your personalized matches.</p>
+            </div>
+          )}
+          {activeTab === "matches" && !isLoadingMatches && activeMatch && (
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
               {/* Profile Card */}
               <div className="md:col-span-7 glass-card rounded-[32px] overflow-hidden border border-white/10 p-6 space-y-6">
                 <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden">
-                  <img src={activeMatch.imageUrls[0]} alt={activeMatch.name} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
+                  <img src={activeMatch.imageUrls?.[0] || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"} alt={activeMatch.firstName} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
                   
                   <div className="absolute top-8 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 z-10">
                     <ShieldCheck className="w-3.5 h-3.5" /> Trust {activeMatch.trustScore}%
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10">
-                    <h3 className="text-2xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h3>
-                    <p className="text-xs text-gray-400 font-semibold">{activeMatch.occupation} • {activeMatch.location}</p>
+                    <h3 className="text-2xl font-black text-white">{activeMatch.firstName} {activeMatch.lastName}, {activeMatch.dateOfBirth}</h3>
+                    <p className="text-xs text-gray-400 font-semibold">{activeMatch.occupation} • {activeMatch.residenceCity}</p>
                   </div>
                 </div>
 
@@ -504,9 +458,9 @@ export default function Dashboard() {
               
               <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
                 <div className="relative h-[400px] md:h-[500px] group">
-                  <img src={activeMatch.imageUrls[activeMatchImageIndex]} alt={activeMatch.name} className="w-full h-full object-cover object-center transition-all duration-500" />
+                  <img src={activeMatch.imageUrls?.[activeMatchImageIndex] || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"} alt={activeMatch.firstName} className="w-full h-full object-cover object-center transition-all duration-500" />
                   
-                  {activeMatch.imageUrls.length > 1 && (
+                  {activeMatch.imageUrls?.length > 1 && (
                     <>
                       <button onClick={() => setActiveMatchImageIndex(prev => prev > 0 ? prev - 1 : activeMatch.imageUrls.length - 1)} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60 z-20">
                         <ChevronLeft className="w-5 h-5" />
@@ -515,7 +469,7 @@ export default function Dashboard() {
                         <ChevronRight className="w-5 h-5" />
                       </button>
                       <div className="absolute top-4 left-0 right-0 flex justify-center gap-2 px-8 z-10">
-                        {activeMatch.imageUrls.map((_, i) => (
+                        {activeMatch.imageUrls.map((_: any, i: number) => (
                           <div key={i} className={`h-1.5 flex-1 rounded-full ${i === activeMatchImageIndex ? 'bg-white shadow-lg shadow-white/50' : 'bg-white/30'}`} />
                         ))}
                       </div>
@@ -524,8 +478,8 @@ export default function Dashboard() {
 
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none z-0" />
                   <div className="absolute bottom-0 left-0 p-8 z-10">
-                    <h2 className="text-4xl font-black text-white">{activeMatch.name}, {activeMatch.age}</h2>
-                    <p className="text-gray-400 font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.location}</p>
+                    <h2 className="text-4xl font-black text-white">{activeMatch.firstName} {activeMatch.lastName}, {activeMatch.dateOfBirth}</h2>
+                    <p className="text-gray-400 font-bold tracking-widest uppercase text-sm mt-2">{activeMatch.occupation} • {activeMatch.residenceCity}, {activeMatch.residenceCountry}</p>
                   </div>
                 </div>
 

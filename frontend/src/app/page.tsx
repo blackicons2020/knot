@@ -27,7 +27,7 @@ export default function Home() {
             <Link href="#pricing" className="hover:text-[#D4AF37] transition-colors">Elite Tiers</Link>
           </nav>
           <div className="flex items-center gap-3 md:gap-4">
-            <Link href="/onboarding" className="hidden sm:inline text-sm font-semibold hover:text-[#D4AF37] transition-colors">
+            <Link href="/dashboard" className="text-sm font-semibold hover:text-[#D4AF37] transition-colors">
               Sign In
             </Link>
             <Link href="/onboarding" className="px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-black rose-glow-btn text-white">

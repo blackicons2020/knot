@@ -87,13 +87,14 @@ export class AIService {
     }
   }
 
-  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, userName: string, userAge: number): Promise<any> {
+  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, firstName: string, lastName: string, dateOfBirth: string): Promise<any> {
     try {
       const response = await axios.post(`${this.aiServiceUrl}/onboarding/verify`, {
         selfie_url: selfieUrl,
         id_url: idUrl,
-        user_name: userName,
-        user_age: userAge,
+        first_name: firstName,
+        last_name: lastName,
+        date_of_birth: dateOfBirth,
       });
       return response.data;
     } catch (error) {
@@ -101,8 +102,8 @@ export class AIService {
       return {
         success: true,
         confidenceScore: 95,
-        ocrName: userName,
-        ocrAge: userAge,
+        ocrName: `${firstName} ${lastName}`,
+        ocrAge: dateOfBirth,
         details: 'Approved via default fallback',
       };
     }

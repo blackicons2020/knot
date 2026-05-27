@@ -26,7 +26,7 @@ export class UsersService {
 
   async updateProfile(id: string, dto: any) {
     const allowedKeys = [
-      'name', 'age', 'bio', 'occupation', 'education', 'religion', 'culturalBackground',
+      'firstName', 'lastName', 'dateOfBirth', 'bio', 'occupation', 'education', 'religion', 'culturalBackground',
       'smoking', 'drinking', 'maritalStatus', 'childrenStatus', 'marriageTimeline', 'willingToRelocate',
       'childrenPreference', 'idealPartnerTraits', 'personalValues', 'marriageExpectations', 'careerGoals',
       'residenceCountry', 'residenceState', 'residenceCity', 'originCountry', 'originState', 'originCity',
@@ -37,7 +37,7 @@ export class UsersService {
     const data: any = {};
     for (const key of allowedKeys) {
       if (dto[key] !== undefined) {
-        if (key === 'age' || key === 'readinessScore' || key === 'seriousnessLevel' || key === 'trustScore' || key === 'moderationFlags') {
+        if (key === 'readinessScore' || key === 'seriousnessLevel' || key === 'trustScore' || key === 'moderationFlags') {
           data[key] = Number(dto[key]) || 0;
         } else if (key === 'isVerified' || key === 'isPremium' || key === 'idVerified' || key === 'selfieVerified') {
           data[key] = Boolean(dto[key]);
@@ -119,7 +119,7 @@ export class UsersService {
     return this.aiService.validateOnboardingAnswer(question, answer);
   }
 
-  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, userName: string, userAge: number) {
-    return this.aiService.verifyOnboardingDocuments(selfieUrl, idUrl, userName, userAge);
+  async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, firstName: string, lastName: string, dateOfBirth: string) {
+    return this.aiService.verifyOnboardingDocuments(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
   }
 }

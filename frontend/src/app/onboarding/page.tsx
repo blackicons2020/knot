@@ -17,8 +17,9 @@ export default function Onboarding() {
   const [step, setStep] = useState(1); // 1: Welcome, 2: Essentials Form, 3: AI Interview, 4: Processing, 5: Results Card
   
   // Essentials Form Fields
-  const [name, setName] = useState("");
-  const [age, setAge] = useState(25);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
   const [religion, setReligion] = useState("");
   const [religionSelect, setReligionSelect] = useState("");
@@ -26,6 +27,7 @@ export default function Onboarding() {
   const [occupation, setOccupation] = useState("");
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [governmentId, setGovernmentId] = useState<string | null>(null);
+  const [verificationSelfie, setVerificationSelfie] = useState<string | null>(null);
   const [verificationStep, setVerificationStep] = useState(0);
 
   // Lifestyle & Expectations State
@@ -170,7 +172,7 @@ export default function Onboarding() {
             if (ctx) {
               ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
               const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-              setProfilePicture(dataUrl);
+              setVerificationSelfie(dataUrl);
             }
           }
           
@@ -304,10 +306,11 @@ export default function Onboarding() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          selfieUrl: profilePicture,
+          selfieUrl: verificationSelfie,
           idUrl: governmentId,
-          name: name,
-          age: Number(age) || 0
+          firstName: firstName,
+          lastName: lastName,
+          dateOfBirth: dateOfBirth
         })
       });
 
@@ -400,31 +403,45 @@ export default function Onboarding() {
             </div>
 
             <div className="space-y-4">
-              {/* Full Name */}
-              <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                  <input 
-                    type="text" 
-                    value={name} 
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Enter your full name" 
-                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">First Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input 
+                      type="text" 
+                      value={firstName} 
+                      onChange={e => setFirstName(e.target.value)}
+                      placeholder="e.g. John" 
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Surname</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input 
+                      type="text" 
+                      value={lastName} 
+                      onChange={e => setLastName(e.target.value)}
+                      placeholder="e.g. Doe" 
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Age & Occupation */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Age</label>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Date of Birth</label>
                   <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <input 
-                      type="number" 
-                      value={age} 
-                      onChange={e => setAge(parseInt(e.target.value) || 0)}
+                      type="date" 
+                      value={dateOfBirth} 
+                      onChange={e => setDateOfBirth(e.target.value)}
                       className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
                     />
                   </div>
@@ -748,31 +765,23 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* Selfie Picture Verification with Live Camera simulation */}
+              {/* Profile Picture Upload */}
               <div className="pt-2 border-t border-white/5">
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Selfie Picture Verification</label>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Profile Picture</label>
                 <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
                   <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                     {profilePicture ? (
-                      <img src={profilePicture} alt="Selfie Preview" className="w-full h-full object-cover" />
+                      <img src={profilePicture} alt="Profile Preview" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-6 h-6 text-gray-500" />
                     )}
                   </div>
                   <div className="space-y-1.5 flex-1">
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={startLivenessScanner}
-                        className="px-4 py-2 bg-[#D4AF37]/15 border border-[#D4AF37]/35 rounded-xl text-xs font-black text-[#D4AF37] hover:bg-[#D4AF37]/25 transition-all flex items-center gap-1.5"
-                      >
-                        <Camera className="w-3.5 h-3.5" /> Start Live Face Scan
-                      </button>
-                      
                       <input 
                         type="file" 
                         accept="image/*" 
-                        id="selfie-upload" 
+                        id="profile-upload" 
                         className="hidden" 
                         onChange={(e) => {
                           const file = e.target.files?.[0];
@@ -786,20 +795,47 @@ export default function Onboarding() {
                         }}
                       />
                       <label 
-                        htmlFor="selfie-upload" 
+                        htmlFor="profile-upload" 
                         className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 cursor-pointer transition-colors flex items-center gap-1"
                       >
                         <Upload className="w-3 h-3" /> Upload Photo
                       </label>
                     </div>
-                    <p className="text-[9px] text-gray-500">Live Face Scan utilizes aliveness verification to increase your Compatibility Trust Rating.</p>
+                    <p className="text-[9px] text-gray-500">This photo will be displayed on your profile for matches to see.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Selfie Picture Verification with Live Camera simulation */}
+              <div className="pt-2 border-t border-white/5">
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Selfie Scan for Verification</label>
+                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                    {verificationSelfie ? (
+                      <img src={verificationSelfie} alt="Selfie Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <Smile className="w-6 h-6 text-gray-500" />
+                    )}
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={startLivenessScanner}
+                        className="px-4 py-2 bg-[#D4AF37]/15 border border-[#D4AF37]/35 rounded-xl text-xs font-black text-[#D4AF37] hover:bg-[#D4AF37]/25 transition-all flex items-center gap-1.5"
+                      >
+                        <Camera className="w-3.5 h-3.5" /> Start Live Face Scan
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-gray-500">This selfie is strictly for identity verification against your Government ID and will remain private.</p>
                   </div>
                 </div>
               </div>
 
               {/* Government ID Scan (Passport/DL) */}
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Government ID Scan (Passport/DL)</label>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Government ID Scan (Passport/DL)</label>
+                <p className="text-[9px] text-gray-500 mb-2">This document is strictly for identity verification.</p>
                 <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
                   <div className="w-16 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {governmentId ? (

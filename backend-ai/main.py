@@ -359,8 +359,9 @@ def combine_images_horizontally(img1_data: bytes, img2_data: bytes) -> bytes:
 class VerifyRequest(BaseModel):
     selfie_url: str
     id_url: str
-    user_name: str
-    user_age: int
+    first_name: str
+    last_name: str
+    date_of_birth: str
 
 @app.post("/onboarding/verify")
 def verify_onboarding_documents(request: VerifyRequest):
@@ -372,15 +373,15 @@ def verify_onboarding_documents(request: VerifyRequest):
         You are KNOT's High-Trust AI Identity & Fraud Prevention Officer.
         Your task is to analyze the provided image (which contains BOTH the Selfie on the left and the Government ID on the right, side-by-side) to verify the user's identity.
 
-        User's Claimed Name: {request.user_name}
-        User's Claimed Age: {request.user_age}
+        User's Claimed Name: {request.first_name} {request.last_name}
+        User's Claimed Date of Birth: {request.date_of_birth}
 
         Check the following conditions strictly:
         1. ID Validity: Is the Government ID image a valid government-issued identification document (e.g., Passport, ID Card, Driver's License, Voter's Card)?
            - If it is an ordinary paper document, a handwritten note, blank paper, a notebook, or a screenshot of text, it is INVALID. Reject it.
         2. Selfie Validity: Is the Selfie image a clear, real picture of a human face looking at the camera?
         3. Face Match: Compare the face in the Selfie with the photo in the Government ID. Do they belong to the same person?
-        4. Name & Age/DOB Consistency: Does the name printed on the ID document match or closely align with the user's claimed name "{request.user_name}"? Does the date of birth or age on the ID align with the claimed age {request.user_age}?
+        4. Name & DOB Consistency: Does the name printed on the ID document match or closely align with the user's claimed name "{request.first_name} {request.last_name}"? Does the date of birth on the ID align with the claimed DOB {request.date_of_birth}?
 
         Return ONLY a raw JSON block:
         {{

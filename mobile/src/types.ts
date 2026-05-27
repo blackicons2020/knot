@@ -72,8 +72,9 @@ export enum SocialActivity {
 export interface User {
   id: string;
   email?: string;
-  name: string;
-  age: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
   bio: string;
   interests: string[];
   profileImageUrls: string[];

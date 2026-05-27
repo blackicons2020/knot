@@ -50,8 +50,9 @@ export default function OnboardingScreen() {
   const [form, setForm] = useState<User>({
     id: userProfile?.id || '',
     email: userProfile?.email || '',
-    name: '',
-    age: 25,
+    firstName: '',
+    lastName: '',
+    dateOfBirth: '',
     bio: '',
     interests: [],
     profileImageUrls: [],
@@ -317,7 +318,7 @@ export default function OnboardingScreen() {
       }
 
       // Check verification with AI Backend
-      const res = await db.verifyOnboarding(selfieUrl, idUrl, form.name, form.age);
+      const res = await db.verifyOnboarding(selfieUrl, idUrl, form.firstName, form.lastName, form.dateOfBirth);
 
       if (!res.success) {
         Alert.alert(
@@ -515,26 +516,44 @@ export default function OnboardingScreen() {
         {step === 2 && (
           <View style={styles.formContainer}>
             
-            <Text style={styles.label}>Full Name</Text>
-            <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
-              <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
-                value={form.name}
-                onChangeText={(v) => set('name', v)}
-                placeholder="Enter your full name"
-                placeholderTextColor={Colors.gray400}
-              />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.label}>First Name</Text>
+                <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                  <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
+                    value={form.firstName}
+                    onChangeText={(v) => set('firstName', v)}
+                    placeholder="First Name"
+                    placeholderTextColor={Colors.gray400}
+                  />
+                </View>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.label}>Surname</Text>
+                <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                  <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
+                  <TextInput
+                    style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
+                    value={form.lastName}
+                    onChangeText={(v) => set('lastName', v)}
+                    placeholder="Surname"
+                    placeholderTextColor={Colors.gray400}
+                  />
+                </View>
+              </View>
             </View>
 
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Age</Text>
+                <Text style={styles.label}>Date of Birth</Text>
                 <TextInput
                   style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={String(form.age)}
-                  onChangeText={(v) => set('age', parseInt(v) || 0)}
-                  keyboardType="numeric"
+                  value={form.dateOfBirth}
+                  onChangeText={(v) => set('dateOfBirth', v)}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={Colors.gray400}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -705,9 +724,9 @@ export default function OnboardingScreen() {
 
 
             <TouchableOpacity
-              style={[styles.actionButton, { marginTop: 24, opacity: (!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
+              style={[styles.actionButton, { marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
               onPress={handleProcessAIVerification}
-              disabled={!form.name || !form.email || !form.profileImageUrls?.length || !govIdUri}
+              disabled={!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri}
             >
               <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
               <Ionicons name="arrow-forward" size={18} color={Colors.white} />
@@ -884,7 +903,7 @@ export default function OnboardingScreen() {
                 </View>
               </View>
 
-              <Text style={[styles.certName, textStyle]}>{form.name}</Text>
+              <Text style={[styles.certName, textStyle]}>{form.firstName} {form.lastName}</Text>
               <Text style={styles.certLocation}>
                 {form.residenceCity || 'Lagos'}, {form.residenceCountry || 'Nigeria'} • Active Member
               </Text>

@@ -104,10 +104,10 @@ class ApiService {
     });
   }
 
-  async verifyOnboarding(selfieUrl: string, idUrl: string, name: string, age: number): Promise<{ success: boolean; confidenceScore: number; ocrName: string; ocrAge: string; details: string }> {
+  async verifyOnboarding(selfieUrl: string, idUrl: string, firstName: string, lastName: string, dateOfBirth: string): Promise<{ success: boolean; confidenceScore: number; ocrName: string; ocrAge: string; details: string }> {
     return this.request<{ success: boolean; confidenceScore: number; ocrName: string; ocrAge: string; details: string }>('/users/onboarding/verify', {
       method: 'POST',
-      body: JSON.stringify({ selfieUrl, idUrl, name, age }),
+      body: JSON.stringify({ selfieUrl, idUrl, firstName, lastName, dateOfBirth }),
     });
   }
 

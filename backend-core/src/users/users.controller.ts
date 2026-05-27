@@ -51,9 +51,10 @@ export class UsersController {
   async verifyDocuments(
     @Body('selfieUrl') selfieUrl: string,
     @Body('idUrl') idUrl: string,
-    @Body('name') name: string,
-    @Body('age') age: number,
+    @Body('firstName') firstName: string,
+    @Body('lastName') lastName: string,
+    @Body('dateOfBirth') dateOfBirth: string,
   ) {
-    return this.usersService.verifyOnboardingDocuments(selfieUrl, idUrl, name, age);
+    return this.usersService.verifyOnboardingDocuments(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
   }
 }

@@ -11,8 +11,9 @@ model User {
   id                   String    @id @default(uuid())
   email                String    @unique
   passwordHash         String
-  name                 String
-  age                  Int
+  firstName            String
+  lastName             String
+  dateOfBirth          String
   bio                  String    @default("")
   occupation           String    @default("")
   education            String    @default("")
