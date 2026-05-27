@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from openai import OpenAI
 from dotenv import load_dotenv
+from io import BytesIO
+from PIL import Image
 
 load_dotenv()
 
@@ -299,12 +301,32 @@ def load_image_from_url(url: str) -> Dict[str, Any]:
         header, encoded = url.split(",", 1)
         mime_type = header.split(";")[0].split(":")[1]
         data = base64.b64decode(encoded)
-        return {"mime_type": mime_type, "data": data}
+    else:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        mime_type = response.headers.get("Content-Type", "image/jpeg")
+        data = response.content
+
+    # Compress the image
+    try:
+        img = Image.open(BytesIO(data))
+        # Convert to RGB if it has alpha channel
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
         
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    mime_type = response.headers.get("Content-Type", "image/jpeg")
-    return {"mime_type": mime_type, "data": response.content}
+        # Resize if very large
+        max_size = (800, 800)
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Save compressed
+        output = BytesIO()
+        img.save(output, format="JPEG", quality=75)
+        data = output.getvalue()
+        mime_type = "image/jpeg"
+    except Exception as e:
+        logger.warning(f"Could not compress image: {e}")
+        
+    return {"mime_type": mime_type, "data": data}
 
 class VerifyRequest(BaseModel):
     selfie_url: str
