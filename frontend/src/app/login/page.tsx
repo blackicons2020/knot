@@ -39,7 +39,11 @@ export default function Login() {
 
       if (data.token) {
         localStorage.setItem('knot_token', data.token);
-        router.push('/dashboard');
+        if (data.user?.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
       }
     } catch (err: any) {
       setError(err.message || "Failed to sign in. Please try again.");
