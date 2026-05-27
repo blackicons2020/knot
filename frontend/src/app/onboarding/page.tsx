@@ -1069,7 +1069,7 @@ export default function Onboarding() {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full trust-badge text-[10px] font-black tracking-widest uppercase">
                   <ShieldCheck className="w-3.5 h-3.5" /> Verified Registry Certificate
                 </div>
-                <h3 className="text-2xl font-serif font-black text-white">{name}</h3>
+                <h3 className="text-2xl font-serif font-black text-white">{firstName} {lastName}</h3>
                 <p className="text-xs text-gray-400">{residenceCity || "Lagos"}, {residenceCountry || "Nigeria"} • Active Member</p>
               </div>
 
