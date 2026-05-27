@@ -132,7 +132,7 @@ def calculate_compatibility(request: CompatibilityRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-70b",
+            model="llama3.1-8b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -172,7 +172,7 @@ def extract_interview_data(request: InterviewExtractRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-70b",
+            model="llama3.1-8b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -202,7 +202,7 @@ def coach_respond(request: CoachRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-70b",
+            model="llama3.1-8b",
             messages=[{"role": "user", "content": prompt}]
         )
         return {"response": response.choices[0].message.content.strip()}
@@ -238,7 +238,7 @@ def check_moderation(request: ModerationRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-70b",
+            model="llama3.1-8b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -271,7 +271,7 @@ def validate_onboarding_answer(request: ValidationRequest):
         Do not include markdown tags like ```json.
         """
         response = client.chat.completions.create(
-            model="llama3.1-70b",
+            model="llama3.1-8b",
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
