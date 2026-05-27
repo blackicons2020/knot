@@ -27,15 +27,15 @@ else:
         base_url="https://api.cerebras.ai/v1",
     )
 
-# Configure OpenAI client for Groq (Vision)
-GROQ_KEY = os.getenv("GROQ_API_KEY") or os.getenv("GROK_API_KEY")
-groq_client = None
-if not GROQ_KEY:
-    logger.warning("GROQ_API_KEY is not set in environmental variables.")
+# Configure OpenAI client for Hugging Face (Vision)
+HF_KEY = os.getenv("HF_API_KEY")
+hf_client = None
+if not HF_KEY:
+    logger.warning("HF_API_KEY is not set in environmental variables.")
 else:
-    groq_client = OpenAI(
-        api_key=GROQ_KEY,
-        base_url="https://api.groq.com/openai/v1",
+    hf_client = OpenAI(
+        api_key=HF_KEY,
+        base_url="https://api-inference.huggingface.co/v1/",
     )
 
 app = FastAPI(
@@ -343,11 +343,11 @@ def verify_onboarding_documents(request: VerifyRequest):
         Do not include markdown tags like ```json.
         """
         
-        if not groq_client:
-            raise Exception("Groq client not initialized (missing API key)")
+        if not hf_client:
+            raise Exception("Hugging Face client not initialized (missing HF_API_KEY)")
             
-        response = groq_client.chat.completions.create(
-            model="llama-3.2-90b-vision-preview",
+        response = hf_client.chat.completions.create(
+            model="meta-llama/Llama-3.2-11B-Vision-Instruct",
             messages=[
                 {
                     "role": "user",
@@ -373,11 +373,10 @@ def verify_onboarding_documents(request: VerifyRequest):
         return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in document verification: {str(e)}")
-        # Temporary fallback: Auto-approve since Groq decommissioned their vision models
         return {
-            "success": True,
-            "confidenceScore": 95,
-            "ocrName": request.user_name,
-            "ocrAge": request.user_age,
-            "details": "Approved via fallback (Vision model currently unavailable)"
+            "success": False,
+            "confidenceScore": 0,
+            "ocrName": "",
+            "ocrAge": 0,
+            "details": f"Verification failed. Please ensure your images are clear and valid. Details: {str(e)}"
         }
