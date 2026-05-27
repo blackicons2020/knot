@@ -29,15 +29,15 @@ else:
         base_url="https://api.cerebras.ai/v1",
     )
 
-# Configure OpenAI client for Hugging Face (Vision)
-HF_KEY = os.getenv("HF_API_KEY")
-hf_client = None
-if not HF_KEY:
-    logger.warning("HF_API_KEY is not set in environmental variables.")
+# Configure OpenAI client for GitHub Models (Vision)
+GITHUB_KEY = os.getenv("GITHUB_TOKEN")
+github_client = None
+if not GITHUB_KEY:
+    logger.warning("GITHUB_TOKEN is not set in environmental variables.")
 else:
-    hf_client = OpenAI(
-        api_key=HF_KEY,
-        base_url="https://api-inference.huggingface.co/v1/",
+    github_client = OpenAI(
+        api_key=GITHUB_KEY,
+        base_url="https://models.inference.ai.azure.com",
     )
 
 app = FastAPI(
@@ -365,11 +365,11 @@ def verify_onboarding_documents(request: VerifyRequest):
         Do not include markdown tags like ```json.
         """
         
-        if not hf_client:
-            raise Exception("Hugging Face client not initialized (missing HF_API_KEY)")
+        if not github_client:
+            raise Exception("GitHub client not initialized (missing GITHUB_TOKEN)")
             
-        response = hf_client.chat.completions.create(
-            model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+        response = github_client.chat.completions.create(
+            model="Llama-3.2-90B-Vision-Instruct",
             messages=[
                 {
                     "role": "user",
@@ -395,11 +395,10 @@ def verify_onboarding_documents(request: VerifyRequest):
         return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in document verification: {str(e)}")
-        # Fallback: Auto-approve since reliable free vision models are currently unavailable
         return {
-            "success": True,
-            "confidenceScore": 95,
-            "ocrName": request.user_name,
-            "ocrAge": request.user_age,
-            "details": "Approved via fallback (Free Vision APIs are currently unstable/unavailable)"
+            "success": False,
+            "confidenceScore": 0,
+            "ocrName": "",
+            "ocrAge": 0,
+            "details": f"Verification failed. Please ensure your images are clear and valid. Details: {str(e)}"
         }
