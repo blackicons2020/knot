@@ -63,7 +63,30 @@ export class AuthService {
   }
 
   private sanitizeUser(user: any) {
-    const { passwordHash, ...rest } = user;
-    return rest;
+    const { passwordHash, ...result } = user;
+    return result;
+  }
+
+  async seedAdmin() {
+    const email = 'admin@knot.com';
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      if (existing.role !== 'ADMIN') {
+        await this.prisma.user.update({ where: { email }, data: { role: 'ADMIN' } });
+      }
+      return { message: 'Admin account is ready. Password is: Admin123!' };
+    }
+
+    const passwordHash = await bcrypt.hash('Admin123!', 10);
+    await this.prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        firstName: 'System',
+        lastName: 'Admin',
+        role: 'ADMIN',
+      }
+    });
+    return { message: 'Admin account successfully seeded! Password is: Admin123!' };
   }
 }
