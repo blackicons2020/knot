@@ -16,16 +16,27 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("knot-ai-service")
 
-# Configure OpenAI client for Grok (xAI)
+# Configure OpenAI client for Cerebras (Text)
 API_KEY = os.getenv("CEREBRAS_API_KEY") or os.getenv("GROK_API_KEY")
 client = None
 if not API_KEY:
-    logger.warning("GROK_API_KEY is not set in environmental variables.")
+    logger.warning("CEREBRAS_API_KEY is not set in environmental variables.")
 else:
     client = OpenAI(
-    api_key=os.environ.get("CEREBRAS_API_KEY") or os.environ.get("GROK_API_KEY"),
-    base_url="https://api.cerebras.ai/v1",
-)
+        api_key=API_KEY,
+        base_url="https://api.cerebras.ai/v1",
+    )
+
+# Configure OpenAI client for Groq (Vision)
+GROQ_KEY = os.getenv("GROQ_API_KEY") or os.getenv("GROK_API_KEY")
+groq_client = None
+if not GROQ_KEY:
+    logger.warning("GROQ_API_KEY is not set in environmental variables.")
+else:
+    groq_client = OpenAI(
+        api_key=GROQ_KEY,
+        base_url="https://api.groq.com/openai/v1",
+    )
 
 app = FastAPI(
     title="KNOT AI Relationship Intelligence Engine",
@@ -332,8 +343,11 @@ def verify_onboarding_documents(request: VerifyRequest):
         Do not include markdown tags like ```json.
         """
         
-        response = client.chat.completions.create(
-            model="grok-2-vision-latest",
+        if not groq_client:
+            raise Exception("Groq client not initialized (missing API key)")
+            
+        response = groq_client.chat.completions.create(
+            model="llama-3.2-90b-vision-preview",
             messages=[
                 {
                     "role": "user",
