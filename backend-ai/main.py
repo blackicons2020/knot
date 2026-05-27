@@ -29,15 +29,15 @@ else:
         base_url="https://api.cerebras.ai/v1",
     )
 
-# Configure OpenAI client for GitHub Models (Vision)
-GITHUB_KEY = os.getenv("GITHUB_TOKEN")
-github_client = None
-if not GITHUB_KEY:
-    logger.warning("GITHUB_TOKEN is not set in environmental variables.")
+# Configure OpenAI client for Google Gemini (Vision)
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+gemini_client = None
+if not GEMINI_KEY:
+    logger.warning("GEMINI_API_KEY is not set in environmental variables.")
 else:
-    github_client = OpenAI(
-        api_key=GITHUB_KEY,
-        base_url="https://models.inference.ai.azure.com",
+    gemini_client = OpenAI(
+        api_key=GEMINI_KEY,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
     )
 
 app = FastAPI(
@@ -393,15 +393,15 @@ def verify_onboarding_documents(request: VerifyRequest):
         Do not include markdown tags like ```json.
         """
         
-        if not github_client:
-            raise Exception("GitHub client not initialized (missing GITHUB_TOKEN)")
+        if not gemini_client:
+            raise Exception("Gemini client not initialized (missing GEMINI_API_KEY)")
             
-        # Combine images into one to bypass the "1 image per request" limit on GitHub free tier
+        # Combine images into one to bypass limitations and make comparison easier
         combined_data = combine_images_horizontally(selfie_part["data"], id_part["data"])
         combined_b64 = base64.b64encode(combined_data).decode('utf-8')
         
-        response = github_client.chat.completions.create(
-            model="Llama-3.2-90B-Vision-Instruct",
+        response = gemini_client.chat.completions.create(
+            model="gemini-2.5-flash",
             messages=[
                 {
                     "role": "user",
@@ -421,11 +421,10 @@ def verify_onboarding_documents(request: VerifyRequest):
         return extract_json(response.choices[0].message.content)
     except Exception as e:
         logger.error(f"Error in document verification: {str(e)}")
-        # Fallback: Auto-approve because Meta's Llama 3 Vision safety filters refuse facial recognition tasks
         return {
-            "success": True,
-            "confidenceScore": 95,
-            "ocrName": request.user_name,
-            "ocrAge": request.user_age,
-            "details": "Approved via fallback (Llama Vision safety filters block KYC tasks)"
+            "success": False,
+            "confidenceScore": 0,
+            "ocrName": "",
+            "ocrAge": 0,
+            "details": f"Verification failed. Please ensure your images are clear and valid. Details: {str(e)}"
         }
