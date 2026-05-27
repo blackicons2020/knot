@@ -32,9 +32,7 @@ export default function Dashboard() {
       }
 
       try {
-        const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-          ? 'http://localhost:8080'
-          : 'https://knot-backend-core.onrender.com';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
           
         // Fetch real profile
         const profileRes = await fetch(`${API_URL}/users/profile`, {

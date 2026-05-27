@@ -21,9 +21,7 @@ export default function AdminDashboard() {
       }
 
       try {
-        const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-          ? 'http://localhost:8080'
-          : 'https://knot-backend-core.onrender.com';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
           
         const res = await fetch(`${API_URL}/admin/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -49,9 +47,7 @@ export default function AdminDashboard() {
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('knot_token');
     try {
-      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8080'
-        : 'https://knot-backend-core.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
         
       const res = await fetch(`${API_URL}/admin/users/${id}`, {
         method: 'DELETE',

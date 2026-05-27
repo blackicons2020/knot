@@ -228,9 +228,7 @@ export default function Onboarding() {
 
   const handleFinalizeRegistration = async () => {
     try {
-      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8080'
-        : 'https://knot-backend-core.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
         
       const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -269,9 +267,7 @@ export default function Onboarding() {
     setMessages(prev => [...prev, { role: "ai", text: "Analyzing response..." }]);
 
     try {
-      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8080'
-        : 'https://knot-backend-core.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
 
       const question = interviewQuestionIndex === 0 ? "Shall we begin?" : interviewPrompts[interviewQuestionIndex - 1];
       const verifyRes = await fetch(`${API_URL}/users/onboarding/validate-answer`, {
@@ -331,9 +327,7 @@ export default function Onboarding() {
     setVerificationStep(0);
 
     try {
-      const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8080'
-        : 'https://knot-backend-core.onrender.com';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
 
       const verifyRes = await fetch(`${API_URL}/users/onboarding/verify`, {
         method: "POST",
