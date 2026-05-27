@@ -27,7 +27,7 @@ export default function Dashboard() {
     const fetchData = async () => {
       const token = localStorage.getItem('knot_token');
       if (!token) {
-        router.push('/onboarding');
+        router.push('/login');
         return;
       }
 
