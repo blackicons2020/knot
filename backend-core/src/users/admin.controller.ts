@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Patch, Body, Param, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -20,8 +20,12 @@ export class AdminController {
         firstName: true,
         lastName: true,
         role: true,
+        role: true,
         residenceCity: true,
         residenceCountry: true,
+        isPremium: true,
+        maritalStatus: true,
+        isSuspended: true,
       },
       orderBy: { email: 'asc' } // No createdAt currently in User, so order by email
     });
@@ -30,11 +34,18 @@ export class AdminController {
 
   @Delete('users/:id')
   async deleteUser(@Param('id') id: string) {
-    // Delete the user. All relations (matches, messages, images) will cascade delete
-    // as defined in the Prisma schema.
     await this.prisma.user.delete({
       where: { id },
     });
     return { success: true, message: 'User deleted successfully' };
+  }
+
+  @Patch('users/:id/suspend')
+  async toggleSuspendUser(@Param('id') id: string, @Body('isSuspended') isSuspended: boolean) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { isSuspended },
+    });
+    return { success: true, isSuspended: user.isSuspended };
   }
 }

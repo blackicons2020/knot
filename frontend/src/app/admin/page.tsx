@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut } from "lucide-react";
+import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock } from "lucide-react";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -64,6 +64,31 @@ export default function AdminDashboard() {
       alert("Failed to delete user.");
     } finally {
       setDeleteConfirmId(null);
+    }
+  };
+
+  const toggleSuspend = async (id: string, currentStatus: boolean) => {
+    const token = localStorage.getItem('knot_token');
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
+      const res = await fetch(`${API_URL}/admin/users/${id}/suspend`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isSuspended: !currentStatus })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(users.map(u => u.id === id ? { ...u, isSuspended: data.isSuspended } : u));
+      } else {
+        alert("Failed to update suspension status.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update suspension status.");
     }
   };
 
@@ -134,6 +159,7 @@ export default function AdminDashboard() {
                         <div className="font-bold text-white text-sm flex items-center gap-2">
                           {user.firstName} {user.lastName}
                           {user.role === 'ADMIN' && <span className="text-[9px] font-black uppercase bg-[#D4AF37]/20 text-[#D4AF37] px-1.5 py-0.5 rounded">Admin</span>}
+                          {user.isSuspended && <span className="text-[9px] font-black uppercase bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded">Suspended</span>}
                         </div>
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </td>
@@ -166,14 +192,24 @@ export default function AdminDashboard() {
                             </button>
                           </div>
                         ) : (
-                          <button 
-                            onClick={() => setDeleteConfirmId(user.id)}
-                            disabled={user.role === 'ADMIN'} // Prevent admins from easily deleting other admins
-                            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            title="Delete Account"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => toggleSuspend(user.id, user.isSuspended)}
+                              disabled={user.role === 'ADMIN'}
+                              className={`p-2 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${user.isSuspended ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400' : 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-400'}`}
+                              title={user.isSuspended ? "Unsuspend User" : "Suspend User"}
+                            >
+                              {user.isSuspended ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirmId(user.id)}
+                              disabled={user.role === 'ADMIN'}
+                              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                              title="Delete Account"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

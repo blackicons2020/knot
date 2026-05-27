@@ -62,6 +62,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    if (user.isSuspended) {
+      throw new UnauthorizedException('Your account has been suspended by an administrator.');
+    }
+
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials.');
