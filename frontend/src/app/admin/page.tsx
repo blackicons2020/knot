@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, Trash2, Users, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut } from "lucide-react";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -82,9 +82,14 @@ export default function AdminDashboard() {
             <Users className="w-4 h-4" /> Users
           </Link>
         </nav>
-        <Link href="/dashboard" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">
-          &larr; Back to Dashboard
-        </Link>
+        <div className="mt-auto space-y-2">
+          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 text-xs font-semibold text-gray-400 hover:text-white transition-colors">
+            &larr; Back to Dashboard
+          </Link>
+          <button onClick={() => { localStorage.removeItem('knot_token'); router.push('/login'); }} className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-500/10 transition-colors font-semibold text-sm w-full text-left">
+            <LogOut className="w-4 h-4" /> Log Out
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -115,9 +120,10 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-400 font-bold">
-                    <th className="p-4 border-b border-white/5">User</th>
-                    <th className="p-4 border-b border-white/5">Role</th>
+                    <th className="p-4 border-b border-white/5">Name</th>
+                    <th className="p-4 border-b border-white/5">Subscription</th>
                     <th className="p-4 border-b border-white/5">Location</th>
+                    <th className="p-4 border-b border-white/5">Marriage Status</th>
                     <th className="p-4 border-b border-white/5 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -125,17 +131,27 @@ export default function AdminDashboard() {
                   {users.map(user => (
                     <tr key={user.id} className="hover:bg-white/[0.02] transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-white text-sm">{user.firstName} {user.lastName}</div>
+                        <div className="font-bold text-white text-sm flex items-center gap-2">
+                          {user.firstName} {user.lastName}
+                          {user.role === 'ADMIN' && <span className="text-[9px] font-black uppercase bg-[#D4AF37]/20 text-[#D4AF37] px-1.5 py-0.5 rounded">Admin</span>}
+                        </div>
                         <div className="text-xs text-gray-500">{user.email}</div>
                       </td>
                       <td className="p-4">
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full ${user.role === 'ADMIN' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' : 'bg-white/10 text-gray-300'}`}>
-                          {user.role}
-                        </span>
+                        {user.isPremium ? (
+                          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">Yes <span className="text-gray-500 font-normal">($49/mo)</span></span>
+                        ) : (
+                          <span className="text-xs text-gray-500">No</span>
+                        )}
                       </td>
                       <td className="p-4">
                         <div className="text-xs text-gray-400">
                           {user.residenceCity || "Unknown"}, {user.residenceCountry || "Unknown"}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="text-xs text-gray-400">
+                          {user.maritalStatus || "Not Specified"}
                         </div>
                       </td>
                       <td className="p-4 text-right">
@@ -164,7 +180,7 @@ export default function AdminDashboard() {
                   ))}
                   {users.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="p-8 text-center text-gray-500 text-sm">No users found.</td>
+                      <td colSpan={5} className="p-8 text-center text-gray-500 text-sm">No users found.</td>
                     </tr>
                   )}
                 </tbody>
