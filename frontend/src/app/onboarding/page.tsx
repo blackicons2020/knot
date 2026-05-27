@@ -5,7 +5,7 @@ import Link from "next/link";
 import { 
   Bot, Send, Sparkles, ShieldCheck, Heart, User, CheckCircle2, 
   MapPin, Brain, GraduationCap, Briefcase, Calendar, ArrowRight, Loader2,
-  Camera, Upload, X, Shield, RefreshCw, Smile, Eye
+  Camera, Upload, X, Shield, RefreshCw, Smile, Eye, EyeOff
 } from "lucide-react";
 import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE } from "../../services/locationData";
 
@@ -22,6 +22,7 @@ export default function Onboarding() {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [religion, setReligion] = useState("");
   const [religionSelect, setReligionSelect] = useState("");
   const [religionCustom, setReligionCustom] = useState("");
@@ -508,13 +509,22 @@ export default function Onboarding() {
                 </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Password</label>
-                  <input 
-                    type="password" 
-                    value={password} 
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Secure Password" 
-                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showPassword ? "text" : "password"} 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Secure Password" 
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
