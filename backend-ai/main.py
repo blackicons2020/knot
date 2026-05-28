@@ -25,18 +25,18 @@ GROK_API_KEY = os.getenv("GROK_API_KEY")
 client = None
 text_model = "llama-3.3-70b"
 
-if CEREBRAS_API_KEY:
-    client = OpenAI(
-        api_key=CEREBRAS_API_KEY,
-        base_url="https://api.cerebras.ai/v1",
-    )
-    text_model = "llama-3.3-70b"
-elif GROK_API_KEY:
+if GROK_API_KEY:
     client = OpenAI(
         api_key=GROK_API_KEY,
         base_url="https://api.x.ai/v1",
     )
     text_model = "grok-2-latest"
+elif CEREBRAS_API_KEY:
+    client = OpenAI(
+        api_key=CEREBRAS_API_KEY,
+        base_url="https://api.cerebras.ai/v1",
+    )
+    text_model = "llama-3.3-70b"
 else:
     logger.warning("Neither CEREBRAS_API_KEY nor GROK_API_KEY is set in environmental variables.")
 
