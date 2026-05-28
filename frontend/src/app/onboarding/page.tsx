@@ -112,17 +112,22 @@ export default function Onboarding() {
   // Handle Liveness Camera Access
   useEffect(() => {
     if (isLivenessModalOpen && isCameraActive) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-        .then(stream => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-          streamRef.current = stream;
-        })
-        .catch(err => {
-          console.warn("Webcam access failed (using simulation wireframe):", err);
-          setIsCameraActive(false);
-        });
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+          .then(stream => {
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+            streamRef.current = stream;
+          })
+          .catch(err => {
+            console.warn("Webcam access failed (using simulation wireframe):", err);
+            setIsCameraActive(false);
+          });
+      } else {
+        console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
+        setIsCameraActive(false);
+      }
     } else {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -134,17 +139,22 @@ export default function Onboarding() {
   // Handle ID Scanning Camera Access
   useEffect(() => {
     if (isIdScanModalOpen && isCameraActive) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(stream => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-          streamRef.current = stream;
-        })
-        .catch(err => {
-          console.warn("Back camera access failed (using simulation wireframe):", err);
-          setIsCameraActive(false);
-        });
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+          .then(stream => {
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+            }
+            streamRef.current = stream;
+          })
+          .catch(err => {
+            console.warn("Back camera access failed (using simulation wireframe):", err);
+            setIsCameraActive(false);
+          });
+      } else {
+        console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
+        setIsCameraActive(false);
+      }
     } else {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());

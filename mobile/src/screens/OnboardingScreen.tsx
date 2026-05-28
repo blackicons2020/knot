@@ -118,51 +118,44 @@ export default function OnboardingScreen() {
   const [idScanState, setIdScanState] = useState<'align' | 'scanning' | 'complete'>('align');
   const [idScanPrompt, setIdScanPrompt] = useState('Align ID inside the rectangle frame');
 
-  const startLivenessScanner = () => {
-    setIsLivenessModalOpen(true);
-    setLivenessState('align');
-    setLivenessPrompt('Center your face in the circular aperture');
-    
-    setTimeout(() => {
-      setLivenessState('smile');
-      setLivenessPrompt('Now smile big and blink to verify aliveness');
-      
-      setTimeout(() => {
-        setLivenessState('tilt');
-        setLivenessPrompt('Perfect! Tilt your head slowly to the left');
-        
-        setTimeout(() => {
-          setLivenessState('complete');
-          setLivenessPrompt('Liveness Confirmed! Biometric face scan complete.');
-          setLivenessUri('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80');
-          
-          setTimeout(() => {
-            setIsLivenessModalOpen(false);
-          }, 1500);
-        }, 2000);
-      }, 2000);
-    }, 2000);
+  const startLivenessScanner = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant camera access to take a live selfie scan.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      cameraType: 'front',
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      setLivenessUri(result.assets[0].uri);
+    }
   };
 
-  const startIdScanner = () => {
-    setIsIdScanModalOpen(true);
-    setIdScanState('align');
-    setIdScanPrompt('Align document inside the rectangular frame');
+  const startIdScanner = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant camera access to scan your Government ID.');
+      return;
+    }
 
-    setTimeout(() => {
-      setIdScanState('scanning');
-      setIdScanPrompt('Scanning ID barcode & OCR features...');
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+      cameraType: 'back',
+    });
 
-      setTimeout(() => {
-        setIdScanState('complete');
-        setIdScanPrompt('ID Scan Complete! OCR match succeeded.');
-        setGovIdUri('https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&w=300&q=80');
-
-        setTimeout(() => {
-          setIsIdScanModalOpen(false);
-        }, 1500);
-      }, 2000);
-    }, 2000);
+    if (!result.canceled && result.assets?.[0]) {
+      setGovIdUri(result.assets[0].uri);
+    }
   };
 
 
