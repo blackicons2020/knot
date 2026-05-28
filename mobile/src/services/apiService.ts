@@ -44,7 +44,7 @@ class ApiService {
       });
       clearTimeout(timeoutId);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Request failed');
+      if (!res.ok) throw new Error(data.message || data.error || 'Request failed');
       return data as T;
     } catch (error) {
       clearTimeout(timeoutId);

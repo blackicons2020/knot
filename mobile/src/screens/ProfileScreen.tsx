@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import AppHeader from '../components/AppHeader';
-import { db } from '../services/databaseService';
+import { db } from '../services/apiService';
 import { Colors } from '../theme/colors';
 import { RootStackParamList } from '../types';
 

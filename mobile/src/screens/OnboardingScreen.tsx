@@ -27,6 +27,7 @@ import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, User, MaritalStatus, SmokingHabits, DrinkingHabits, ChildrenPreference, WillingToRelocate } from '../types';
 import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE } from '../services/locationData';
 import { db } from '../services/apiService';
+import { LivenessCameraModal } from '../components/LivenessCameraModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -110,8 +111,6 @@ export default function OnboardingScreen() {
 
   // Selfie Liveness Interactive Modal States
   const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
-  const [livenessState, setLivenessState] = useState<'align' | 'smile' | 'tilt' | 'complete'>('align');
-  const [livenessPrompt, setLivenessPrompt] = useState('Center your face in the circle');
 
   // ID Scanning Interactive Modal States
   const [isIdScanModalOpen, setIsIdScanModalOpen] = useState(false);
@@ -119,23 +118,11 @@ export default function OnboardingScreen() {
   const [idScanPrompt, setIdScanPrompt] = useState('Align ID inside the rectangle frame');
 
   const startLivenessScanner = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant camera access to take a live selfie scan.');
-      return;
-    }
+    setIsLivenessModalOpen(true);
+  };
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      cameraType: 'front',
-    });
-
-    if (!result.canceled && result.assets?.[0]) {
-      setLivenessUri(result.assets[0].uri);
-    }
+  const handleLivenessCapture = (uri: string) => {
+    setLivenessUri(uri);
   };
 
   const startIdScanner = async () => {
@@ -1055,54 +1042,12 @@ export default function OnboardingScreen() {
         </View>
       </Modal>
 
-      {/* Selfie Liveness Face Scan Modal */}
-      <Modal visible={isLivenessModalOpen} animationType="fade" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(10,14,20,0.95)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderWidth: 1, borderColor: Colors.accent + '40', borderRadius: 32, padding: 24, width: '100%', maxWidth: 360, alignItems: 'center', position: 'relative' }}>
-            <TouchableOpacity 
-              onPress={() => setIsLivenessModalOpen(false)}
-              style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
-            >
-              <Ionicons name="close" size={24} color={Colors.gray400} />
-            </TouchableOpacity>
-
-            <View style={{ alignItems: 'center', marginBottom: 20 }}>
-              <Text style={{ fontSize: 16, fontWeight: '900', color: isDarkMode ? Colors.white : Colors.dark }}>Biometric Face Scanner</Text>
-              <Text style={{ fontSize: 8, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>Verifying Live Authenticity</Text>
-            </View>
-
-            {/* Circular Aperture */}
-            <View style={{ width: 180, height: 180, borderRadius: 90, borderWidth: 4, borderColor: Colors.accent, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', backgroundColor: '#121721', marginVertical: 20, shadowColor: Colors.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 }}>
-              {/* Simulation avatar/camera feed */}
-              <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', opacity: livenessState === 'complete' ? 0.3 : 1 }}>
-                <Ionicons name="person" size={72} color={Colors.gray600} />
-              </View>
-
-              {/* Success Checkmark */}
-              {livenessState === 'complete' && (
-                <View style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(16,185,129,0.9)', alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name="checkmark-circle" size={56} color={Colors.white} />
-                </View>
-              )}
-
-              {/* Pulsing Scan Line */}
-              {livenessState !== 'complete' && (
-                <View style={{ position: 'absolute', left: 0, right: 0, height: 2, backgroundColor: Colors.accent }} />
-              )}
-            </View>
-
-            {/* Prompt Instructions */}
-            <View style={{ backgroundColor: Colors.white + '08', borderRadius: 16, padding: 12, width: '100%', minHeight: 64, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? Colors.gray200 : Colors.gray800, textAlign: 'center' }}>{livenessPrompt}</Text>
-              <View style={{ flexDirection: 'row', gap: 6, marginTop: 10 }}>
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'align' ? Colors.accent : '#10b981' }} />
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'smile' ? Colors.accent : livenessState === 'tilt' || livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: livenessState === 'tilt' ? Colors.accent : livenessState === 'complete' ? '#10b981' : Colors.gray500 }} />
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Selfie Liveness Face Scan Modal (Vision Camera) */}
+      <LivenessCameraModal
+        visible={isLivenessModalOpen}
+        onClose={() => setIsLivenessModalOpen(false)}
+        onCapture={handleLivenessCapture}
+      />
 
       {/* ID Document Scanner Modal */}
       <Modal visible={isIdScanModalOpen} animationType="fade" transparent>
