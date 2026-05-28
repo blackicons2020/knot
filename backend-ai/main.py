@@ -36,7 +36,7 @@ elif CEREBRAS_API_KEY:
         api_key=CEREBRAS_API_KEY,
         base_url="https://api.cerebras.ai/v1",
     )
-    text_model = "llama-3.3-70b"
+    text_model = "gpt-oss-120b"
 else:
     logger.warning("Neither CEREBRAS_API_KEY nor GROK_API_KEY is set in environmental variables.")
 
