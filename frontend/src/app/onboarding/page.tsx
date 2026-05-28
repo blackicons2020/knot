@@ -42,9 +42,16 @@ export default function Onboarding() {
   const [marriageTimeline, setMarriageTimeline] = useState("");
   const [willingToRelocate, setWillingToRelocate] = useState("");
   const [childrenPreference, setChildrenPreference] = useState("");
+  
+  const [languageSelect, setLanguageSelect] = useState("");
+  const [languageCustom, setLanguageCustom] = useState("");
+  const [traitSelect, setTraitSelect] = useState("");
+  const [traitCustom, setTraitCustom] = useState("");
+  
   const [idealPartnerTraits, setIdealPartnerTraits] = useState("");
-
-  // Advanced Location Dropdowns
+  
+  const MAJOR_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other'];
+  const MAJOR_TRAITS = ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Other'];
   const [residenceCountry, setResidenceCountry] = useState("");
   const [residenceState, setResidenceState] = useState("");
   const [residenceCity, setResidenceCity] = useState("");
@@ -697,15 +704,37 @@ export default function Onboarding() {
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Languages Spoken</label>
-                    <input
-                      type="text"
-                      value={languagesSpoken}
-                      onChange={(e) => setLanguagesSpoken(e.target.value)}
-                      placeholder="e.g. English, Spanish"
+                    <select
+                      value={languageSelect}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setLanguageSelect(val);
+                        if (val !== 'Other') {
+                          setLanguagesSpoken(val);
+                        } else {
+                          setLanguagesSpoken(languageCustom);
+                        }
+                      }}
                       className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
+                    >
+                      <option value="">Select primary language</option>
+                      {MAJOR_LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>{lang}</option>
+                      ))}
+                    </select>
+                    {languageSelect === 'Other' && (
+                      <input
+                        type="text"
+                        value={languageCustom}
+                        onChange={(e) => {
+                          setLanguageCustom(e.target.value);
+                          setLanguagesSpoken(e.target.value);
+                        }}
+                        placeholder="Specify your language"
+                        className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
@@ -812,13 +841,36 @@ export default function Onboarding() {
 
                 <div>
                   <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Ideal Partner Traits</label>
-                  <input
-                    type="text"
-                    value={idealPartnerTraits}
-                    onChange={(e) => setIdealPartnerTraits(e.target.value)}
-                    placeholder="e.g. Kind, Ambitious, Family-oriented (comma separated)"
+                  <select
+                    value={traitSelect}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setTraitSelect(val);
+                      if (val !== 'Other') {
+                        setIdealPartnerTraits(val);
+                      } else {
+                        setIdealPartnerTraits(traitCustom);
+                      }
+                    }}
                     className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
+                  >
+                    <option value="">Select primary trait</option>
+                    {MAJOR_TRAITS.map((trait) => (
+                      <option key={trait} value={trait}>{trait}</option>
+                    ))}
+                  </select>
+                  {traitSelect === 'Other' && (
+                    <input
+                      type="text"
+                      value={traitCustom}
+                      onChange={(e) => {
+                        setTraitCustom(e.target.value);
+                        setIdealPartnerTraits(e.target.value);
+                      }}
+                      placeholder="Specify ideal trait"
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
+                    />
+                  )}
                 </div>
               </div>
 

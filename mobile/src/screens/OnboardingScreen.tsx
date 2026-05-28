@@ -19,7 +19,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-
+import { LinearGradient } from 'expo-linear-gradient';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
@@ -45,6 +46,8 @@ export default function OnboardingScreen() {
 
   // Image Upload State
   const [govIdUri, setGovIdUri] = useState<string | null>(null);
+  const [livenessUri, setLivenessUri] = useState<string | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Form State
   const [form, setForm] = useState<User>({
@@ -131,7 +134,7 @@ export default function OnboardingScreen() {
         setTimeout(() => {
           setLivenessState('complete');
           setLivenessPrompt('Liveness Confirmed! Biometric face scan complete.');
-          set('profileImageUrls', ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80']);
+          setLivenessUri('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80');
           
           setTimeout(() => {
             setIsLivenessModalOpen(false);
@@ -303,7 +306,7 @@ export default function OnboardingScreen() {
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
-      let selfieUrl = form.profileImageUrls?.[0] || '';
+      let selfieUrl = livenessUri || form.profileImageUrls?.[0] || '';
       let idUrl = govIdUri || '';
 
       // Upload if local file URIs
@@ -374,6 +377,7 @@ export default function OnboardingScreen() {
     try {
       const finalForm = {
         ...form,
+        name: `${form.firstName} ${form.lastName}`,
         isVerified: true,
         personalValues: archetype.personalValues,
         bio: 'Intentional Builder focused on traditional family values and mutual growth.',
@@ -499,9 +503,16 @@ export default function OnboardingScreen() {
             <Text style={styles.welcomeDesc}>
               Before entering KNOT, all members complete our AI Guided interview to establish personality vectors, attachment archetypes, and commitment integrity.
             </Text>
-            <TouchableOpacity style={styles.actionButton} onPress={() => setStep(2)}>
-              <Text style={styles.actionButtonText}>Begin Registry Setup</Text>
-              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+            <TouchableOpacity onPress={() => setStep(2)}>
+              <LinearGradient
+                colors={['#E27D8D', '#2D1B4E']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.actionButton}
+              >
+                <Text style={styles.actionButtonText}>Begin Registry Setup</Text>
+                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              </LinearGradient>
             </TouchableOpacity>
             
             <View style={{ marginTop: 40, alignItems: 'center' }}>
@@ -548,13 +559,27 @@ export default function OnboardingScreen() {
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.label}>Date of Birth</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.dateOfBirth}
-                  onChangeText={(v) => set('dateOfBirth', v)}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor={Colors.gray400}
-                />
+                <TouchableOpacity
+                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, justifyContent: 'center' }]}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={{ color: form.dateOfBirth ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }}>
+                    {form.dateOfBirth || "YYYY-MM-DD"}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={form.dateOfBirth ? new Date(form.dateOfBirth) : new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        set('dateOfBirth', selectedDate.toISOString().split('T')[0]);
+                      }
+                    }}
+                  />
+                )}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.label}>Occupation</Text>
@@ -672,64 +697,91 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            {/* Selfie Upload */}
+            {/* Profile Picture Upload */}
             <View style={styles.uploadSection}>
-              <Text style={styles.label}>Selfie Picture Verification</Text>
+              <Text style={styles.label}>PROFILE PICTURE</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
                 <View style={styles.uploadAvatar}>
                   {form.profileImageUrls?.length > 0 ? (
                     <Image source={{ uri: form.profileImageUrls[0] }} style={styles.uploadImage} />
                   ) : (
-                    <Ionicons name="person" size={24} color={Colors.gray400} />
+                    <Ionicons name="person-outline" size={24} color={Colors.gray400} />
                   )}
                 </View>
                 <View style={styles.uploadInfo}>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    <TouchableOpacity style={[styles.uploadBtn, { backgroundColor: Colors.primary + '1F', borderColor: Colors.primary + '3B' }]} onPress={startLivenessScanner}>
-                      <Text style={[styles.uploadBtnText, { color: Colors.primary }]}>Start Live Face Scan</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('selfie')}>
-                      <Text style={styles.uploadBtnText}>Upload Photo</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.uploadSubtext}>Live Face Scan utilizes aliveness verification to increase your Compatibility Trust Rating.</Text>
+                  <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('selfie')}>
+                    <Ionicons name="cloud-upload-outline" size={14} color={Colors.gray300} style={{ marginRight: 6 }} />
+                    <Text style={styles.uploadBtnText}>Upload Photo</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.uploadSubtext}>This photo will be displayed on your profile for matches to see.</Text>
                 </View>
               </View>
             </View>
 
-            {/* ID Document Upload */}
+            {/* Selfie Scan For Verification */}
             <View style={styles.uploadSection}>
-              <Text style={styles.label}>Government ID Scan (Passport/DL)</Text>
+              <Text style={styles.label}>SELFIE SCAN FOR VERIFICATION</Text>
+              <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                <View style={styles.uploadAvatar}>
+                  {livenessUri ? (
+                    <Image source={{ uri: livenessUri }} style={styles.uploadImage} />
+                  ) : (
+                    <Ionicons name="happy-outline" size={24} color={Colors.gray400} />
+                  )}
+                </View>
+                <View style={styles.uploadInfo}>
+                  <TouchableOpacity style={[styles.uploadBtn, { backgroundColor: '#1A1A1A', borderColor: '#403A2B' }]} onPress={startLivenessScanner}>
+                    <Ionicons name="camera-outline" size={14} color="#D4AF37" style={{ marginRight: 6 }} />
+                    <Text style={[styles.uploadBtnText, { color: '#D4AF37' }]}>Start Live Face Scan</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.uploadSubtext}>This selfie is strictly for identity verification against your Government ID and will remain private.</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Government ID Scan */}
+            <View style={styles.uploadSection}>
+              <Text style={styles.label}>GOVERNMENT ID SCAN (PASSPORT/DL)</Text>
+              <Text style={[styles.uploadSubtext, { marginBottom: 8 }]}>This document is strictly for identity verification.</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
                 <View style={[styles.uploadAvatar, { borderRadius: BorderRadius.lg }]}>
                   {govIdUri ? (
                     <Image source={{ uri: govIdUri }} style={styles.uploadImage} />
                   ) : (
-                    <Ionicons name="shield-checkmark" size={24} color={Colors.gray400} />
+                    <Ionicons name="shield-checkmark-outline" size={24} color={Colors.gray400} />
                   )}
                 </View>
                 <View style={styles.uploadInfo}>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    <TouchableOpacity style={[styles.uploadBtn, { backgroundColor: Colors.primary + '1F', borderColor: Colors.primary + '3B' }]} onPress={startIdScanner}>
-                      <Text style={[styles.uploadBtnText, { color: Colors.primary }]}>Scan ID Document</Text>
+                  <View style={{ flexDirection: 'column', gap: 8 }}>
+                    <TouchableOpacity style={styles.uploadBtn} onPress={startIdScanner}>
+                      <Ionicons name="eye-outline" size={14} color={Colors.gray300} style={{ marginRight: 6 }} />
+                      <Text style={styles.uploadBtnText}>Scan ID Document</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickImage('id')}>
+                      <Ionicons name="cloud-upload-outline" size={14} color={Colors.gray300} style={{ marginRight: 6 }} />
                       <Text style={styles.uploadBtnText}>Upload ID</Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.uploadSubtext}>Requires a clear photo of your official government-issued ID.</Text>
+                  <Text style={styles.uploadSubtext}>Official government passport, voter card, or license is required.</Text>
                 </View>
               </View>
             </View>
 
 
             <TouchableOpacity
-              style={[styles.actionButton, { marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }]}
+              style={{ marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }}
               onPress={handleProcessAIVerification}
               disabled={!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri}
             >
-              <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
-              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              <LinearGradient
+                colors={['#E27D8D', '#2D1B4E']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.actionButton}
+              >
+                <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
+                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         )}
@@ -949,9 +1001,16 @@ export default function OnboardingScreen() {
 
             </View>
 
-            <TouchableOpacity style={[styles.actionButton, { marginTop: 24 }]} onPress={complete}>
-              <Text style={styles.actionButtonText}>Activate Dashboard</Text>
-              <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+            <TouchableOpacity style={{ marginTop: 24 }} onPress={complete}>
+              <LinearGradient
+                colors={['#E27D8D', '#2D1B4E']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.actionButton}
+              >
+                <Text style={styles.actionButtonText}>Activate Dashboard</Text>
+                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         )}
@@ -1170,7 +1229,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
     borderRadius: BorderRadius.full,
     paddingVertical: 18,
     paddingHorizontal: 36,
@@ -1284,6 +1342,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   uploadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.white + '1A',
     borderWidth: 1,
     borderColor: Colors.white + '1D',
