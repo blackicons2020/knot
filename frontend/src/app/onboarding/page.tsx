@@ -995,7 +995,7 @@ export default function Onboarding() {
 
             <button 
               onClick={handleProcessAIVerification}
-              disabled={!firstName || !lastName || !dateOfBirth || !email || !password || !profilePicture || !governmentId || !residenceCountry || !originCountry}
+              disabled={!firstName || !lastName || !dateOfBirth || !email || !password || !profilePicture || !verificationSelfie || !governmentId || !residenceCountry || !originCountry}
               className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
             >
               Verify Identity & Documents

@@ -306,14 +306,17 @@ export default function OnboardingScreen() {
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
-      let selfieUrl = livenessUri || form.profileImageUrls?.[0] || '';
+      let selfieUrl = livenessUri || '';
       let idUrl = govIdUri || '';
+      let profileUrl = form.profileImageUrls?.[0] || '';
 
       // Upload if local file URIs
       if (selfieUrl.startsWith('file:') || selfieUrl.startsWith('content:')) {
         selfieUrl = await db.uploadPhoto(selfieUrl);
-        // Save the remote URL to the form so we save the valid link
-        setForm(p => ({ ...p, profileImageUrls: [selfieUrl] }));
+      }
+      if (profileUrl.startsWith('file:') || profileUrl.startsWith('content:')) {
+        profileUrl = await db.uploadPhoto(profileUrl);
+        setForm(p => ({ ...p, profileImageUrls: [profileUrl] }));
       }
       if (idUrl.startsWith('file:') || idUrl.startsWith('content:')) {
         idUrl = await db.uploadPhoto(idUrl);
@@ -769,9 +772,9 @@ export default function OnboardingScreen() {
 
 
             <TouchableOpacity
-              style={{ marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri) ? 0.4 : 1 }}
+              style={{ marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !livenessUri || !govIdUri) ? 0.4 : 1 }}
               onPress={handleProcessAIVerification}
-              disabled={!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !govIdUri}
+              disabled={!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !livenessUri || !govIdUri}
             >
               <LinearGradient
                 colors={['#E27D8D', '#2D1B4E']}
