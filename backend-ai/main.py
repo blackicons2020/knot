@@ -18,16 +18,27 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("knot-ai-service")
 
-# Configure OpenAI client for Cerebras (Text)
-API_KEY = os.getenv("CEREBRAS_API_KEY") or os.getenv("GROK_API_KEY")
+# Configure OpenAI client for Text
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
+GROK_API_KEY = os.getenv("GROK_API_KEY")
+
 client = None
-if not API_KEY:
-    logger.warning("CEREBRAS_API_KEY is not set in environmental variables.")
-else:
+text_model = "llama-3.3-70b"
+
+if CEREBRAS_API_KEY:
     client = OpenAI(
-        api_key=API_KEY,
+        api_key=CEREBRAS_API_KEY,
         base_url="https://api.cerebras.ai/v1",
     )
+    text_model = "llama-3.3-70b"
+elif GROK_API_KEY:
+    client = OpenAI(
+        api_key=GROK_API_KEY,
+        base_url="https://api.x.ai/v1",
+    )
+    text_model = "grok-2-latest"
+else:
+    logger.warning("Neither CEREBRAS_API_KEY nor GROK_API_KEY is set in environmental variables.")
 
 # Configure OpenAI client for Google Gemini (Vision)
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
@@ -146,7 +157,7 @@ def calculate_compatibility(request: CompatibilityRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-8b",
+            model=text_model,
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -186,7 +197,7 @@ def extract_interview_data(request: InterviewExtractRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-8b",
+            model=text_model,
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -216,7 +227,7 @@ def coach_respond(request: CoachRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-8b",
+            model=text_model,
             messages=[{"role": "user", "content": prompt}]
         )
         return {"response": response.choices[0].message.content.strip()}
@@ -252,7 +263,7 @@ def check_moderation(request: ModerationRequest):
         """
         
         response = client.chat.completions.create(
-            model="llama3.1-8b",
+            model=text_model,
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
@@ -285,7 +296,7 @@ def validate_onboarding_answer(request: ValidationRequest):
         Do not include markdown tags like ```json.
         """
         response = client.chat.completions.create(
-            model="llama3.1-8b",
+            model=text_model,
             messages=[{"role": "user", "content": prompt}]
         )
         return extract_json(response.choices[0].message.content)
