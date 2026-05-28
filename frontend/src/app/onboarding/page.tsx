@@ -704,6 +704,7 @@ export default function Onboarding() {
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Languages Spoken</label>
                     <select
                       value={languageSelect}
