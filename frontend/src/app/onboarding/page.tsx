@@ -242,12 +242,17 @@ export default function Onboarding() {
     loadModels();
   }, []);
 
+  const livenessStateRef = useRef(livenessState);
+  useEffect(() => {
+    livenessStateRef.current = livenessState;
+  }, [livenessState]);
+
   // Liveness State Machine & Loop
   useEffect(() => {
     let active = true;
 
     const detectFace = async () => {
-      if (!isLivenessModalOpen || !videoRef.current || livenessState === "complete") return;
+      if (!isLivenessModalOpen || !videoRef.current || livenessStateRef.current === "complete") return;
       const faceapi = await import('@vladmandic/face-api');
       
       const video = videoRef.current;
@@ -258,20 +263,21 @@ export default function Onboarding() {
 
         if (detection) {
           const { expressions, landmarks, detection: box } = detection;
+          const currentState = livenessStateRef.current;
           
-          if (livenessState === "align") {
+          if (currentState === "align") {
             // Check if face is centered and large enough
             const faceWidth = box.box.width;
             if (faceWidth > 120 && faceWidth < 400) { // Rough estimate for fitting in aperture
               setLivenessState("smile");
               setLivenessPrompt("Good! Now smile big to verify aliveness");
             }
-          } else if (livenessState === "smile") {
+          } else if (currentState === "smile") {
             if (expressions.happy > 0.8) {
               setLivenessState("left");
               setLivenessPrompt("Perfect! Turn your head slowly to the left");
             }
-          } else if (livenessState === "left") {
+          } else if (currentState === "left") {
             // Check yaw using landmarks (nose compared to eyes/jaw)
             const nose = landmarks.getNose()[0];
             const leftEye = landmarks.getLeftEye()[0];
@@ -283,7 +289,7 @@ export default function Onboarding() {
               setLivenessState("right");
               setLivenessPrompt("Great! Now turn your head to the right");
             }
-          } else if (livenessState === "right") {
+          } else if (currentState === "right") {
             const nose = landmarks.getNose()[0];
             const leftEye = landmarks.getLeftEye()[0];
             const rightEye = landmarks.getRightEye()[0];
@@ -320,7 +326,7 @@ export default function Onboarding() {
       }
     };
 
-    if (isLivenessModalOpen && isCameraActive && livenessState !== "complete") {
+    if (isLivenessModalOpen && isCameraActive) {
       // Small delay to let video start playing
       setTimeout(() => detectFace(), 1000);
     }
@@ -329,7 +335,7 @@ export default function Onboarding() {
       active = false;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [isLivenessModalOpen, isCameraActive, livenessState]);
+  }, [isLivenessModalOpen, isCameraActive]);
 
   // Liveness Real Webcam Capture init
   const startLivenessScanner = () => {
