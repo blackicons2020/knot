@@ -21,4 +21,15 @@ export class AIController {
     );
     return { response };
   }
+
+  @Post('compatibility')
+  async compatibility(
+    @Body() body: {
+      user_a: any;
+      user_b: any;
+    }
+  ) {
+    const { user_a, user_b } = body;
+    return this.aiService.calculateCompatibility(user_a, user_b);
+  }
 }

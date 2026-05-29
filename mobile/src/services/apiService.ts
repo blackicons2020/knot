@@ -118,6 +118,13 @@ class ApiService {
     });
   }
 
+  async calculateCompatibility(userA: User, userB: User): Promise<any> {
+    return this.request<any>('/ai/compatibility', {
+      method: 'POST',
+      body: JSON.stringify({ user_a: userA, user_b: userB }),
+    });
+  }
+
   async updatePremiumStatus(uid: string, isPremium: boolean): Promise<void> {
     await this.request(`/users/${uid}`, {
       method: 'PUT',

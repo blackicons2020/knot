@@ -47,15 +47,27 @@ export default function ChatScreen() {
     const msg = text.trim();
     if (!msg) return;
     setText('');
-    setAiChatTip('');
+    setAiChatTip('AI Coach is typing...');
     try {
       await db.sendMessage(match.id, user.id, msg);
-      setTimeout(() => {
-        setAiChatTip(`AI Message Assistant: ${match.name} values authentic alignment. Suggest discussing your preferred marriage timeline or origin backgrounds.`);
-      }, 2000);
-    } catch {
+      
+      const updatedHistory = [...messages, { id: 'tmp', text: msg, senderId: user.id, timestamp: Date.now() }];
+      const formattedHistory = updatedHistory.map(m => ({
+        role: m.senderId === user.id ? 'user' : 'match',
+        text: m.text
+      }));
+      
+      const coachData = await db.getCoachResponse(formattedHistory, user, msg);
+      if (coachData && coachData.response) {
+        setAiChatTip(`AI Coach: ${coachData.response}`);
+      } else {
+        setAiChatTip('');
+      }
+    } catch (err) {
+      console.error(err);
       addToast('Failed to send message', 'error');
       setText(msg);
+      setAiChatTip('');
     }
   };
 

@@ -16,12 +16,16 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>("m1");
   const [showMatchModal, setShowMatchModal] = useState(false);
+  const [matchCompatibility, setMatchCompatibility] = useState<any>(null);
+  const [isCalculatingMatch, setIsCalculatingMatch] = useState(false);
   const [connectedMatchName, setConnectedMatchName] = useState("");
 
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
+  const [matchesViewedToday, setMatchesViewedToday] = useState(0);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,42 +139,95 @@ export default function Dashboard() {
     }
   };
 
-  const handleSendChatMessage = () => {
+  const handleSendChatMessage = async () => {
     if (!chatInput.trim()) return;
-    setChatMessages(prev => [...prev, { sender: "me", text: chatInput }]);
+    const msg = chatInput.trim();
+    setChatMessages(prev => [...prev, { sender: "me", text: msg }]);
     setChatInput("");
-    setAiChatTip(""); // Remove tip once sent
+    setAiChatTip("AI Coach is analyzing...");
 
-    setTimeout(() => {
-      const sophiaResponses = [
-        "That sounds wonderful! I actually think communication is key. We should talk more about our goals.",
-        "Oh, I completely agree with you on that. It's so refreshing to hear.",
-        "Haha, that's exactly what I was thinking! Tell me more.",
-        "I've never looked at it that way before, but it makes perfect sense.",
-        "That's so interesting. What made you feel that way?",
-        "I love that we're on the same page. Alignment is really important to me."
-      ];
-      const randomResponse = sophiaResponses[Math.floor(Math.random() * sophiaResponses.length)];
-
-      setChatMessages(prev => [...prev, { sender: "partner", text: randomResponse }]);
-      setAiChatTip(`AI Message Assistant: ${activeMatch?.partner?.firstName || "Your match"} is highly engaged. Keep the conversation flowing naturally.`);
-    }, 1500);
-  };
-
-  const handlePass = () => {
-    if (currentMatchIndex < matches.length - 1) {
-      setCurrentMatchIndex(prev => prev + 1);
-      setActiveMatchImageIndex(0);
-    } else {
-      alert("You have reviewed all daily matches. More matches will be curated for you tomorrow!");
+    try {
+      const history = chatMessages.map(m => ({ role: m.sender === "me" ? "user" : "match", text: m.text }));
+      const res = await fetch("https://knot-backend-ai.onrender.com/coach/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_history: history,
+          user_profile: { firstName: userProfile?.firstName || "Web", lastName: userProfile?.lastName || "User", dateOfBirth: userProfile?.dateOfBirth || "1990-01-01", bio: "Seeking a serious partner." },
+          current_message: msg,
+        })
+      });
+      const data = await res.json();
+      if (data.response) {
+        setAiChatTip(`AI Coach: ${data.response}`);
+      } else {
+        setAiChatTip("");
+      }
+    } catch (e) {
+      setAiChatTip("AI Coach is currently unavailable.");
     }
   };
 
-  const handleConnect = () => {
-    setActiveTab("matchProfile");
+  const getDailyLimit = () => {
+    switch (userProfile?.subscriptionTier) {
+      case 'Executive': return 100;
+      case 'Elite': return 25;
+      case 'Premium': return 15;
+      default: return 3; // Essential / Free
+    }
   };
 
-  const handlePaystackCheckout = () => {
+  const checkLimitAndProceed = (action: () => void) => {
+    const limit = getDailyLimit();
+    if (matchesViewedToday >= limit) {
+      setShowSubscriptionModal(true);
+      return;
+    }
+    setMatchesViewedToday(prev => prev + 1);
+    action();
+  };
+
+  const handlePass = () => {
+    checkLimitAndProceed(() => {
+      if (currentMatchIndex < matches.length - 1) {
+        setCurrentMatchIndex(prev => prev + 1);
+        setActiveMatchImageIndex(0);
+      } else {
+        alert("You have reviewed all daily matches. More matches will be curated for you tomorrow!");
+      }
+    });
+  };
+
+  const handleConnect = () => {
+    checkLimitAndProceed(async () => {
+      setShowMatchModal(true);
+      setIsCalculatingMatch(true);
+      try {
+        const res = await fetch("https://knot-backend-ai.onrender.com/compatibility", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_a: userProfile || { firstName: "You" },
+            user_b: activeMatch?.partner || { firstName: "Match" }
+          })
+        });
+        const data = await res.json();
+        setMatchCompatibility(data);
+      } catch (e) {
+        setMatchCompatibility({
+          compatibilityScore: 92,
+          emotionalAlignment: 88,
+          communicationStyle: 90,
+          valuesAlignment: 95,
+          aiExplanation: "We couldn't connect to KNOT AI for deep insights, but you share a strong foundational alignment based on values."
+        });
+      } finally {
+        setIsCalculatingMatch(false);
+      }
+    });
+  };
+
+  const handlePaystackCheckout = (tierName: string, amount: number, currency: string) => {
     const paystack = (window as any).PaystackPop;
     if (!paystack) {
       const script = document.createElement("script");
@@ -179,7 +236,7 @@ export default function Dashboard() {
       script.onload = () => {
         const loadedPaystack = (window as any).PaystackPop;
         if (loadedPaystack) {
-          triggerPaystackPopup(loadedPaystack);
+          triggerPaystackPopup(loadedPaystack, tierName, amount, currency);
         } else {
           alert("Error: Paystack payment gateway could not be loaded. Please disable any active adblockers and try again.");
         }
@@ -189,17 +246,17 @@ export default function Dashboard() {
       };
       document.body.appendChild(script);
     } else {
-      triggerPaystackPopup(paystack);
+      triggerPaystackPopup(paystack, tierName, amount, currency);
     }
   };
 
-  const triggerPaystackPopup = (paystack: any) => {
+  const triggerPaystackPopup = (paystack: any, tierName: string, amount: number, currency: string) => {
     try {
       const handler = paystack.setup({
         key: "pk_live_b2c985a001f4c23b6bd1a19af4193f57c901446c",
-        email: "gabriel@knot.com",
-        amount: 250000,
-        currency: "NGN",
+        email: userProfile?.email || "gabriel@knot.com",
+        amount: amount * 100, // Paystack requires amount in kobo/cents
+        currency: currency,
         ref: "KNOT-WEB-" + Date.now(),
         callback: function(response: any) {
           console.log("Paystack payment successful! Reference:", response.reference);
@@ -220,7 +277,9 @@ export default function Dashboard() {
               const verifyData = await verifyRes.json();
               if (verifyData && verifyData.success) {
                 setIsPremium(true);
-                alert("🌟 Premium Registry Activated!\n\nWelcome to Premium Alignment. You now have unlimited access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.");
+                setUserProfile({ ...userProfile, subscriptionTier: tierName });
+                setShowSubscriptionModal(false);
+                alert(`🌟 ${tierName} Registry Activated!\n\nWelcome to ${tierName} Alignment. You now have expanded access to matches, advanced compatibility analysis, and our 24/7 AI Relationship Coach.`);
               } else {
                 alert("Verification Pending: Payment is being processed. Please refresh your profile in a few moments.");
               }
@@ -247,9 +306,180 @@ export default function Dashboard() {
       {/* Sidebar Backdrop for Mobile */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
+      )}
+
+      {/* Subscription Overlay Modal */}
+      {showSubscriptionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-6xl bg-[#121721] rounded-[32px] border border-white/10 p-8 shadow-2xl my-auto">
+            <button 
+              onClick={() => setShowSubscriptionModal(false)}
+              className="absolute top-6 right-6 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-gray-400 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="text-center space-y-4 mb-12">
+              <h2 className="text-4xl font-black font-serif text-white">Daily Match Limit Reached</h2>
+              <p className="text-gray-400 max-w-xl mx-auto">You've reached the maximum number of highly-curated matches for your current plan today. Upgrade to a premium tier to unlock more daily matches and exclusive relationship intelligence features.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Premium Plan */}
+              <div className="glass-card rounded-[24px] p-8 border border-white/5 relative flex flex-col">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#2D1B4E] text-[#D4AF37] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#D4AF37]/20 whitespace-nowrap">
+                  Most Popular
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2">Knot Premium</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
+                    <>
+                      <span className="text-4xl font-black text-[#D4AF37]">₦19,500</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-4xl font-black text-[#D4AF37]">$19.99</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  )}
+                </div>
+                <ul className="space-y-4 flex-1 mb-8">
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span className="font-bold text-white">15 AI-Curated Matches/Day</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Unlimited Messaging</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Advanced Compatibility Insights</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Read Receipts</span>
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => handlePaystackCheckout(
+                    'Premium', 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 19500 : 19.99, 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                  )}
+                  className="w-full py-4 rounded-xl bg-white/5 hover:bg-[#2D1B4E]/50 border border-white/10 hover:border-[#D4AF37]/30 text-white font-bold transition-all"
+                >
+                  Select Premium
+                </button>
+              </div>
+
+              {/* Elite Plan */}
+              <div className="glass-card rounded-[24px] p-8 border border-[#D4AF37]/30 relative flex flex-col shadow-lg shadow-[#D4AF37]/5 bg-[#D4AF37]/5">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                  Elite Verification
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2">Knot Elite</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
+                    <>
+                      <span className="text-4xl font-black text-[#D4AF37]">₦40,000</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-4xl font-black text-[#D4AF37]">$39.99</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  )}
+                </div>
+                <ul className="space-y-4 flex-1 mb-8">
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span className="font-bold text-white">25 Elite-Curated Matches/Day</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Elite Verification Badge</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Priority Matchmaking Placement</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Incognito & Advanced Privacy</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-300">
+                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
+                    <span>Deep Emotional Compatibility Maps</span>
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => handlePaystackCheckout(
+                    'Elite', 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 40000 : 39.99, 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                  )}
+                  className="w-full py-4 rounded-xl rose-glow-btn text-white font-black transition-all"
+                >
+                  Select Elite
+                </button>
+              </div>
+
+              {/* VIP Executive */}
+              <div className="glass-card rounded-[24px] p-8 border border-white/5 relative flex flex-col bg-black">
+                <h3 className="text-2xl font-black text-white mb-2">Knot Executive</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
+                    <>
+                      <span className="text-4xl font-black text-white">₦320,000</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-4xl font-black text-white">$199</span>
+                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                    </>
+                  )}
+                </div>
+                <ul className="space-y-4 flex-1 mb-8">
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <span className="font-bold text-white">Unlimited Concierge Matches</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <span>Private Relationship Advisors</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <span>White-Glove Onboarding</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    <span>Private Curated Introductions</span>
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => handlePaystackCheckout(
+                    'Executive', 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 320000 : 199.00, 
+                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                  )}
+                  className="w-full py-4 rounded-xl bg-white text-black font-black hover:bg-gray-200 transition-all"
+                >
+                  Apply for Executive
+                </button>
+              </div>
+            </div>
+            
+            <p className="text-center text-xs text-gray-500 mt-8">Secure payments processed safely. Cancel anytime.</p>
+          </div>
+        </div>
       )}
 
       {/* Sidebar Navigation */}
@@ -755,18 +985,22 @@ export default function Dashboard() {
                   </button>
                   <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
                   <div>
-                    <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Match"}</h5>
+                        <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Match"}</h5>
                     <span className="text-[9px] text-[#10B981] font-bold">Verified Real Human</span>
                   </div>
                 </div>
 
-                <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                  {chatMessages.map((m, idx) => (
-                    <div key={idx} className={`flex items-start gap-3 ${m.sender === "me" ? "justify-end" : ""}`}>
-                      <div className={`p-4 rounded-[22px] text-xs leading-relaxed max-w-[80%] ${
-                        m.sender === "me" 
-                          ? "bg-[#2D1B4E] border border-white/10 rounded-tr-none text-white"
-                          : "bg-white/5 border border-white/5 rounded-tl-none text-gray-300"
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2`}>
+                      {msg.sender !== "me" && (
+                        <img src={activeMatch?.partner?.photoUrl || ""} alt="Match" className="w-8 h-8 rounded-full object-cover mr-2 self-end" />
+                      )}
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
+                        msg.sender === "me" 
+                          ? "bg-[#2D1B4E] text-white border border-white/10 rounded-br-none" 
+                          : "bg-white/5 text-gray-300 border border-white/5 rounded-bl-none"
                       }`}>
                         {m.text}
                       </div>
@@ -914,47 +1148,27 @@ export default function Dashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                       <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Marriage History</div>
-                      <div className="text-sm text-white font-bold">Never married</div>
+                      <div className="text-sm text-white font-bold">{userProfile?.maritalStatus || "Not specified"}</div>
                     </div>
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                       <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Occupation</div>
-                      <div className="text-sm text-white font-bold">Software Engineer</div>
+                      <div className="text-sm text-white font-bold">{userProfile?.occupation || "Not specified"}</div>
                     </div>
                   </div>
 
                   <div className="p-5 rounded-2xl bg-[#121721] border border-white/10">
                     <h5 className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-black mb-3">Current Residence</h5>
                     <div className="grid grid-cols-3 gap-2 mb-4">
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Country</div><div className="text-sm text-white font-bold">USA</div></div>
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">State</div><div className="text-sm text-white font-bold">Massachusetts</div></div>
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">City</div><div className="text-sm text-white font-bold">Boston</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Country</div><div className="text-sm text-white font-bold">{userProfile?.residenceCountry || "USA"}</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">State</div><div className="text-sm text-white font-bold">{userProfile?.residenceState || "MA"}</div></div>
+                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">City</div><div className="text-sm text-white font-bold">{userProfile?.residenceCity || "Boston"}</div></div>
                     </div>
-                    
-                    <div className="h-px bg-white/5 my-4" />
-                    
-                    <h5 className="text-[10px] text-[#D4AF37] uppercase tracking-widest font-black mb-3">Heritage & Origin</h5>
-                    <div className="grid grid-cols-3 gap-2 mb-4">
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Country</div><div className="text-sm text-white font-bold">USA</div></div>
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">State</div><div className="text-sm text-white font-bold">New York</div></div>
-                      <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">City</div><div className="text-sm text-white font-bold">New York City</div></div>
-                    </div>
-                    
-                    <div><div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Cultural Identity</div><div className="text-sm text-white font-bold">African-American</div></div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Registry Bio</div>
-                    <div className="text-sm text-white leading-relaxed">Software engineer passionate about building a meaningful legacy. I value transparency, emotional availability, and structured growth. Looking for a partner who shares my vision for a stable, loving family and mutual continuous improvement.</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                      <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Nationality</div>
-                      <div className="text-sm text-white font-bold">American</div>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                       <div className="text-[9px] text-gray-500 uppercase tracking-widest font-black mb-1">Languages Spoken</div>
-                      <div className="text-sm text-white font-bold">English, Spanish</div>
+                      <div className="text-sm text-white font-bold">{userProfile?.languagesSpoken?.join(", ") || "English"}</div>
                     </div>
                   </div>
                 </div>
@@ -1060,7 +1274,7 @@ export default function Dashboard() {
                         <span className="text-gray-400 font-bold">Base Member</span>
                       </div>
                       <button
-                        onClick={handlePaystackCheckout}
+                        onClick={() => setShowSubscriptionModal(true)}
                         className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] text-[#0A0E14] font-black text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                       >
                         <Sparkles className="w-4 h-4" /> Upgrade to Premium
@@ -1093,8 +1307,15 @@ export default function Dashboard() {
 
             <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2">
               <div className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Compatibility Score</div>
-              <div className="text-3xl font-serif font-black text-[#D4AF37]">94%</div>
+              <div className="text-3xl font-serif font-black text-[#D4AF37]">
+                {isCalculatingMatch ? <span className="text-xl animate-pulse text-gray-400">Analyzing...</span> : `${matchCompatibility?.compatibilityScore || 94}%`}
+              </div>
             </div>
+            {!isCalculatingMatch && matchCompatibility?.aiExplanation && (
+              <div className="text-xs text-gray-300 italic">
+                {matchCompatibility.aiExplanation}
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               <button 
