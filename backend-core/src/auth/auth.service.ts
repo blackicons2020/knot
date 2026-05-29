@@ -84,9 +84,8 @@ export class AuthService {
     const email = 'admin@knot.com';
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
-      if (existing.role !== 'ADMIN') {
-        await this.prisma.user.update({ where: { email }, data: { role: 'ADMIN' } });
-      }
+      const passwordHash = await bcrypt.hash('Admin123!', 10);
+      await this.prisma.user.update({ where: { email }, data: { role: 'ADMIN', passwordHash } });
       return { message: 'Admin account is ready. Password is: Admin123!' };
     }
 
