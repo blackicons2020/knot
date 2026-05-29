@@ -268,7 +268,7 @@ export default function Onboarding() {
           if (currentState === "align") {
             // Check if face is centered and large enough
             const faceWidth = box.box.width;
-            if (faceWidth > 120 && faceWidth < 400) { // Rough estimate for fitting in aperture
+            if (faceWidth > 50) { // Relaxed size constraint for different webcams
               setLivenessState("smile");
               setLivenessPrompt("Good! Now smile big to verify aliveness");
             }
