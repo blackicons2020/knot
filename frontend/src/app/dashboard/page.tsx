@@ -1002,7 +1002,7 @@ export default function Dashboard() {
                           ? "bg-[#2D1B4E] text-white border border-white/10 rounded-br-none" 
                           : "bg-white/5 text-gray-300 border border-white/5 rounded-bl-none"
                       }`}>
-                        {m.text}
+                        {msg.text}
                       </div>
                     </div>
                   ))}
