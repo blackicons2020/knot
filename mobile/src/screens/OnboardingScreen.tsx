@@ -735,7 +735,7 @@ export default function OnboardingScreen() {
                     <Ionicons name="camera-outline" size={14} color="#D4AF37" style={{ marginRight: 6 }} />
                     <Text style={[styles.uploadBtnText, { color: '#D4AF37' }]}>Start Live Face Scan</Text>
                   </TouchableOpacity>
-                  <Text style={styles.uploadSubtext}>Selfie for Verification</Text>
+                  <Text style={styles.uploadSubtext}>This selfie is strictly for verification</Text>
                 </View>
               </View>
             </View>

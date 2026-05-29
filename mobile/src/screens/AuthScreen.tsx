@@ -75,7 +75,7 @@ export default function AuthScreen() {
           {isLogin ? 'Welcome Back' : 'Join the Registry'}
         </Text>
         <Text style={[styles.subheadline, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-          Where true relationships lead to vows
+          Fraud-Proof AI Matching High-Trust
         </Text>
 
         {/* Social Buttons */}

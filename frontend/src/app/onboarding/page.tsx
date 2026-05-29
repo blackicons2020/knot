@@ -5,8 +5,63 @@ import Link from "next/link";
 import { 
   Bot, Send, Sparkles, ShieldCheck, Heart, User, CheckCircle2, 
   MapPin, Brain, GraduationCap, Briefcase, Calendar, ArrowRight, Loader2,
-  Camera, Upload, X, Shield, RefreshCw, Smile, Eye, EyeOff
+  Camera, Upload, X, Shield, RefreshCw, Smile, Eye, EyeOff, ChevronDown, Check
 } from "lucide-react";
+
+const MultiSelectDropdown = ({ label, options, values, onChange, placeholder }: { label: string, options: string[], values: string[], onChange: (v: string[]) => void, placeholder: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleOption = (opt: string) => {
+    if (values.includes(opt)) {
+      onChange(values.filter(v => v !== opt));
+    } else {
+      onChange([...values, opt]);
+    }
+  };
+
+  return (
+    <div className="relative mb-3" ref={dropdownRef}>
+      <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">{label}</label>
+      <div 
+        className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white cursor-pointer flex justify-between items-center h-12"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={values.length === 0 ? "text-gray-500" : "truncate pr-2"}>
+          {values.length > 0 ? values.join(', ') : placeholder}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-2 bg-[#1A202C] border border-white/10 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+          {options.map(opt => (
+            <div 
+              key={opt}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0"
+              onClick={() => toggleOption(opt)}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${values.includes(opt) ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-white/20'}`}>
+                {values.includes(opt) && <Check className="w-3 h-3 text-black" strokeWidth={3} />}
+              </div>
+              <span className="text-xs text-gray-300">{opt}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 import { COUNTRIES, STATES_BY_COUNTRY, CITIES_BY_STATE } from "../../services/locationData";
 
 // Biometric Vector Images
@@ -794,22 +849,13 @@ export default function Onboarding() {
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Languages Spoken</label>
-                    <select
-                      multiple
-                      value={languagesSpoken}
-                      onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions, option => option.value);
-                        setLanguagesSpoken(selected);
-                      }}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 h-24"
-                    >
-                      {MAJOR_LANGUAGES.map((lang) => (
-                        <option key={lang} value={lang}>{lang}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <MultiSelectDropdown
+                    label="Languages Spoken"
+                    options={MAJOR_LANGUAGES}
+                    values={languagesSpoken}
+                    onChange={setLanguagesSpoken}
+                    placeholder="Select primary language"
+                  />
                   <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
                     <select
@@ -913,22 +959,13 @@ export default function Onboarding() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Ideal Partner Traits</label>
-                  <select
-                    multiple
-                    value={idealPartnerTraits}
-                    onChange={(e) => {
-                      const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setIdealPartnerTraits(selected);
-                    }}
-                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 h-24"
-                  >
-                    {MAJOR_TRAITS.map((trait) => (
-                      <option key={trait} value={trait}>{trait}</option>
-                    ))}
-                  </select>
-                </div>
+                <MultiSelectDropdown
+                  label="Ideal Partner Traits"
+                  options={MAJOR_TRAITS}
+                  values={idealPartnerTraits}
+                  onChange={setIdealPartnerTraits}
+                  placeholder="Select primary trait"
+                />
               </div>
 
               {/* Profile Picture Upload */}
@@ -993,7 +1030,7 @@ export default function Onboarding() {
                         <Camera className="w-3.5 h-3.5" /> Start Live Face Scan
                       </button>
                     </div>
-                    <p className="text-[9px] text-gray-500">This selfie is strictly for identity verification against your Government ID and will remain private.</p>
+                    <p className="text-[9px] text-gray-500">This selfie is strictly for verification</p>
                   </div>
                 </div>
               </div>
