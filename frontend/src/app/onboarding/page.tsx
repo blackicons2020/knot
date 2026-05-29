@@ -73,6 +73,8 @@ export default function Onboarding() {
   // Camera stream refs
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const idVideoRef = useRef<HTMLVideoElement | null>(null);
+  const idStreamRef = useRef<MediaStream | null>(null);
 
   // AI Interview Conversation State
   const [messages, setMessages] = useState<Array<{ role: "ai" | "user"; text: string }>>([
@@ -107,13 +109,6 @@ export default function Onboarding() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
   }, [messages]);
 
   // Handle Liveness Camera Access
@@ -265,7 +260,7 @@ export default function Onboarding() {
         }
       }
 
-      if (active && livenessState !== "complete") {
+      if (active) {
         requestRef.current = requestAnimationFrame(detectFace);
       }
     };
