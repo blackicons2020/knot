@@ -167,6 +167,9 @@ export default function OnboardingScreen() {
   const [dropdownCallback, setDropdownCallback] = useState<((v: string) => void) | null>(null);
   const [dropdownTitle, setDropdownTitle] = useState('');
   const [dropdownSearch, setDropdownSearch] = useState('');
+  const [dropdownMultiSelect, setDropdownMultiSelect] = useState(false);
+  const [dropdownSelectedItems, setDropdownSelectedItems] = useState<string[]>([]);
+  const [dropdownMultiCallback, setDropdownMultiCallback] = useState<((v: string[]) => void) | null>(null);
 
   // Trigger Scanner animation when Step 4 loads
   useEffect(() => {
@@ -376,10 +379,21 @@ export default function OnboardingScreen() {
     }
   };
 
-  const openDropdown = (title: string, options: string[], onSelect: (v: string) => void) => {
+  const openDropdown = (title: string, options: string[], callback: (v: string) => void) => {
     setDropdownTitle(title);
     setDropdownOptions(options);
-    setDropdownCallback(() => onSelect);
+    setDropdownCallback(() => callback);
+    setDropdownMultiSelect(false);
+    setDropdownSearch('');
+    setDropdownVisible(true);
+  };
+
+  const openMultiDropdown = (title: string, options: string[], currentValues: string[], callback: (v: string[]) => void) => {
+    setDropdownTitle(title);
+    setDropdownOptions(options);
+    setDropdownMultiCallback(() => callback);
+    setDropdownMultiSelect(true);
+    setDropdownSelectedItems(currentValues || []);
     setDropdownSearch('');
     setDropdownVisible(true);
   };
@@ -394,12 +408,28 @@ export default function OnboardingScreen() {
     <View style={{ marginBottom: 12 }}>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
-        style={[styles.dropdownBtn, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+        style={[styles.dropdownBtn, { backgroundColor: Colors.white + '05', borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
         onPress={() => openDropdown(label, options, onSelect)}
         activeOpacity={0.7}
       >
         <Text style={[styles.dropdownBtnText, { color: value ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }]}>
           {value || placeholder}
+        </Text>
+        <Ionicons name="chevron-down" size={18} color={Colors.gray400} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderMultiDropdownField = (label: string, values: string[], placeholder: string, options: string[], onSelect: (v: string[]) => void) => (
+    <View style={{ marginBottom: 12 }}>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity
+        style={[styles.dropdownBtn, { backgroundColor: Colors.white + '05', borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+        onPress={() => openMultiDropdown(label, options, values, onSelect)}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.dropdownBtnText, { color: values.length ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }]}>
+          {values.length ? values.join(', ') : placeholder}
         </Text>
         <Ionicons name="chevron-down" size={18} color={Colors.gray400} />
       </TouchableOpacity>
@@ -634,14 +664,7 @@ export default function OnboardingScreen() {
               <Text style={[styles.subSectionTitle, { color: Colors.primary, marginBottom: 16 }]}>Lifestyle & Expectations</Text>
               
               <View style={{ marginBottom: 12 }}>
-                <Text style={styles.label}>Languages Spoken</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.languagesSpoken?.join(', ')}
-                  onChangeText={(v) => set('languagesSpoken', v.split(',').map(s => s.trim()).filter(Boolean))}
-                  placeholder="e.g. English, Yoruba, Spanish"
-                  placeholderTextColor={Colors.gray400}
-                />
+                {renderMultiDropdownField('Languages Spoken', form.languagesSpoken || [], 'Select languages', ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'], (v) => set('languagesSpoken', v))}
               </View>
 
               {renderDropdownField('Marriage History', form.maritalStatus, 'Select history', Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
@@ -669,14 +692,9 @@ export default function OnboardingScreen() {
               {renderDropdownField('Children Intent', form.childrenPreference, 'Select intent', Object.values(ChildrenPreference), (v) => set('childrenPreference', v))}
 
               <View style={{ marginBottom: 12 }}>
-                <Text style={styles.label}>Ideal Partner Traits</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.idealPartnerTraits?.join(', ')}
-                  onChangeText={(v) => set('idealPartnerTraits', v.split(',').map(s => s.trim()).filter(Boolean))}
-                  placeholder="e.g. Kind, Ambitious, Family-oriented"
-                  placeholderTextColor={Colors.gray400}
-                />
+                <View style={styles.row}>
+                  {renderMultiDropdownField('Ideal Partner Traits', form.idealPartnerTraits || [], 'Select traits', ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'], (v) => set('idealPartnerTraits', v))}
+                </View>
               </View>
             </View>
 
@@ -696,7 +714,7 @@ export default function OnboardingScreen() {
                     <Ionicons name="cloud-upload-outline" size={14} color={Colors.gray300} style={{ marginRight: 6 }} />
                     <Text style={styles.uploadBtnText}>Upload Photo</Text>
                   </TouchableOpacity>
-                  <Text style={styles.uploadSubtext}>This photo will be displayed on your profile for matches to see.</Text>
+                  <Text style={styles.uploadSubtext}>Profile Picture for Display</Text>
                 </View>
               </View>
             </View>
@@ -717,15 +735,15 @@ export default function OnboardingScreen() {
                     <Ionicons name="camera-outline" size={14} color="#D4AF37" style={{ marginRight: 6 }} />
                     <Text style={[styles.uploadBtnText, { color: '#D4AF37' }]}>Start Live Face Scan</Text>
                   </TouchableOpacity>
-                  <Text style={styles.uploadSubtext}>This selfie is strictly for identity verification against your Government ID and will remain private.</Text>
+                  <Text style={styles.uploadSubtext}>Selfie for Verification</Text>
                 </View>
               </View>
             </View>
 
             {/* Government ID Scan */}
             <View style={styles.uploadSection}>
-              <Text style={styles.label}>GOVERNMENT ID SCAN (PASSPORT/DL)</Text>
-              <Text style={[styles.uploadSubtext, { marginBottom: 8 }]}>This document is strictly for identity verification.</Text>
+              <Text style={styles.label}>GOVERNMENT ID SCAN</Text>
+              <Text style={[styles.uploadSubtext, { marginBottom: 8 }]}>Int’l Passport, Driver’s License, voters card or National ID</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
                 <View style={[styles.uploadAvatar, { borderRadius: BorderRadius.lg }]}>
                   {govIdUri ? (
@@ -745,7 +763,7 @@ export default function OnboardingScreen() {
                       <Text style={styles.uploadBtnText}>Upload ID</Text>
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.uploadSubtext}>Official government passport, voter card, or license is required.</Text>
+                  <Text style={styles.uploadSubtext}>ID for Verification</Text>
                 </View>
               </View>
             </View>
@@ -1025,19 +1043,42 @@ export default function OnboardingScreen() {
               data={filteredDropdownOptions}
               keyExtractor={(item) => item}
               keyboardShouldPersistTaps="handled"
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.modalItem}
-                  onPress={() => {
-                    dropdownCallback?.(item);
-                    setDropdownVisible(false);
-                  }}
-                >
-                  <Text style={[styles.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }]}>{item}</Text>
-                </TouchableOpacity>
-              )}
+              renderItem={({ item }) => {
+                const isSelected = dropdownMultiSelect ? dropdownSelectedItems.includes(item) : false;
+                return (
+                  <TouchableOpacity
+                    style={[styles.modalItem, isSelected && { backgroundColor: Colors.primary + '20' }]}
+                    onPress={() => {
+                      if (dropdownMultiSelect) {
+                        setDropdownSelectedItems(prev => 
+                          prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+                        );
+                      } else {
+                        dropdownCallback?.(item);
+                        setDropdownVisible(false);
+                      }
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                      <Text style={[styles.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }]}>{item}</Text>
+                      {isSelected && <Ionicons name="checkmark" size={20} color={Colors.primary} />}
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
               ListEmptyComponent={<Text style={[styles.modalEmpty, { color: Colors.gray400 }]}>No results found</Text>}
             />
+            {dropdownMultiSelect && (
+              <TouchableOpacity
+                style={{ padding: 16, backgroundColor: Colors.primary, alignItems: 'center', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}
+                onPress={() => {
+                  dropdownMultiCallback?.(dropdownSelectedItems);
+                  setDropdownVisible(false);
+                }}
+              >
+                <Text style={{ color: Colors.dark, fontWeight: 'bold', fontSize: 16 }}>Done</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>

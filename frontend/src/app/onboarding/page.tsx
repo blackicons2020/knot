@@ -34,7 +34,7 @@ export default function Onboarding() {
 
   // Lifestyle & Expectations State
   const [nationality, setNationality] = useState("");
-  const [languagesSpoken, setLanguagesSpoken] = useState("");
+  const [languagesSpoken, setLanguagesSpoken] = useState<string[]>([]);
   const [maritalStatus, setMaritalStatus] = useState("");
   const [smoking, setSmoking] = useState("");
   const [drinking, setDrinking] = useState("");
@@ -48,10 +48,10 @@ export default function Onboarding() {
   const [traitSelect, setTraitSelect] = useState("");
   const [traitCustom, setTraitCustom] = useState("");
   
-  const [idealPartnerTraits, setIdealPartnerTraits] = useState("");
+  const [idealPartnerTraits, setIdealPartnerTraits] = useState<string[]>([]);
   
-  const MAJOR_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other'];
-  const MAJOR_TRAITS = ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Other'];
+  const MAJOR_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'];
+  const MAJOR_TRAITS = ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'];
   const [residenceCountry, setResidenceCountry] = useState("");
   const [residenceState, setResidenceState] = useState("");
   const [residenceCity, setResidenceCity] = useState("");
@@ -61,7 +61,7 @@ export default function Onboarding() {
 
   // Selfie Liveness Interactive Modal States
   const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
-  const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "tilt" | "complete">("idle");
+  const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "left" | "right" | "complete">("idle");
   const [livenessPrompt, setLivenessPrompt] = useState("Center your face in the circle");
   const [isCameraActive, setIsCameraActive] = useState(true);
 
@@ -109,6 +109,13 @@ export default function Onboarding() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   // Handle Liveness Camera Access
   useEffect(() => {
     if (isLivenessModalOpen && isCameraActive) {
@@ -142,66 +149,144 @@ export default function Onboarding() {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
           .then(stream => {
-            if (videoRef.current) {
-              videoRef.current.srcObject = stream;
+            if (idVideoRef.current) {
+              idVideoRef.current.srcObject = stream;
             }
-            streamRef.current = stream;
-          })
-          .catch(err => {
-            console.warn("Back camera access failed (using simulation wireframe):", err);
-            setIsCameraActive(false);
-          });
-      } else {
-        console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
+            idStreamRef.current = stream;
+        idStreamRef.current = stream;
+      })
+      .catch(err => {
+        console.warn("Back camera access failed (using simulation wireframe):", err);
         setIsCameraActive(false);
-      }
+      });
     } else {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
+      console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
+      setIsCameraActive(false);
     }
-  }, [isIdScanModalOpen, isCameraActive]);
+  } else {
+    if (idStreamRef.current) {
+      idStreamRef.current.getTracks().forEach(track => track.stop());
+      idStreamRef.current = null;
+    }
+  }
+}, [isIdScanModalOpen, isCameraActive]);
 
-  // Liveness Real Webcam Capture
+  // Add ref for face-api requestAnimationFrame
+  const requestRef = useRef<number | null>(null);
+
+  // Load face-api models on mount
+  useEffect(() => {
+    const loadModels = async () => {
+      try {
+        const faceapi = await import('@vladmandic/face-api');
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+          faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+          faceapi.nets.faceExpressionNet.loadFromUri('/models')
+        ]);
+        console.log("FaceAPI models loaded successfully.");
+      } catch (err) {
+        console.error("Failed to load FaceAPI models", err);
+      }
+    };
+    loadModels();
+  }, []);
+
+  // Liveness State Machine & Loop
+  useEffect(() => {
+    let active = true;
+
+    const detectFace = async () => {
+      if (!isLivenessModalOpen || !videoRef.current || livenessState === "complete") return;
+      const faceapi = await import('@vladmandic/face-api');
+      
+      const video = videoRef.current;
+      if (video.readyState === 4) { // HAVE_ENOUGH_DATA
+        const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceExpressions();
+
+        if (detection) {
+          const { expressions, landmarks, detection: box } = detection;
+          
+          if (livenessState === "align") {
+            // Check if face is centered and large enough
+            const faceWidth = box.box.width;
+            if (faceWidth > 120 && faceWidth < 400) { // Rough estimate for fitting in aperture
+              setLivenessState("smile");
+              setLivenessPrompt("Good! Now smile big to verify aliveness");
+            }
+          } else if (livenessState === "smile") {
+            if (expressions.happy > 0.8) {
+              setLivenessState("left");
+              setLivenessPrompt("Perfect! Turn your head slowly to the left");
+            }
+          } else if (livenessState === "left") {
+            // Check yaw using landmarks (nose compared to eyes/jaw)
+            const nose = landmarks.getNose()[0];
+            const leftEye = landmarks.getLeftEye()[0];
+            const rightEye = landmarks.getRightEye()[0];
+            // If turning left (from user's perspective, right on screen), nose is closer to right eye
+            const distLeft = Math.abs(nose.x - leftEye.x);
+            const distRight = Math.abs(nose.x - rightEye.x);
+            if (distRight < distLeft * 0.5) {
+              setLivenessState("right");
+              setLivenessPrompt("Great! Now turn your head to the right");
+            }
+          } else if (livenessState === "right") {
+            const nose = landmarks.getNose()[0];
+            const leftEye = landmarks.getLeftEye()[0];
+            const rightEye = landmarks.getRightEye()[0];
+            const distLeft = Math.abs(nose.x - leftEye.x);
+            const distRight = Math.abs(nose.x - rightEye.x);
+            if (distLeft < distRight * 0.5) {
+              setLivenessState("complete");
+              setLivenessPrompt("Liveness Confirmed! Biometric face scan complete.");
+              
+              // Capture the frame!
+              const canvas = document.createElement("canvas");
+              canvas.width = video.videoWidth || 640;
+              canvas.height = video.videoHeight || 480;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+                setVerificationSelfie(dataUrl);
+              }
+              
+              setTimeout(() => {
+                if (active) {
+                  setIsLivenessModalOpen(false);
+                  setIsCameraActive(false);
+                }
+              }, 1500);
+            }
+          }
+        }
+      }
+
+      if (active && livenessState !== "complete") {
+        requestRef.current = requestAnimationFrame(detectFace);
+      }
+    };
+
+    if (isLivenessModalOpen && isCameraActive && livenessState !== "complete") {
+      // Small delay to let video start playing
+      setTimeout(() => detectFace(), 1000);
+    }
+
+    return () => {
+      active = false;
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [isLivenessModalOpen, isCameraActive, livenessState]);
+
+  // Liveness Real Webcam Capture init
   const startLivenessScanner = () => {
     setIsLivenessModalOpen(true);
     setIsCameraActive(true);
     setLivenessState("align");
     setLivenessPrompt("Center your face in the circular aperture");
-    
-    setTimeout(() => {
-      setLivenessState("smile");
-      setLivenessPrompt("Now smile big and blink to verify aliveness");
-      
-      setTimeout(() => {
-        setLivenessState("tilt");
-        setLivenessPrompt("Perfect! Tilt your head slowly to the left");
-        
-        setTimeout(() => {
-          setLivenessState("complete");
-          setLivenessPrompt("Liveness Confirmed! Biometric face scan complete.");
-          
-          // Capture the actual webcam frame
-          if (videoRef.current) {
-            const canvas = document.createElement("canvas");
-            canvas.width = videoRef.current.videoWidth || 640;
-            canvas.height = videoRef.current.videoHeight || 480;
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-              const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-              setVerificationSelfie(dataUrl);
-            }
-          }
-          
-          setTimeout(() => {
-            setIsLivenessModalOpen(false);
-            setIsCameraActive(false);
-          }, 1500);
-        }, 2000);
-      }, 2000);
-    }, 2000);
   };
 
   // ID Card Real Webcam Capture
@@ -717,35 +802,18 @@ export default function Onboarding() {
                   <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Languages Spoken</label>
                     <select
-                      value={languageSelect}
+                      multiple
+                      value={languagesSpoken}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        setLanguageSelect(val);
-                        if (val !== 'Other') {
-                          setLanguagesSpoken(val);
-                        } else {
-                          setLanguagesSpoken(languageCustom);
-                        }
+                        const selected = Array.from(e.target.selectedOptions, option => option.value);
+                        setLanguagesSpoken(selected);
                       }}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 h-24"
                     >
-                      <option value="">Select primary language</option>
                       {MAJOR_LANGUAGES.map((lang) => (
                         <option key={lang} value={lang}>{lang}</option>
                       ))}
                     </select>
-                    {languageSelect === 'Other' && (
-                      <input
-                        type="text"
-                        value={languageCustom}
-                        onChange={(e) => {
-                          setLanguageCustom(e.target.value);
-                          setLanguagesSpoken(e.target.value);
-                        }}
-                        placeholder="Specify your language"
-                        className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
-                      />
-                    )}
                   </div>
                   <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
@@ -853,35 +921,18 @@ export default function Onboarding() {
                 <div>
                   <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Ideal Partner Traits</label>
                   <select
-                    value={traitSelect}
+                    multiple
+                    value={idealPartnerTraits}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setTraitSelect(val);
-                      if (val !== 'Other') {
-                        setIdealPartnerTraits(val);
-                      } else {
-                        setIdealPartnerTraits(traitCustom);
-                      }
+                      const selected = Array.from(e.target.selectedOptions, option => option.value);
+                      setIdealPartnerTraits(selected);
                     }}
-                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
+                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 h-24"
                   >
-                    <option value="">Select primary trait</option>
                     {MAJOR_TRAITS.map((trait) => (
                       <option key={trait} value={trait}>{trait}</option>
                     ))}
                   </select>
-                  {traitSelect === 'Other' && (
-                    <input
-                      type="text"
-                      value={traitCustom}
-                      onChange={(e) => {
-                        setTraitCustom(e.target.value);
-                        setIdealPartnerTraits(e.target.value);
-                      }}
-                      placeholder="Specify ideal trait"
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
-                    />
-                  )}
                 </div>
               </div>
 
@@ -954,8 +1005,8 @@ export default function Onboarding() {
 
               {/* Government ID Scan (Passport/DL) */}
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Government ID Scan (Passport/DL)</label>
-                <p className="text-[9px] text-gray-500 mb-2">This document is strictly for identity verification.</p>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Government ID Scan</label>
+                <p className="text-[9px] text-gray-500 mb-2">Int’l Passport, Driver’s License, voters card or National ID</p>
                 <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
                   <div className="w-16 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {governmentId ? (
@@ -997,7 +1048,7 @@ export default function Onboarding() {
                         <Upload className="w-3 h-3" /> Upload ID
                       </label>
                     </div>
-                    <p className="text-[9px] text-gray-500">Official government passport, voter card, or license is required.</p>
+                    <p className="text-[9px] text-gray-500">ID for Verification</p>
                   </div>
                 </div>
               </div>
@@ -1303,9 +1354,10 @@ export default function Onboarding() {
             <div className="p-3 bg-white/5 border border-white/5 rounded-2xl min-h-[64px] flex flex-col items-center justify-center">
               <span className="text-xs font-bold text-gray-200">{livenessPrompt}</span>
               <div className="flex gap-1.5 mt-2">
-                <span className={`w-2 h-2 rounded-full ${livenessState === "align" ? "bg-[#D4AF37] animate-pulse" : livenessState !== "idle" ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : livenessState === "tilt" || livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "tilt" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "align" ? "bg-[#D4AF37] animate-pulse" : "bg-[#10B981]"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "left" || livenessState === "right" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "left" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "right" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "right" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
               </div>
             </div>
           </div>
@@ -1334,7 +1386,7 @@ export default function Onboarding() {
             <div className="w-full aspect-[1.586/1] rounded-2xl border-4 border-dashed border-[#E27D8D] mx-auto flex items-center justify-center relative overflow-hidden bg-[#121721] shadow-[0_0_24px_rgba(226,125,141,0.15)]">
               {isCameraActive ? (
                 <video 
-                  ref={videoRef} 
+                  ref={idVideoRef} 
                   autoPlay 
                   playsInline 
                   muted 
