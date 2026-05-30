@@ -45,6 +45,9 @@ export default function Dashboard() {
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           setUserProfile(profileData);
+          if (profileData.photoUrls && profileData.photoUrls.length > 0) {
+            setUserPhotos(profileData.photoUrls);
+          }
         }
 
         // Fetch daily matches securely
@@ -68,10 +71,7 @@ export default function Dashboard() {
   const [activeMatchImageIndex, setActiveMatchImageIndex] = useState(0);
 
   // User Photos State
-  const [userPhotos, setUserPhotos] = useState([
-    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
-    "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&q=80"
-  ]);
+  const [userPhotos, setUserPhotos] = useState<string[]>([]);
   const [primaryPhotoIndex, setPrimaryPhotoIndex] = useState(0);
 
   // AI Coach State
@@ -81,13 +81,9 @@ export default function Dashboard() {
   const [coachInput, setCoachInput] = useState("");
 
   // Messaging State
-  const [chatMessages, setChatMessages] = useState([
-    { sender: "partner", text: "Hi! I really liked your thoughts on long-term commitment. How was your weekend?" }
-  ]);
+  const [chatMessages, setChatMessages] = useState<{sender: string, text: string}[]>([]);
   const [chatInput, setChatInput] = useState("");
-  const [aiChatTip, setAiChatTip] = useState(
-    "AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory."
-  );
+  const [aiChatTip, setAiChatTip] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
@@ -608,8 +604,12 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
               {/* Profile Card */}
               <div className="md:col-span-7 glass-card rounded-[32px] overflow-hidden border border-white/10 p-6 space-y-6">
-                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden">
-                  <img src={activeMatch.imageUrls?.[0] || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"} alt={activeMatch.firstName} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
+                <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden bg-gray-900 flex items-center justify-center">
+                  {activeMatch.imageUrls?.[0] || activeMatch.photoUrl ? (
+                    <img src={activeMatch.imageUrls?.[0] || activeMatch.photoUrl} alt={activeMatch.firstName} className="w-full h-full object-cover grayscale-[15%] brightness-95" />
+                  ) : (
+                    <User className="w-24 h-24 text-gray-700" />
+                  )}
                   
                   <div className="absolute top-8 right-4 trust-badge px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 z-10">
                     <ShieldCheck className="w-3.5 h-3.5" /> Trust {activeMatch.trustScore}%
@@ -706,7 +706,13 @@ export default function Dashboard() {
               
               <div className="glass-card rounded-[32px] overflow-hidden border border-[#D4AF37]/30">
                 <div className="relative h-[400px] md:h-[500px] group">
-                  <img src={activeMatch.imageUrls?.[activeMatchImageIndex] || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80"} alt={activeMatch.firstName} className="w-full h-full object-cover object-center transition-all duration-500" />
+                  {activeMatch.imageUrls?.[activeMatchImageIndex] || activeMatch.photoUrl ? (
+                    <img src={activeMatch.imageUrls?.[activeMatchImageIndex] || activeMatch.photoUrl} alt={activeMatch.firstName} className="w-full h-full object-cover object-center transition-all duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                      <User className="w-16 h-16 text-gray-700" />
+                    </div>
+                  )}
                   
                   {activeMatch.imageUrls?.length > 1 && (
                     <>
@@ -961,16 +967,29 @@ export default function Dashboard() {
               {/* Inbox Lists */}
               <div className={`md:col-span-4 glass-card rounded-[28px] border border-white/5 p-4 overflow-y-auto space-y-2 h-full ${activeChatId ? "hidden md:block" : "block"}`}>
                 <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-black px-2 mb-3">Chats</h4>
-                <button 
-                  onClick={() => setActiveChatId("m1")}
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-left transition-all hover:bg-[#2D1B4E]/40"
-                >
-                  <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
-                  <div>
-                    <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Sophia"}</h5>
-                    <p className="text-[10px] text-gray-400 truncate">How was your weekend?</p>
+                {matches.length > 0 ? (
+                  <button 
+                    onClick={() => setActiveChatId("m1")}
+                    className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[#2D1B4E]/30 border border-[#D4AF37]/20 text-left transition-all hover:bg-[#2D1B4E]/40"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden flex-shrink-0">
+                      {activeMatch?.partner?.photoUrl ? (
+                        <img className="w-full h-full object-cover" src={activeMatch.partner.photoUrl} alt="" />
+                      ) : (
+                        <User className="w-full h-full p-2 text-gray-500" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="text-xs font-bold text-white truncate">{activeMatch?.partner?.firstName || "Match"}</h5>
+                      <p className="text-[10px] text-gray-400 truncate">Tap to start conversation</p>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-40 text-center px-4">
+                    <MessageSquare className="w-8 h-8 text-gray-600 mb-2" />
+                    <p className="text-xs text-gray-500">No active conversations yet.</p>
                   </div>
-                </button>
+                )}
               </div>
 
               {/* Chat View */}
@@ -983,7 +1002,13 @@ export default function Dashboard() {
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
-                  <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80" alt="" />
+                  <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden flex-shrink-0">
+                    {activeMatch?.partner?.photoUrl ? (
+                      <img className="w-full h-full object-cover" src={activeMatch.partner.photoUrl} alt="" />
+                    ) : (
+                      <User className="w-full h-full p-1.5 text-gray-500" />
+                    )}
+                  </div>
                   <div>
                         <h5 className="text-xs font-bold text-white">{activeMatch?.partner?.firstName || "Match"}</h5>
                     <span className="text-[9px] text-[#10B981] font-bold">Verified Real Human</span>
