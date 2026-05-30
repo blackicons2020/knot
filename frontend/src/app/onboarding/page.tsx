@@ -90,20 +90,23 @@ export default function Onboarding() {
   // Lifestyle & Expectations State
   const [nationality, setNationality] = useState("");
   const [languagesSpoken, setLanguagesSpoken] = useState<string[]>([]);
-  const [maritalStatus, setMaritalStatus] = useState("");
+  const [otherLanguageInput, setOtherLanguageInput] = useState("");
   const [smoking, setSmoking] = useState("");
   const [drinking, setDrinking] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
   const [childrenStatus, setChildrenStatus] = useState("");
   const [marriageTimeline, setMarriageTimeline] = useState("");
   const [willingToRelocate, setWillingToRelocate] = useState("");
+  const [preferredMarryFrom, setPreferredMarryFrom] = useState("");
   const [childrenPreference, setChildrenPreference] = useState("");
+  const [idealPartnerTraits, setIdealPartnerTraits] = useState<string[]>([]);
+  const [otherTraitInput, setOtherTraitInput] = useState("");
+  const [marriageExpectations, setMarriageExpectations] = useState("");
   
   const [languageSelect, setLanguageSelect] = useState("");
   const [languageCustom, setLanguageCustom] = useState("");
   const [traitSelect, setTraitSelect] = useState("");
   const [traitCustom, setTraitCustom] = useState("");
-  
-  const [idealPartnerTraits, setIdealPartnerTraits] = useState<string[]>([]);
   
   const MAJOR_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'];
   const MAJOR_TRAITS = ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'];
@@ -487,16 +490,22 @@ export default function Onboarding() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
+      
+      // Final cleanup of "Other" fields
+      const finalLanguages = languagesSpoken.map(l => l === "Other" && otherLanguageInput ? otherLanguageInput : l);
+      const finalTraits = idealPartnerTraits.map(t => t === "Other" && otherTraitInput ? otherTraitInput : t);
 
       const verifyRes = await fetch(`${API_URL}/users/onboarding/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          selfieUrl: verificationSelfie,
+          selfieUrl: verificationSelfie, // FIX: Scanner now strictly uses the Selfie Image
           idUrl: governmentId,
           firstName: firstName,
           lastName: lastName,
-          dateOfBirth: dateOfBirth
+          dateOfBirth: dateOfBirth,
+          languagesSpoken: finalLanguages,
+          idealPartnerTraits: finalTraits
         })
       });
 
@@ -855,13 +864,24 @@ export default function Onboarding() {
                 <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <MultiSelectDropdown
-                    label="Languages Spoken"
-                    options={MAJOR_LANGUAGES}
-                    values={languagesSpoken}
-                    onChange={setLanguagesSpoken}
-                    placeholder="Select primary language"
-                  />
+                  <div className="space-y-2">
+                    <MultiSelectDropdown
+                      label="Languages Spoken"
+                      options={[...MAJOR_LANGUAGES, "Other"]}
+                      values={languagesSpoken}
+                      onChange={setLanguagesSpoken}
+                      placeholder="Select primary language"
+                    />
+                    {languagesSpoken.includes("Other") && (
+                      <input
+                        type="text"
+                        value={otherLanguageInput}
+                        onChange={(e) => setOtherLanguageInput(e.target.value)}
+                        placeholder="Please specify other language(s)"
+                        className="w-full bg-[#121721] border border-[#D4AF37]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                      />
+                    )}
+                  </div>
                   <div>
                     <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
                     <select
@@ -965,13 +985,24 @@ export default function Onboarding() {
                   </div>
                 </div>
 
-                <MultiSelectDropdown
-                  label="Ideal Partner Traits"
-                  options={MAJOR_TRAITS}
-                  values={idealPartnerTraits}
-                  onChange={setIdealPartnerTraits}
-                  placeholder="Select primary trait"
-                />
+                <div className="space-y-2 mt-4 sm:col-span-2">
+                  <MultiSelectDropdown
+                    label="Ideal Partner Traits"
+                    options={[...MAJOR_TRAITS, "Other"]}
+                    values={idealPartnerTraits}
+                    onChange={setIdealPartnerTraits}
+                    placeholder="Select primary trait"
+                  />
+                  {idealPartnerTraits.includes("Other") && (
+                    <input
+                      type="text"
+                      value={otherTraitInput}
+                      onChange={(e) => setOtherTraitInput(e.target.value)}
+                      placeholder="Please specify other ideal trait(s)"
+                      className="w-full bg-[#121721] border border-[#D4AF37]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]"
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Profile Picture Upload */}
