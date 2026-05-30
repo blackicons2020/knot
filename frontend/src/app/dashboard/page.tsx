@@ -296,6 +296,42 @@ export default function Dashboard() {
     }
   };
 
+  const getFormattedPrice = (tier: string, country: string | undefined) => {
+    const isAfrica = ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(country || '');
+    
+    if (tier === 'Premium') {
+      if (!isAfrica) return { symbol: '$', amount: '19.99', currency: 'USD', rawAmount: 19.99 };
+      switch (country) {
+        case 'Nigeria': return { symbol: '₦', amount: '18,000', currency: 'NGN', rawAmount: 18000 };
+        case 'Ghana': return { symbol: 'GH₵', amount: '168', currency: 'GHS', rawAmount: 168 };
+        case 'Kenya': return { symbol: 'KSh', amount: '1,560', currency: 'KES', rawAmount: 1560 };
+        case 'South Africa': return { symbol: 'R', amount: '228', currency: 'ZAR', rawAmount: 228 };
+        default: return { symbol: '$', amount: '12.00', currency: 'USD', rawAmount: 12 };
+      }
+    }
+    if (tier === 'Elite') {
+      if (!isAfrica) return { symbol: '$', amount: '39.99', currency: 'USD', rawAmount: 39.99 };
+      switch (country) {
+        case 'Nigeria': return { symbol: '₦', amount: '37,500', currency: 'NGN', rawAmount: 37500 };
+        case 'Ghana': return { symbol: 'GH₵', amount: '350', currency: 'GHS', rawAmount: 350 };
+        case 'Kenya': return { symbol: 'KSh', amount: '3,250', currency: 'KES', rawAmount: 3250 };
+        case 'South Africa': return { symbol: 'R', amount: '475', currency: 'ZAR', rawAmount: 475 };
+        default: return { symbol: '$', amount: '25.00', currency: 'USD', rawAmount: 25 };
+      }
+    }
+    if (tier === 'Executive') {
+      if (!isAfrica) return { symbol: '$', amount: '199', currency: 'USD', rawAmount: 199 };
+      switch (country) {
+        case 'Nigeria': return { symbol: '₦', amount: '298,500', currency: 'NGN', rawAmount: 298500 };
+        case 'Ghana': return { symbol: 'GH₵', amount: '2,786', currency: 'GHS', rawAmount: 2786 };
+        case 'Kenya': return { symbol: 'KSh', amount: '25,870', currency: 'KES', rawAmount: 25870 };
+        case 'South Africa': return { symbol: 'R', amount: '3,781', currency: 'ZAR', rawAmount: 3781 };
+        default: return { symbol: '$', amount: '199.00', currency: 'USD', rawAmount: 199 };
+      }
+    }
+    return { symbol: '$', amount: '0', currency: 'USD', rawAmount: 0 };
+  };
+
   return (
     <div className="flex h-screen bg-[#0A0E14] text-white overflow-hidden">
       
@@ -362,17 +398,8 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-xl font-black text-white mb-2">Knot Premium</h3>
                 <div className="flex items-end gap-1 mb-6">
-                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
-                    <>
-                      <span className="text-3xl font-black text-[#D4AF37]">₦18,000</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-3xl font-black text-[#D4AF37]">$19.99</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  )}
+                  <span className="text-3xl font-black text-[#D4AF37]">{getFormattedPrice('Premium', userProfile?.residenceCountry).symbol}{getFormattedPrice('Premium', userProfile?.residenceCountry).amount}</span>
+                  <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
                   <li className="flex items-start gap-2 text-sm text-gray-300">
@@ -399,8 +426,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Premium', 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 18000 : 19.99, 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                    getFormattedPrice('Premium', userProfile?.residenceCountry).rawAmount, 
+                    getFormattedPrice('Premium', userProfile?.residenceCountry).currency
                   )}
                   className="w-full py-3 rounded-xl bg-white/5 hover:bg-[#2D1B4E]/50 border border-white/10 hover:border-[#D4AF37]/30 text-white font-bold transition-all text-sm"
                 >
@@ -415,17 +442,8 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-xl font-black text-white mb-2">Knot Elite</h3>
                 <div className="flex items-end gap-1 mb-6">
-                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
-                    <>
-                      <span className="text-3xl font-black text-[#D4AF37]">₦37,500</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-3xl font-black text-[#D4AF37]">$39.99</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  )}
+                  <span className="text-3xl font-black text-[#D4AF37]">{getFormattedPrice('Elite', userProfile?.residenceCountry).symbol}{getFormattedPrice('Elite', userProfile?.residenceCountry).amount}</span>
+                  <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
                   <li className="flex items-start gap-2 text-sm text-gray-300">
@@ -452,8 +470,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Elite', 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 37500 : 39.99, 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                    getFormattedPrice('Elite', userProfile?.residenceCountry).rawAmount, 
+                    getFormattedPrice('Elite', userProfile?.residenceCountry).currency
                   )}
                   className="w-full py-3 rounded-xl rose-glow-btn text-white font-black transition-all text-sm"
                 >
@@ -465,17 +483,8 @@ export default function Dashboard() {
               <div className="glass-card rounded-[24px] p-6 border border-white/5 relative flex flex-col bg-black">
                 <h3 className="text-xl font-black text-white mb-2">Knot Executive</h3>
                 <div className="flex items-end gap-1 mb-6">
-                  {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
-                    <>
-                      <span className="text-3xl font-black text-white">₦298,500</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-3xl font-black text-white">$199</span>
-                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
-                    </>
-                  )}
+                  <span className="text-3xl font-black text-white">{getFormattedPrice('Executive', userProfile?.residenceCountry).symbol}{getFormattedPrice('Executive', userProfile?.residenceCountry).amount}</span>
+                  <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
                   <li className="flex items-start gap-2 text-sm text-gray-400">
@@ -502,8 +511,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Executive', 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 298500 : 199.00, 
-                    ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
+                    getFormattedPrice('Executive', userProfile?.residenceCountry).rawAmount, 
+                    getFormattedPrice('Executive', userProfile?.residenceCountry).currency
                   )}
                   className="w-full py-3 rounded-xl bg-white text-black font-black hover:bg-gray-200 transition-all text-sm"
                 >

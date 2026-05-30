@@ -25,6 +25,37 @@ export const CURRENCY_MAP: Record<string, CurrencyInfo> = {
 export const DEFAULT_CURRENCY: CurrencyInfo = { code: 'USD', symbol: '$', rate: 1 };
 export const PAYSTACK_SUPPORTED_CURRENCIES = ['NGN', 'USD', 'GHS', 'KES', 'ZAR'];
 
+export const AFRICAN_COUNTRIES = ['Nigeria', 'Ghana', 'Kenya', 'South Africa'];
+
+export const TIER_PRICES = {
+  Essential: { global: 0, africa: 0 },
+  Premium: { global: 19.99, africa: 12.00 },
+  Elite: { global: 39.99, africa: 25.00 },
+  Executive: { global: 199.00, africa: 199.00 },
+};
+
+export const getTierPriceUSD = (tier: 'Essential' | 'Premium' | 'Elite' | 'Executive', country: string): number => {
+  if (tier === 'Essential') return 0;
+  const isAfrica = AFRICAN_COUNTRIES.includes(country);
+  return isAfrica ? TIER_PRICES[tier].africa : TIER_PRICES[tier].global;
+};
+
+export const formatTierPrice = (tier: 'Essential' | 'Premium' | 'Elite' | 'Executive', country: string = 'United States of America'): string => {
+  if (tier === 'Essential') return 'Free';
+  const isAfrica = AFRICAN_COUNTRIES.includes(country);
+  const usdAmount = getTierPriceUSD(tier, country);
+  
+  if (isAfrica) {
+    const info = CURRENCY_MAP[country] || DEFAULT_CURRENCY;
+    const localValue = usdAmount * info.rate;
+    return `${info.symbol}${localValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else {
+    // Force USD for non-African countries
+    return `$${usdAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+};
+
+
 export const formatLocalPrice = (usdAmount: number, country: string = 'United States of America'): string => {
   const info = CURRENCY_MAP[country] || DEFAULT_CURRENCY;
   const localValue = usdAmount * info.rate;
