@@ -309,8 +309,8 @@ export default function Dashboard() {
 
       {/* Subscription Overlay Modal */}
       {showSubscriptionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-6xl bg-[#121721] rounded-[32px] border border-white/10 p-8 shadow-2xl my-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-7xl bg-[#121721] rounded-[32px] border border-white/10 p-8 shadow-2xl my-auto">
             <button 
               onClick={() => setShowSubscriptionModal(false)}
               className="absolute top-6 right-6 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-gray-400 transition-colors"
@@ -323,42 +323,67 @@ export default function Dashboard() {
               <p className="text-gray-400 max-w-xl mx-auto">You've reached the maximum number of highly-curated matches for your current plan today. Upgrade to a premium tier to unlock more daily matches and exclusive relationship intelligence features.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Basic Plan */}
+              <div className="glass-card rounded-[24px] p-6 border border-white/5 relative flex flex-col opacity-80 hover:opacity-100 transition-opacity">
+                <h3 className="text-xl font-black text-white mb-2">Knot Basic</h3>
+                <div className="flex items-end gap-1 mb-6">
+                  <span className="text-3xl font-black text-white">Free</span>
+                </div>
+                <ul className="space-y-4 flex-1 mb-8">
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span>3 Standard Matches/Day</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-sm text-gray-400">
+                    <CheckCircle2 className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <span>Basic Messaging</span>
+                  </li>
+                </ul>
+                <button 
+                  onClick={() => setShowSubscriptionModal(false)}
+                  className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all text-sm"
+                >
+                  Current Plan
+                </button>
+              </div>
+
               {/* Premium Plan */}
-              <div className="glass-card rounded-[24px] p-8 border border-white/5 relative flex flex-col">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#2D1B4E] text-[#D4AF37] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#D4AF37]/20 whitespace-nowrap">
+              {/* Premium Plan */}
+              <div className="glass-card rounded-[24px] p-6 border border-white/5 relative flex flex-col">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#2D1B4E] text-[#D4AF37] px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-[#D4AF37]/20 whitespace-nowrap">
                   Most Popular
                 </div>
-                <h3 className="text-2xl font-black text-white mb-2">Knot Premium</h3>
+                <h3 className="text-xl font-black text-white mb-2">Knot Premium</h3>
                 <div className="flex items-end gap-1 mb-6">
                   {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
                     <>
-                      <span className="text-4xl font-black text-[#D4AF37]">₦19,500</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-[#D4AF37]">₦19,500</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-4xl font-black text-[#D4AF37]">$19.99</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-[#D4AF37]">$19.99</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   )}
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span className="font-bold text-white">15 AI-Curated Matches/Day</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="font-bold text-white text-xs">15 AI-Curated Matches/Day</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Unlimited Messaging</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Unlimited Messaging</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Advanced Compatibility Insights</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Advanced Compatibility</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Read Receipts</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Read Receipts</span>
                   </li>
                 </ul>
                 <button 
@@ -367,51 +392,52 @@ export default function Dashboard() {
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 19500 : 19.99, 
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
                   )}
-                  className="w-full py-4 rounded-xl bg-white/5 hover:bg-[#2D1B4E]/50 border border-white/10 hover:border-[#D4AF37]/30 text-white font-bold transition-all"
+                  className="w-full py-3 rounded-xl bg-white/5 hover:bg-[#2D1B4E]/50 border border-white/10 hover:border-[#D4AF37]/30 text-white font-bold transition-all text-sm"
                 >
                   Select Premium
                 </button>
               </div>
 
               {/* Elite Plan */}
-              <div className="glass-card rounded-[24px] p-8 border border-[#D4AF37]/30 relative flex flex-col shadow-lg shadow-[#D4AF37]/5 bg-[#D4AF37]/5">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+              {/* Elite Plan */}
+              <div className="glass-card rounded-[24px] p-6 border border-[#D4AF37]/30 relative flex flex-col shadow-lg shadow-[#D4AF37]/5 bg-[#D4AF37]/5">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#D4AF37] text-black px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
                   Elite Verification
                 </div>
-                <h3 className="text-2xl font-black text-white mb-2">Knot Elite</h3>
+                <h3 className="text-xl font-black text-white mb-2">Knot Elite</h3>
                 <div className="flex items-end gap-1 mb-6">
                   {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
                     <>
-                      <span className="text-4xl font-black text-[#D4AF37]">₦40,000</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-[#D4AF37]">₦40,000</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-4xl font-black text-[#D4AF37]">$39.99</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-[#D4AF37]">$39.99</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   )}
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span className="font-bold text-white">25 Elite-Curated Matches/Day</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="font-bold text-white text-xs">25 Elite Matches/Day</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Elite Verification Badge</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Elite Verification Badge</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Priority Matchmaking Placement</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Priority Matchmaking</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Incognito & Advanced Privacy</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Incognito & Privacy</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-[#D4AF37] flex-shrink-0" />
-                    <span>Deep Emotional Compatibility Maps</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-300">
+                    <CheckCircle2 className="w-4 h-4 text-[#D4AF37] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Deep Emotional Maps</span>
                   </li>
                 </ul>
                 <button 
@@ -420,44 +446,45 @@ export default function Dashboard() {
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 40000 : 39.99, 
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
                   )}
-                  className="w-full py-4 rounded-xl rose-glow-btn text-white font-black transition-all"
+                  className="w-full py-3 rounded-xl rose-glow-btn text-white font-black transition-all text-sm"
                 >
                   Select Elite
                 </button>
               </div>
 
               {/* VIP Executive */}
-              <div className="glass-card rounded-[24px] p-8 border border-white/5 relative flex flex-col bg-black">
-                <h3 className="text-2xl font-black text-white mb-2">Knot Executive</h3>
+              {/* VIP Executive */}
+              <div className="glass-card rounded-[24px] p-6 border border-white/5 relative flex flex-col bg-black">
+                <h3 className="text-xl font-black text-white mb-2">Knot Executive</h3>
                 <div className="flex items-end gap-1 mb-6">
                   {['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? (
                     <>
-                      <span className="text-4xl font-black text-white">₦320,000</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-white">₦320,000</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   ) : (
                     <>
-                      <span className="text-4xl font-black text-white">$199</span>
-                      <span className="text-sm text-gray-500 font-bold mb-1">/mo</span>
+                      <span className="text-3xl font-black text-white">$199</span>
+                      <span className="text-xs text-gray-500 font-bold mb-1">/mo</span>
                     </>
                   )}
                 </div>
                 <ul className="space-y-4 flex-1 mb-8">
-                  <li className="flex items-start gap-3 text-sm text-gray-400">
-                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span className="font-bold text-white">Unlimited Concierge Matches</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-400">
+                    <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="font-bold text-white text-xs">Unlimited Concierge Matches</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-400">
-                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span>Private Relationship Advisors</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-400">
+                    <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Private Advisors</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-400">
-                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span>White-Glove Onboarding</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-400">
+                    <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">White-Glove Onboarding</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-gray-400">
-                    <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                    <span>Private Curated Introductions</span>
+                  <li className="flex items-start gap-2 text-sm text-gray-400">
+                    <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-xs">Curated Introductions</span>
                   </li>
                 </ul>
                 <button 
@@ -466,7 +493,7 @@ export default function Dashboard() {
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 320000 : 199.00, 
                     ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(userProfile?.residenceCountry) ? 'NGN' : 'USD'
                   )}
-                  className="w-full py-4 rounded-xl bg-white text-black font-black hover:bg-gray-200 transition-all"
+                  className="w-full py-3 rounded-xl bg-white text-black font-black hover:bg-gray-200 transition-all text-sm"
                 >
                   Apply for Executive
                 </button>
