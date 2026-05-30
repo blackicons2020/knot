@@ -300,36 +300,39 @@ export default function Dashboard() {
     const isAfrica = ['Nigeria', 'Ghana', 'Kenya', 'South Africa'].includes(country || '');
     
     if (tier === 'Premium') {
-      if (!isAfrica) return { symbol: '$', amount: '19.99', currency: 'USD', rawAmount: 19.99 };
+      const usdAmount = isAfrica ? 12 : 19.99;
+      if (!isAfrica) return { symbol: '$', amount: '19.99', currency: 'USD', rawAmount: 19.99, usdAmount };
       switch (country) {
-        case 'Nigeria': return { symbol: '₦', amount: '18,000', currency: 'NGN', rawAmount: 18000 };
-        case 'Ghana': return { symbol: 'GH₵', amount: '168', currency: 'GHS', rawAmount: 168 };
-        case 'Kenya': return { symbol: 'KSh', amount: '1,560', currency: 'KES', rawAmount: 1560 };
-        case 'South Africa': return { symbol: 'R', amount: '228', currency: 'ZAR', rawAmount: 228 };
-        default: return { symbol: '$', amount: '12.00', currency: 'USD', rawAmount: 12 };
+        case 'Nigeria': return { symbol: '₦', amount: '18,000', currency: 'NGN', rawAmount: 18000, usdAmount };
+        case 'Ghana': return { symbol: 'GH₵', amount: '168', currency: 'GHS', rawAmount: 168, usdAmount };
+        case 'Kenya': return { symbol: 'KSh', amount: '1,560', currency: 'KES', rawAmount: 1560, usdAmount };
+        case 'South Africa': return { symbol: 'R', amount: '228', currency: 'ZAR', rawAmount: 228, usdAmount };
+        default: return { symbol: '$', amount: '12.00', currency: 'USD', rawAmount: 12, usdAmount };
       }
     }
     if (tier === 'Elite') {
-      if (!isAfrica) return { symbol: '$', amount: '39.99', currency: 'USD', rawAmount: 39.99 };
+      const usdAmount = isAfrica ? 25 : 39.99;
+      if (!isAfrica) return { symbol: '$', amount: '39.99', currency: 'USD', rawAmount: 39.99, usdAmount };
       switch (country) {
-        case 'Nigeria': return { symbol: '₦', amount: '37,500', currency: 'NGN', rawAmount: 37500 };
-        case 'Ghana': return { symbol: 'GH₵', amount: '350', currency: 'GHS', rawAmount: 350 };
-        case 'Kenya': return { symbol: 'KSh', amount: '3,250', currency: 'KES', rawAmount: 3250 };
-        case 'South Africa': return { symbol: 'R', amount: '475', currency: 'ZAR', rawAmount: 475 };
-        default: return { symbol: '$', amount: '25.00', currency: 'USD', rawAmount: 25 };
+        case 'Nigeria': return { symbol: '₦', amount: '37,500', currency: 'NGN', rawAmount: 37500, usdAmount };
+        case 'Ghana': return { symbol: 'GH₵', amount: '350', currency: 'GHS', rawAmount: 350, usdAmount };
+        case 'Kenya': return { symbol: 'KSh', amount: '3,250', currency: 'KES', rawAmount: 3250, usdAmount };
+        case 'South Africa': return { symbol: 'R', amount: '475', currency: 'ZAR', rawAmount: 475, usdAmount };
+        default: return { symbol: '$', amount: '25.00', currency: 'USD', rawAmount: 25, usdAmount };
       }
     }
     if (tier === 'Executive') {
-      if (!isAfrica) return { symbol: '$', amount: '199', currency: 'USD', rawAmount: 199 };
+      const usdAmount = 199;
+      if (!isAfrica) return { symbol: '$', amount: '199', currency: 'USD', rawAmount: 199, usdAmount };
       switch (country) {
-        case 'Nigeria': return { symbol: '₦', amount: '298,500', currency: 'NGN', rawAmount: 298500 };
-        case 'Ghana': return { symbol: 'GH₵', amount: '2,786', currency: 'GHS', rawAmount: 2786 };
-        case 'Kenya': return { symbol: 'KSh', amount: '25,870', currency: 'KES', rawAmount: 25870 };
-        case 'South Africa': return { symbol: 'R', amount: '3,781', currency: 'ZAR', rawAmount: 3781 };
-        default: return { symbol: '$', amount: '199.00', currency: 'USD', rawAmount: 199 };
+        case 'Nigeria': return { symbol: '₦', amount: '298,500', currency: 'NGN', rawAmount: 298500, usdAmount };
+        case 'Ghana': return { symbol: 'GH₵', amount: '2,786', currency: 'GHS', rawAmount: 2786, usdAmount };
+        case 'Kenya': return { symbol: 'KSh', amount: '25,870', currency: 'KES', rawAmount: 25870, usdAmount };
+        case 'South Africa': return { symbol: 'R', amount: '3,781', currency: 'ZAR', rawAmount: 3781, usdAmount };
+        default: return { symbol: '$', amount: '199.00', currency: 'USD', rawAmount: 199, usdAmount };
       }
     }
-    return { symbol: '$', amount: '0', currency: 'USD', rawAmount: 0 };
+    return { symbol: '$', amount: '0', currency: 'USD', rawAmount: 0, usdAmount: 0 };
   };
 
   return (
@@ -426,8 +429,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Premium', 
-                    getFormattedPrice('Premium', userProfile?.residenceCountry).rawAmount, 
-                    getFormattedPrice('Premium', userProfile?.residenceCountry).currency
+                    getFormattedPrice('Premium', userProfile?.residenceCountry).usdAmount, 
+                    'USD'
                   )}
                   className="w-full py-3 rounded-xl bg-white/5 hover:bg-[#2D1B4E]/50 border border-white/10 hover:border-[#D4AF37]/30 text-white font-bold transition-all text-sm"
                 >
@@ -470,8 +473,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Elite', 
-                    getFormattedPrice('Elite', userProfile?.residenceCountry).rawAmount, 
-                    getFormattedPrice('Elite', userProfile?.residenceCountry).currency
+                    getFormattedPrice('Elite', userProfile?.residenceCountry).usdAmount, 
+                    'USD'
                   )}
                   className="w-full py-3 rounded-xl rose-glow-btn text-white font-black transition-all text-sm"
                 >
@@ -511,8 +514,8 @@ export default function Dashboard() {
                 <button 
                   onClick={() => handlePaystackCheckout(
                     'Executive', 
-                    getFormattedPrice('Executive', userProfile?.residenceCountry).rawAmount, 
-                    getFormattedPrice('Executive', userProfile?.residenceCountry).currency
+                    getFormattedPrice('Executive', userProfile?.residenceCountry).usdAmount, 
+                    'USD'
                   )}
                   className="w-full py-3 rounded-xl bg-white text-black font-black hover:bg-gray-200 transition-all text-sm"
                 >
