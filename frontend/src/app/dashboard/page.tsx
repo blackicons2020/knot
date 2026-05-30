@@ -1147,7 +1147,10 @@ export default function Dashboard() {
                       <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
                     </div>
                   </div>
-                  <button className="w-full mt-2 py-2.5 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:bg-white/20 transition-colors flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => window.location.href = '/onboarding'}
+                    className="w-full mt-2 py-2.5 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+                  >
                     <Settings className="w-3.5 h-3.5" /> Edit Profile Data
                   </button>
                 </div>
