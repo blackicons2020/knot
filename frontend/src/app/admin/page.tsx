@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock, Plus, X } from "lucide-react";
+import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock, Plus, X, Menu } from "lucide-react";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -11,6 +11,7 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Create User State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -148,16 +149,33 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#0A0D14] flex">
+      {/* Sidebar Backdrop for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#121721] border-r border-white/5 flex flex-col p-6 hidden md:flex">
-        <Link href="/" className="flex items-center gap-2 mb-12">
-          <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
-            KNOT<span className="text-[#D4AF37]">.</span>
-          </span>
-        </Link>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#121721] border-r border-white/5 flex flex-col p-6 transition-transform duration-300 md:static md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex items-center justify-between mb-12">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-2xl font-serif font-black tracking-wider text-[#F5F5F1] flex items-center gap-1">
+              KNOT<span className="text-[#D4AF37]">.</span>
+            </span>
+          </Link>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-1 text-gray-400 hover:text-white md:hidden"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         <div className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Admin Hub</div>
         <nav className="space-y-2 flex-1">
-          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 text-[#D4AF37] font-semibold text-sm">
+          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 text-[#D4AF37] font-semibold text-sm" onClick={() => setIsSidebarOpen(false)}>
             <Users className="w-4 h-4" /> Users
           </Link>
         </nav>
@@ -177,11 +195,20 @@ export default function AdminDashboard() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#E27D8D]/5 blur-[120px] pointer-events-none" />
 
         <header className="mb-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-black text-white flex items-center gap-3">
-              <ShieldAlert className="w-8 h-8 text-[#E27D8D]" /> Admin Control
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">Manage platform users and data.</p>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-gray-400 hover:text-white md:hidden"
+              aria-label="Open sidebar"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-serif font-black text-white flex items-center gap-3">
+                <ShieldAlert className="w-8 h-8 text-[#E27D8D]" /> Admin Control
+              </h1>
+              <p className="text-sm text-gray-400 mt-1">Manage platform users and data.</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <button 
