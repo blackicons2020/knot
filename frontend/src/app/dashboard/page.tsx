@@ -1148,7 +1148,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <button 
-                    onClick={() => window.location.href = '/onboarding'}
+                    onClick={() => window.location.href = '/onboarding?step=2'}
                     className="w-full mt-2 py-2.5 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
                   >
                     <Settings className="w-3.5 h-3.5" /> Edit Profile Data

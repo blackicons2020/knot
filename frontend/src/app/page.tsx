@@ -30,7 +30,7 @@ export default function Home() {
             <Link href="/login" className="text-sm font-semibold hover:text-[#D4AF37] transition-colors">
               Sign In
             </Link>
-            <Link href="/onboarding" className="px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-black rose-glow-btn text-white">
+            <Link href="/login" className="px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-black rose-glow-btn text-white">
               Join Registry
             </Link>
           </div>
@@ -371,7 +371,7 @@ export default function Home() {
                   <li className="flex items-center gap-2">✔ Private Registry Listing</li>
                 </ul>
               </div>
-              <Link href="/onboarding" className="w-full mt-8 py-3 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-[#F5F5F1] text-center hover:bg-white/10 transition-all">
+              <Link href="/login" className="w-full mt-8 py-3 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-[#F5F5F1] text-center hover:bg-white/10 transition-all">
                 Become Elite
               </Link>
             </div>

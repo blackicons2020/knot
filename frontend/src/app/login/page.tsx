@@ -12,6 +12,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,14 @@ export default function Login() {
 
     setIsLoading(true);
     setError("");
+
+    if (!isLogin) {
+      // For onboarding, store credentials temporarily and go directly to step 2 (Personal Details)
+      sessionStorage.setItem('onboard_email', email);
+      sessionStorage.setItem('onboard_password', password);
+      router.push('/onboarding?step=2');
+      return;
+    }
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
@@ -69,8 +78,12 @@ export default function Login() {
         <div className="glass-card rounded-[36px] p-8 sm:p-10 border border-white/10 shadow-2xl relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
           
-          <h1 className="text-2xl font-serif font-black text-white mb-2">Welcome Back</h1>
-          <p className="text-sm text-gray-400 mb-8">Sign in to access your curated matches and AI coach.</p>
+          <h1 className="text-2xl font-serif font-black text-white mb-2">
+            {isLogin ? "Welcome Back" : "Join the Registry"}
+          </h1>
+          <p className="text-sm text-gray-400 mb-8">
+            {isLogin ? "Sign in to access your curated matches and AI coach." : "Enter your email and a secure password to begin."}
+          </p>
 
           <form onSubmit={handleLogin} className="space-y-5">
             {error && (
@@ -88,6 +101,7 @@ export default function Login() {
                 placeholder="name@email.com" 
                 className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
                 disabled={isLoading}
+                autoComplete="username"
               />
             </div>
 
@@ -101,6 +115,7 @@ export default function Login() {
                   placeholder="Enter your password" 
                   className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
                   disabled={isLoading}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                 />
                 <button
                   type="button"
@@ -118,16 +133,20 @@ export default function Login() {
               className="w-full mt-2 py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating...</>
+                <><Loader2 className="w-4 h-4 animate-spin" /> {isLogin ? 'Authenticating...' : 'Processing...'}</>
               ) : (
-                <>Access Registry <ArrowRight className="w-4 h-4" /></>
+                <>{isLogin ? 'Access Registry' : 'Apply Here'} <ArrowRight className="w-4 h-4" /></>
               )}
             </button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-white/5 text-center">
             <p className="text-xs text-gray-500">
-              Not on the registry yet? <Link href="/onboarding" className="text-[#D4AF37] font-bold hover:underline">Apply here</Link>
+              {isLogin ? (
+                <>Not on the registry yet? <button type="button" onClick={() => setIsLogin(false)} className="text-[#D4AF37] font-bold hover:underline">Apply here</button></>
+              ) : (
+                <>Already a member? <button type="button" onClick={() => setIsLogin(true)} className="text-[#D4AF37] font-bold hover:underline">Access Registry</button></>
+              )}
             </p>
           </div>
         </div>

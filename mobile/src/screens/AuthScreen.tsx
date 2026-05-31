@@ -81,15 +81,9 @@ export default function AuthScreen() {
         {/* Social Buttons */}
         <View style={styles.socialContainer}>
           <TouchableOpacity
-            style={[
-              styles.socialBtn,
-              {
-                backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.white,
-                borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : Colors.gray200,
-              },
-            ]}
+            style={styles.socialBtn}
             onPress={handleGoogleSignIn}
-            activeOpacity={0.8}
+            activeOpacity={0.6}
           >
             <Ionicons name="logo-google" size={20} color={isDarkMode ? Colors.white : Colors.gray700} />
             <Text style={[styles.socialBtnText, { color: isDarkMode ? Colors.white : Colors.gray700 }]}>
@@ -143,6 +137,8 @@ export default function AuthScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                textContentType="password"
+                autoComplete={isLogin ? "password" : "new-password"}
               />
             </View>
             <TouchableOpacity
@@ -231,14 +227,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: 15,
-    borderWidth: 1,
+    gap: 8,
+    paddingVertical: 10,
   },
   socialBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
   },
   dividerRow: {
     flexDirection: 'row',
