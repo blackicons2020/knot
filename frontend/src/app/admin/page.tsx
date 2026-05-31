@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock } from "lucide-react";
+import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock, Plus, X } from "lucide-react";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -11,9 +11,17 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  
+  // Create User State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newFirstName, setNewFirstName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
-  useEffect(() => {
-    const fetchUsers = async () => {
+  const fetchUsers = async () => {
       const token = localStorage.getItem('knot_token');
       if (!token) {
         router.push('/login');
@@ -43,6 +51,50 @@ export default function AdminDashboard() {
     };
     fetchUsers();
   }, [router]);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail || !newPassword || !newFirstName || !newLastName) {
+      setCreateError("All fields are required.");
+      return;
+    }
+    
+    setIsCreating(true);
+    setCreateError("");
+    
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newEmail,
+          password: newPassword,
+          firstName: newFirstName,
+          lastName: newLastName
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to create user.");
+      }
+      
+      // Successfully created, close modal and refresh list
+      setIsCreateModalOpen(false);
+      setNewEmail("");
+      setNewPassword("");
+      setNewFirstName("");
+      setNewLastName("");
+      fetchUsers();
+      
+    } catch (err: any) {
+      setCreateError(err.message || "An error occurred while creating the user.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('knot_token');
@@ -128,6 +180,14 @@ export default function AdminDashboard() {
               <ShieldAlert className="w-8 h-8 text-[#E27D8D]" /> Admin Control
             </h1>
             <p className="text-sm text-gray-400 mt-1">Manage platform users and data.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Create User
+            </button>
           </div>
         </header>
 
@@ -225,6 +285,89 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Create User Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#121721] rounded-[24px] border border-white/10 shadow-2xl overflow-hidden relative">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <h2 className="text-xl font-serif font-black text-white">Create New User</h2>
+              <button 
+                onClick={() => setIsCreateModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+              {createError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400">
+                  {createError}
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">First Name</label>
+                  <input 
+                    type="text" 
+                    value={newFirstName}
+                    onChange={e => setNewFirstName(e.target.value)}
+                    className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Last Name</label>
+                  <input 
+                    type="text" 
+                    value={newLastName}
+                    onChange={e => setNewLastName(e.target.value)}
+                    className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                  className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Password</label>
+                <input 
+                  type="password" 
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+                />
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isCreating}
+                  className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#D4AF37] text-black hover:bg-[#F2CD5C] transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create User"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
