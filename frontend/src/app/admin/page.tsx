@@ -49,6 +49,8 @@ export default function AdminDashboard() {
         setIsLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchUsers();
   }, [router]);
 
