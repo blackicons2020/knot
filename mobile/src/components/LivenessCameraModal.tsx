@@ -17,7 +17,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   const cameraRef = useRef<Camera>(null);
   
   const [hasPermission, setHasPermission] = useState(false);
-  const [livenessState, setLivenessState] = useState<'align' | 'smile' | 'left' | 'right' | 'complete'>('align');
+  const [livenessState, setLivenessState] = useState<'align' | 'smile' | 'up' | 'down' | 'complete'>('align');
   const [prompt, setPrompt] = useState('Center your face in the circular aperture');
 
   // Request permissions
@@ -29,18 +29,18 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   }, []);
 
   // Shared values for worklet state
-  const step = useSharedValue(0); // 0: align, 1: smile, 2: left, 3: right, 4: complete
+  const step = useSharedValue(0); // 0: align, 1: smile, 2: up, 3: down, 4: complete
   
   const handleStepChangeJS = Worklets.createRunOnJS((newStep: number) => {
     if (newStep === 1) {
       setLivenessState('smile');
       setPrompt('Good! Now smile big to verify aliveness');
     } else if (newStep === 2) {
-      setLivenessState('left');
-      setPrompt('Perfect! Turn your head slowly to the left');
+      setLivenessState('up');
+      setPrompt('Perfect! Raise your head up');
     } else if (newStep === 3) {
-      setLivenessState('right');
-      setPrompt('Great! Now turn your head to the right');
+      setLivenessState('down');
+      setPrompt('Great! Now lower your head down');
     } else if (newStep === 4) {
       setLivenessState('complete');
       setPrompt('Liveness Confirmed! Biometric face scan complete.');
@@ -91,14 +91,14 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
           handleStepChangeJS(2);
         }
       } else if (step.value === 2) {
-        // Left
-        if (face.yawAngle && face.yawAngle < -20) {
+        // Up (Pitch positive)
+        if (face.pitchAngle && face.pitchAngle > 15) {
           step.value = 3;
           handleStepChangeJS(3);
         }
       } else if (step.value === 3) {
-        // Right
-        if (face.yawAngle && face.yawAngle > 20) {
+        // Down (Pitch negative)
+        if (face.pitchAngle && face.pitchAngle < -15) {
           step.value = 4;
           handleStepChangeJS(4);
         }
@@ -125,9 +125,10 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
               ref={cameraRef}
               style={styles.camera}
               device={device}
-              isActive={visible && livenessState !== 'complete'}
+              isActive={visible}
               frameProcessor={frameProcessor}
               pixelFormat="yuv"
+              photo={true}
             />
           </View>
         </View>
@@ -136,8 +137,8 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
           <Text style={styles.promptText}>{prompt}</Text>
           <View style={styles.dots}>
             <View style={[styles.dot, livenessState !== 'align' ? styles.dotActive : null]} />
-            <View style={[styles.dot, (livenessState === 'left' || livenessState === 'right' || livenessState === 'complete') ? styles.dotActive : null]} />
-            <View style={[styles.dot, (livenessState === 'right' || livenessState === 'complete') ? styles.dotActive : null]} />
+            <View style={[styles.dot, (livenessState === 'up' || livenessState === 'down' || livenessState === 'complete') ? styles.dotActive : null]} />
+            <View style={[styles.dot, (livenessState === 'down' || livenessState === 'complete') ? styles.dotActive : null]} />
             <View style={[styles.dot, livenessState === 'complete' ? styles.dotActive : null]} />
           </View>
         </View>

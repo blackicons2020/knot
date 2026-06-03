@@ -13,6 +13,7 @@ import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, User } from '../types';
 import { db } from '../services/apiService';
 import { MATCHES_DATA } from '../constants';
+import { AdminAddUserModal } from '../components/AdminAddUserModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type AdminTab = 'all' | 'pending' | 'verified' | 'subscribers';
@@ -26,6 +27,7 @@ export default function AdminScreen() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AdminTab>('all');
   const [search, setSearch] = useState('');
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -100,8 +102,11 @@ export default function AdminScreen() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={s.seedBtn} onPress={() => setIsAddUserModalOpen(true)}>
+            <Text style={s.seedBtnText}>ADD USER</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={s.seedBtn} onPress={handleSeed} disabled={loading}>
-            <Text style={s.seedBtnText}>{loading ? 'SEEDING...' : 'SEED MOCK DATA'}</Text>
+            <Text style={s.seedBtnText}>{loading ? 'SEEDING...' : 'SEED DATA'}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.closeBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="close" size={22} color={Colors.white} />
@@ -182,6 +187,16 @@ export default function AdminScreen() {
           }
         />
       )}
+
+      <AdminAddUserModal
+        visible={isAddUserModalOpen}
+        onClose={() => setIsAddUserModalOpen(false)}
+        onUserAdded={() => {
+          setIsAddUserModalOpen(false);
+          load();
+        }}
+        isDarkMode={isDarkMode}
+      />
     </View>
   );
 }

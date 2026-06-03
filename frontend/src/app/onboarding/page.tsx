@@ -134,7 +134,7 @@ export default function Onboarding() {
 
   // Selfie Liveness Interactive Modal States
   const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
-  const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "left" | "right" | "complete">("idle");
+  const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "up" | "down" | "complete">("idle");
   const [livenessPrompt, setLivenessPrompt] = useState("Center your face in the circle");
   const [isCameraActive, setIsCameraActive] = useState(true);
 
@@ -292,28 +292,39 @@ export default function Onboarding() {
             }
           } else if (currentState === "smile") {
             if (expressions.happy > 0.8) {
-              setLivenessState("left");
-              setLivenessPrompt("Perfect! Turn your head slowly to the left");
+              setLivenessState("up");
+              setLivenessPrompt("Perfect! Raise your head up");
             }
-          } else if (currentState === "left") {
-            // Check yaw using landmarks (nose compared to eyes/jaw)
+          } else if (currentState === "up") {
+            // Check pitch using landmarks
             const nose = landmarks.getNose()[0];
             const leftEye = landmarks.getLeftEye()[0];
             const rightEye = landmarks.getRightEye()[0];
-            // If turning left (from user's perspective, right on screen), nose is closer to right eye
-            const distLeft = Math.abs(nose.x - leftEye.x);
-            const distRight = Math.abs(nose.x - rightEye.x);
-            if (distRight < distLeft * 0.5) {
-              setLivenessState("right");
-              setLivenessPrompt("Great! Now turn your head to the right");
+            const jaw = landmarks.getJawOutline();
+            const bottomJaw = jaw[8]; // chin
+            
+            const eyeY = (leftEye.y + rightEye.y) / 2;
+            const distEyeNose = Math.abs(nose.y - eyeY);
+            const distNoseChin = Math.abs(bottomJaw.y - nose.y);
+            
+            // Looking up means nose gets closer to eyes
+            if (distEyeNose < distNoseChin * 0.5) {
+              setLivenessState("down");
+              setLivenessPrompt("Great! Now lower your head down");
             }
-          } else if (currentState === "right") {
+          } else if (currentState === "down") {
             const nose = landmarks.getNose()[0];
             const leftEye = landmarks.getLeftEye()[0];
             const rightEye = landmarks.getRightEye()[0];
-            const distLeft = Math.abs(nose.x - leftEye.x);
-            const distRight = Math.abs(nose.x - rightEye.x);
-            if (distLeft < distRight * 0.5) {
+            const jaw = landmarks.getJawOutline();
+            const bottomJaw = jaw[8]; // chin
+            
+            const eyeY = (leftEye.y + rightEye.y) / 2;
+            const distEyeNose = Math.abs(nose.y - eyeY);
+            const distNoseChin = Math.abs(bottomJaw.y - nose.y);
+            
+            // Looking down means nose gets closer to chin
+            if (distNoseChin < distEyeNose * 0.6) {
               setLivenessState("complete");
               setLivenessPrompt("Liveness Confirmed! Biometric face scan complete.");
               
@@ -1408,9 +1419,9 @@ export default function Onboarding() {
               <span className="text-xs font-bold text-gray-200">{livenessPrompt}</span>
               <div className="flex gap-1.5 mt-2">
                 <span className={`w-2 h-2 rounded-full ${livenessState === "align" ? "bg-[#D4AF37] animate-pulse" : "bg-[#10B981]"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "left" || livenessState === "right" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "left" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "right" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "right" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "up" || livenessState === "down" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "up" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "down" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "down" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
               </div>
             </div>
           </div>

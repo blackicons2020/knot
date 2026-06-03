@@ -3,7 +3,63 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock, Plus, X, Menu } from "lucide-react";
+import { ShieldAlert, Trash2, Users, AlertCircle, Loader2, LogOut, Lock, Unlock, Plus, X, Menu, Calendar, Briefcase, User, MapPin, Camera, Check, ChevronDown } from "lucide-react";
+import { COUNTRIES, STATES_BY_COUNTRY } from "../../services/locationData";
+
+const MultiSelectDropdown = ({ label, options, values, onChange, placeholder }: { label: string, options: string[], values: string[], onChange: (v: string[]) => void, placeholder: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleOption = (opt: string) => {
+    if (values.includes(opt)) {
+      onChange(values.filter(v => v !== opt));
+    } else {
+      onChange([...values, opt]);
+    }
+  };
+
+  return (
+    <div className="relative mb-3" ref={dropdownRef}>
+      <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">{label}</label>
+      <div 
+        className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white cursor-pointer flex justify-between items-center"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={values.length === 0 ? "text-gray-500" : "truncate pr-2"}>
+          {values.length > 0 ? values.join(', ') : placeholder}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-2 bg-[#1A202C] border border-white/10 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+          {options.map(opt => (
+            <div 
+              key={opt}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0"
+              onClick={() => toggleOption(opt)}
+            >
+              <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${values.includes(opt) ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-white/20'}`}>
+                {values.includes(opt) && <Check className="w-3 h-3 text-black" strokeWidth={3} />}
+              </div>
+              <span className="text-xs text-gray-300">{opt}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -13,14 +69,60 @@ export default function AdminDashboard() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // Create User State
+  // Add User State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newFirstName, setNewFirstName] = useState("");
   const [newLastName, setNewLastName] = useState("");
+  const [newDateOfBirth, setNewDateOfBirth] = useState("");
+  const [newOccupation, setNewOccupation] = useState("");
+  const [newReligion, setNewReligion] = useState("");
+  const [newBio, setNewBio] = useState("");
+  const [newResidenceCountry, setNewResidenceCountry] = useState("");
+  const [newResidenceState, setNewResidenceState] = useState("");
+  const [newResidenceCity, setNewResidenceCity] = useState("");
+  const [newOriginCountry, setNewOriginCountry] = useState("");
+  const [newOriginState, setNewOriginState] = useState("");
+  const [newOriginCity, setNewOriginCity] = useState("");
+  const [newMaritalStatus, setNewMaritalStatus] = useState("");
+  const [newSmoking, setNewSmoking] = useState("");
+  const [newDrinking, setNewDrinking] = useState("");
+  const [newChildrenStatus, setNewChildrenStatus] = useState("");
+  const [newMarriageTimeline, setNewMarriageTimeline] = useState("");
+  const [newWillingToRelocate, setNewWillingToRelocate] = useState("");
+  const [newChildrenPreference, setNewChildrenPreference] = useState("");
+  
+  // Extra Fields
+  const [newBio, setNewBio] = useState("");
+  const [newEducation, setNewEducation] = useState("");
+  const [newCulturalBackground, setNewCulturalBackground] = useState("");
+  const [newCareerGoals, setNewCareerGoals] = useState("");
+  const [newMarriageExpectations, setNewMarriageExpectations] = useState("");
+  const [newLanguagesSpoken, setNewLanguagesSpoken] = useState<string[]>([]);
+  const [newIdealPartnerTraits, setNewIdealPartnerTraits] = useState<string[]>([]);
+  const [newProfilePhoto, setNewProfilePhoto] = useState<string | null>(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+
+  const MAJOR_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'];
+  const MAJOR_TRAITS = ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'];
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProfilePhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Location selector lists for Add User form
+  const newResidenceStates = STATES_BY_COUNTRY[newResidenceCountry] || [];
+  const newOriginStates = STATES_BY_COUNTRY[newOriginCountry] || [];
 
   const fetchUsers = async () => {
       const token = localStorage.getItem('knot_token');
@@ -58,7 +160,7 @@ export default function AdminDashboard() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail || !newPassword || !newFirstName || !newLastName) {
-      setCreateError("All fields are required.");
+      setCreateError("First name, last name, email and password are required.");
       return;
     }
     
@@ -74,26 +176,58 @@ export default function AdminDashboard() {
           email: newEmail,
           password: newPassword,
           firstName: newFirstName,
-          lastName: newLastName
+          lastName: newLastName,
+          dateOfBirth: newDateOfBirth,
+          occupation: newOccupation,
+          religion: newReligion,
+          bio: newBio,
+          residenceCountry: newResidenceCountry,
+          residenceState: newResidenceState,
+          residenceCity: newResidenceCity,
+          originCountry: newOriginCountry,
+          originState: newOriginState,
+          originCity: newOriginCity,
+          maritalStatus: newMaritalStatus,
+          smoking: newSmoking,
+          drinking: newDrinking,
+          childrenStatus: newChildrenStatus,
+          marriageTimeline: newMarriageTimeline,
+          willingToRelocate: newWillingToRelocate,
+          childrenPreference: newChildrenPreference,
+          bio: newBio,
+          education: newEducation,
+          culturalBackground: newCulturalBackground,
+          careerGoals: newCareerGoals,
+          marriageExpectations: newMarriageExpectations,
+          languagesSpoken: newLanguagesSpoken,
+          idealPartnerTraits: newIdealPartnerTraits,
+          profilePhoto: newProfilePhoto,
         })
       });
       
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || "Failed to create user.");
+        throw new Error(data.message || "Failed to add user.");
       }
       
       // Successfully created, close modal and refresh list
       setIsCreateModalOpen(false);
-      setNewEmail("");
-      setNewPassword("");
-      setNewFirstName("");
-      setNewLastName("");
+      setNewEmail(""); setNewPassword(""); setNewFirstName(""); setNewLastName("");
+      setNewDateOfBirth(""); setNewOccupation(""); setNewReligion(""); setNewBio("");
+      setNewResidenceCountry(""); setNewResidenceState(""); setNewResidenceCity("");
+      setNewOriginCountry(""); setNewOriginState(""); setNewOriginCity("");
+      setNewMaritalStatus(""); setNewSmoking(""); setNewDrinking("");
+      setNewChildrenStatus(""); setNewMarriageTimeline("");
+      setNewWillingToRelocate(""); setNewChildrenPreference("");
+      setNewBio(""); setNewEducation(""); setNewCulturalBackground("");
+      setNewCareerGoals(""); setNewMarriageExpectations("");
+      setNewLanguagesSpoken([]); setNewIdealPartnerTraits([]);
+      setNewProfilePhoto(null);
       fetchUsers();
       
     } catch (err: any) {
-      setCreateError(err.message || "An error occurred while creating the user.");
+      setCreateError(err.message || "An error occurred while adding the user.");
     } finally {
       setIsCreating(false);
     }
@@ -215,7 +349,7 @@ export default function AdminDashboard() {
               onClick={() => setIsCreateModalOpen(true)}
               className="px-4 py-2 rounded-xl text-sm font-bold bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 transition-colors flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" /> Create User
+              <Plus className="w-4 h-4" /> Add User
             </button>
           </div>
         </header>
@@ -315,12 +449,12 @@ export default function AdminDashboard() {
         )}
       </main>
 
-      {/* Create User Modal */}
+      {/* Add User Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-[#121721] rounded-[24px] border border-white/10 shadow-2xl overflow-hidden relative">
-            <div className="p-6 border-b border-white/5 flex items-center justify-between">
-              <h2 className="text-xl font-serif font-black text-white">Create New User</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-[#121721] rounded-[24px] border border-white/10 shadow-2xl overflow-hidden relative max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-xl font-serif font-black text-white">Add New User</h2>
               <button 
                 onClick={() => setIsCreateModalOpen(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -329,55 +463,255 @@ export default function AdminDashboard() {
               </button>
             </div>
             
-            <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+            <form onSubmit={handleCreateUser} className="p-6 space-y-5 overflow-y-auto flex-1">
               {createError && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400">
                   {createError}
                 </div>
               )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">First Name</label>
-                  <input 
-                    type="text" 
-                    value={newFirstName}
-                    onChange={e => setNewFirstName(e.target.value)}
-                    className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Last Name</label>
-                  <input 
-                    type="text" 
-                    value={newLastName}
-                    onChange={e => setNewLastName(e.target.value)}
-                    className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  />
+
+              {/* Account Credentials */}
+              <div className="space-y-3">
+                <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black block">Account Credentials</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Email Address *</label>
+                    <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="user@email.com" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Password *</label>
+                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min 6 characters" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Email Address</label>
-                <input 
-                  type="email" 
-                  value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                  className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+              {/* Personal Details */}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black block">Personal Details</span>
+                
+                {/* Profile Photo */}
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-[#0A0D14] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {newProfilePhoto ? (
+                      <img src={newProfilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-6 h-6 text-gray-500" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-bold block mb-1">Profile Photo</label>
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#D4AF37]/10 file:text-[#D4AF37] hover:file:bg-[#D4AF37]/20" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">First Name *</label>
+                    <input type="text" value={newFirstName} onChange={e => setNewFirstName(e.target.value)} placeholder="John" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Last Name *</label>
+                    <input type="text" value={newLastName} onChange={e => setNewLastName(e.target.value)} placeholder="Doe" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Date of Birth</label>
+                    <input type="date" value={newDateOfBirth} onChange={e => setNewDateOfBirth(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Occupation</label>
+                    <input type="text" value={newOccupation} onChange={e => setNewOccupation(e.target.value)} placeholder="e.g. Software Engineer" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Religion / Faith</label>
+                  <select value={newReligion} onChange={e => setNewReligion(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Religion</option>
+                    <option value="Christian">Christian</option>
+                    <option value="Muslim">Muslim</option>
+                    <option value="Jewish">Jewish</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Buddhist">Buddhist</option>
+                    <option value="Atheist">Atheist</option>
+                    <option value="Agnostic">Agnostic</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Bio</label>
+                  <textarea value={newBio} onChange={e => setNewBio(e.target.value)} rows={2} placeholder="Short bio about this user..." className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50 resize-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Education</label>
+                    <input type="text" value={newEducation} onChange={e => setNewEducation(e.target.value)} placeholder="e.g. BSc Computer Science" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Cultural Background</label>
+                    <input type="text" value={newCulturalBackground} onChange={e => setNewCulturalBackground(e.target.value)} placeholder="e.g. Hispanic, Yoruba" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Residence */}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black block">Current Residence</span>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">Country</label>
+                    <select value={newResidenceCountry} onChange={e => { setNewResidenceCountry(e.target.value); setNewResidenceState(""); setNewResidenceCity(""); }} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
+                    {newResidenceStates.length > 0 ? (
+                      <select value={newResidenceState} onChange={e => setNewResidenceState(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                        <option value="">Select</option>
+                        {newResidenceStates.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={newResidenceState} onChange={e => setNewResidenceState(e.target.value)} placeholder="State" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    <input type="text" value={newResidenceCity} onChange={e => setNewResidenceCity(e.target.value)} placeholder="City" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Heritage & Origin */}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black block">Heritage & Origin</span>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">Country</label>
+                    <select value={newOriginCountry} onChange={e => { setNewOriginCountry(e.target.value); setNewOriginState(""); setNewOriginCity(""); }} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
+                    {newOriginStates.length > 0 ? (
+                      <select value={newOriginState} onChange={e => setNewOriginState(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                        <option value="">Select</option>
+                        {newOriginStates.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    ) : (
+                      <input type="text" value={newOriginState} onChange={e => setNewOriginState(e.target.value)} placeholder="State" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
+                    <input type="text" value={newOriginCity} onChange={e => setNewOriginCity(e.target.value)} placeholder="City" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+                <MultiSelectDropdown 
+                  label="Languages Spoken" 
+                  options={MAJOR_LANGUAGES} 
+                  values={newLanguagesSpoken} 
+                  onChange={setNewLanguagesSpoken} 
+                  placeholder="Select languages..." 
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Password</label>
-                <input 
-                  type="password" 
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
+              {/* Lifestyle & Preferences */}
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <span className="text-[10px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Preferences</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Marital Status</label>
+                    <select value={newMaritalStatus} onChange={e => setNewMaritalStatus(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="Never Married">Never Married</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Separated">Separated</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Children Status</label>
+                    <select value={newChildrenStatus} onChange={e => setNewChildrenStatus(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="No kids">No kids</option>
+                      <option value="Has kids">Has kids</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Smoking</label>
+                    <select value={newSmoking} onChange={e => setNewSmoking(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="Non-smoker">Non-smoker</option>
+                      <option value="Occasional">Occasional</option>
+                      <option value="Regular">Regular</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Drinking</label>
+                    <select value={newDrinking} onChange={e => setNewDrinking(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="Never">Never</option>
+                      <option value="Social">Social</option>
+                      <option value="Regular">Regular</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Marriage Timeline</label>
+                    <select value={newMarriageTimeline} onChange={e => setNewMarriageTimeline(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="ASAP">ASAP</option>
+                      <option value="1-2 years">1-2 years</option>
+                      <option value="3-5 years">3-5 years</option>
+                      <option value="Not sure">Not sure</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Willing to Relocate</label>
+                    <select value={newWillingToRelocate} onChange={e => setNewWillingToRelocate(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                      <option value="Maybe">Maybe</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Children Pref.</label>
+                    <select value={newChildrenPreference} onChange={e => setNewChildrenPreference(e.target.value)} className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select</option>
+                      <option value="Open to children">Open to children</option>
+                      <option value="Want children">Want children</option>
+                      <option value="Don't want children">Don&apos;t want children</option>
+                    </select>
+                  </div>
+                </div>
+                <MultiSelectDropdown 
+                  label="Ideal Partner Traits" 
+                  options={MAJOR_TRAITS} 
+                  values={newIdealPartnerTraits} 
+                  onChange={setNewIdealPartnerTraits} 
+                  placeholder="Select traits..." 
                 />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Marriage Expectations</label>
+                    <input type="text" value={newMarriageExpectations} onChange={e => setNewMarriageExpectations(e.target.value)} placeholder="e.g. Traditional, Equal Partners" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Career Goals</label>
+                    <input type="text" value={newCareerGoals} onChange={e => setNewCareerGoals(e.target.value)} placeholder="e.g. Become CEO, Travel" className="w-full bg-[#0A0D14] border border-white/10 rounded-xl py-2.5 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end gap-3">
+              <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/5">
                 <button 
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
@@ -390,7 +724,7 @@ export default function AdminDashboard() {
                   disabled={isCreating}
                   className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#D4AF37] text-black hover:bg-[#F2CD5C] transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create User"}
+                  {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add User"}
                 </button>
               </div>
             </form>
