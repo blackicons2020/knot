@@ -47,9 +47,29 @@ export class UsersService {
       }
     }
 
-    return this.prisma.user.update({
-      where: { id },
-      data,
+    return this.prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { id },
+        data,
+      });
+
+      if (dto.profileImageUrls && Array.isArray(dto.profileImageUrls)) {
+        await tx.image.deleteMany({ where: { userId: id } });
+        if (dto.profileImageUrls.length > 0) {
+          await tx.image.createMany({
+            data: dto.profileImageUrls.map((url: string, index: number) => ({
+              userId: id,
+              url,
+              isPrimary: index === 0,
+            })),
+          });
+        }
+      }
+
+      return tx.user.findUnique({
+        where: { id },
+        include: { profileImages: true },
+      });
     });
   }
 

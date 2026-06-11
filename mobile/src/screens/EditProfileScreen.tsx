@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text,
-  TextInput, TouchableOpacity, View,
+  TextInput, TouchableOpacity, View, Alert, Image, ActivityIndicator
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -83,6 +84,10 @@ export default function EditProfileScreen() {
   const { setUserProfile } = useAuth();
   const { isDarkMode } = useTheme();
   const [form, setForm] = useState<User>(params.user);
+  
+  // Photos state
+  const [photos, setPhotos] = useState<string[]>(params.user.profileImageUrls || []);
+  const [uploading, setUploading] = useState(false);
 
   // Dropdown modal state
   const [ddVisible, setDdVisible] = useState(false);
@@ -107,9 +112,36 @@ export default function EditProfileScreen() {
   };
 
   const save = async () => {
-    await db.saveUser(form);
-    setUserProfile(form);
+    const updatedUser = { ...form, profileImageUrls: photos };
+    await db.saveUser(updatedUser);
+    setUserProfile(updatedUser);
     navigation.goBack();
+  };
+
+  const pickPhoto = async () => {
+    if (photos.length >= 6) {
+      Alert.alert('Limit', 'Maximum 6 photos allowed.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setUploading(true);
+      try {
+        const serverUrl = await db.uploadPhoto(result.assets[0].uri);
+        setPhotos((prev) => [...prev, serverUrl]);
+      } catch (err: any) {
+        Alert.alert('Upload Failed', err.message || 'Could not upload photo.');
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos(photos.filter((_, i) => i !== idx));
   };
 
   const labelStyle = [st.label, { color: Colors.gray400 }];
@@ -205,6 +237,40 @@ export default function EditProfileScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: 100 }}>
+        {/* ── Photos ── */}
+        <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+          <Text style={st.cardTitle}>Registry Photos</Text>
+          <Text style={[st.hint, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>Upload up to 6 photos. The first is your primary picture.</Text>
+          
+          <View style={st.gridPhotos}>
+            {photos.map((photo, idx) => (
+              <View key={idx} style={st.photoCell}>
+                <Image source={{ uri: photo }} style={st.photoImg} />
+                {idx === 0 && (
+                  <View style={st.mainBadge}>
+                    <Text style={st.mainBadgeText}>Main</Text>
+                  </View>
+                )}
+                <TouchableOpacity style={st.removeBtn} onPress={() => removePhoto(idx)}>
+                  <Ionicons name="trash" size={16} color="#dc2626" />
+                </TouchableOpacity>
+              </View>
+            ))}
+            {photos.length < 6 && !uploading && (
+              <TouchableOpacity style={[st.addCell, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]} onPress={pickPhoto}>
+                <Ionicons name="images" size={24} color={Colors.primary} />
+                <Text style={st.addText}>Add</Text>
+              </TouchableOpacity>
+            )}
+            {uploading && (
+              <View style={[st.addCell, { borderColor: Colors.primary }]}>
+                <ActivityIndicator size="small" color={Colors.primary} />
+                <Text style={st.addText}>Uploading...</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
         {/* ── Identity ── */}
         <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
           <Text style={st.cardTitle}>Identity</Text>
@@ -345,6 +411,17 @@ const st = StyleSheet.create({
   footer: { padding: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.gray200 },
   saveBtn: { backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: 12, alignItems: 'center', elevation: 4 },
   saveBtnText: { color: Colors.white, fontSize: 16, fontWeight: '900' },
+
+  /* Photos */
+  hint: { fontSize: 11, marginBottom: 16 },
+  gridPhotos: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  photoCell: { width: '30%', aspectRatio: 1, borderRadius: BorderRadius.lg, overflow: 'hidden', position: 'relative' },
+  photoImg: { width: '100%', height: '100%' },
+  mainBadge: { position: 'absolute', top: 4, left: 4, backgroundColor: Colors.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+  mainBadgeText: { fontSize: 8, fontWeight: '900', color: Colors.white, textTransform: 'uppercase' },
+  removeBtn: { position: 'absolute', bottom: 4, right: 4, backgroundColor: Colors.white, borderRadius: 16, padding: 4, elevation: 4 },
+  addCell: { width: '30%', aspectRatio: 1, borderRadius: BorderRadius.lg, borderWidth: 2, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+  addText: { fontSize: 9, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 },
 
   /* Modal */
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },

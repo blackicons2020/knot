@@ -149,7 +149,8 @@ export default function OnboardingScreen() {
   // Religion Select States
   const [religionSelect, setReligionSelect] = useState('');
   const [religionCustom, setReligionCustom] = useState('');
-
+  const [languageCustom, setLanguageCustom] = useState('');
+  const [traitCustom, setTraitCustom] = useState('');
 
   // Gold Archetype Results
   const archetype = {
@@ -306,8 +307,23 @@ export default function OnboardingScreen() {
         setGovIdUri(idUrl);
       }
 
-      // Check verification with AI Backend
-      const res = await db.verifyOnboarding(selfieUrl, idUrl, form.firstName, form.lastName, form.dateOfBirth);
+      setVerificationStep(0);
+
+      // Map "Other" custom fields into final arrays
+      const finalLanguages = form.languagesSpoken?.map(l => l === 'Other' && languageCustom ? languageCustom : l) || [];
+      const finalTraits = form.idealPartnerTraits?.map(t => t === 'Other' && traitCustom ? traitCustom : t) || [];
+      
+      // Update form state with the final languages and traits
+      setForm(p => ({ ...p, languagesSpoken: finalLanguages, idealPartnerTraits: finalTraits }));
+
+      // Pass selfieUrl (which is livenessUri uploaded) instead of profileUrl
+      const res = await db.verifyOnboarding(
+        selfieUrl, // FIX: Strictly use selfie image
+        idUrl,
+        form.firstName || '',
+        form.lastName || '',
+        form.dateOfBirth || ''
+      );
 
       if (!res.success) {
         Alert.alert(
@@ -665,6 +681,15 @@ export default function OnboardingScreen() {
               
               <View style={{ marginBottom: 12 }}>
                 {renderMultiDropdownField('Languages Spoken', form.languagesSpoken || [], 'Select languages', ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'], (v) => set('languagesSpoken', v))}
+                {(form.languagesSpoken || []).includes('Other') && (
+                  <TextInput
+                    style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                    value={languageCustom}
+                    onChangeText={setLanguageCustom}
+                    placeholder="Specify other language"
+                    placeholderTextColor={Colors.gray400}
+                  />
+                )}
               </View>
 
               {renderDropdownField('Marriage History', form.maritalStatus, 'Select history', Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
@@ -695,6 +720,15 @@ export default function OnboardingScreen() {
                 <View style={styles.row}>
                   {renderMultiDropdownField('Ideal Partner Traits', form.idealPartnerTraits || [], 'Select traits', ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'], (v) => set('idealPartnerTraits', v))}
                 </View>
+                {(form.idealPartnerTraits || []).includes('Other') && (
+                  <TextInput
+                    style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+                    value={traitCustom}
+                    onChangeText={setTraitCustom}
+                    placeholder="Specify other trait"
+                    placeholderTextColor={Colors.gray400}
+                  />
+                )}
               </View>
             </View>
 

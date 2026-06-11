@@ -178,7 +178,7 @@ export default function ProfileScreen() {
             {(userProfile.profileImageUrls?.length || 0) < 6 && (
               <TouchableOpacity 
                 style={st.addPhotoBtn} 
-                onPress={() => navigation.navigate('ManagePhotos', { user: userProfile })}
+                onPress={() => navigation.navigate('EditProfile', { user: userProfile })}
               >
                 <Ionicons name="camera-outline" size={24} color={Colors.gray400} />
                 <Text style={st.addPhotoText}>Add Photo</Text>

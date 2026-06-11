@@ -45,7 +45,9 @@ export default function Dashboard() {
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           setUserProfile(profileData);
-          if (profileData.photoUrls && profileData.photoUrls.length > 0) {
+          if (profileData.profileImages && profileData.profileImages.length > 0) {
+            setUserPhotos(profileData.profileImages.map((img: any) => img.url));
+          } else if (profileData.photoUrls && profileData.photoUrls.length > 0) {
             setUserPhotos(profileData.photoUrls);
           }
         }
@@ -1148,7 +1150,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <button 
-                    onClick={() => window.location.href = '/onboarding?step=2'}
+                    onClick={() => router.push('/edit-profile')}
                     className="w-full mt-2 py-2.5 rounded-xl bg-white/10 border border-white/10 text-xs font-bold text-gray-300 hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
                   >
                     <Settings className="w-3.5 h-3.5" /> Edit Profile Data
@@ -1201,7 +1203,7 @@ export default function Dashboard() {
                     </div>
                   ))}
                   {userPhotos.length < 6 && (
-                    <button className="aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 transition-all">
+                    <button onClick={() => router.push('/edit-profile')} className="aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5 transition-all">
                       <Camera className="w-6 h-6 text-gray-400" />
                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Add Photo</span>
                     </button>

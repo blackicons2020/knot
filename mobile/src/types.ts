@@ -22,6 +22,13 @@ export type TabParamList = {
 };
 
 // Enums
+export enum SubscriptionTier {
+  Essential = 'Essential',
+  Premium = 'Premium',
+  Elite = 'Elite',
+  Executive = 'Executive',
+}
+
 export enum SmokingHabits {
   NonSmoker = 'Non-smoker',
   Occasional = 'Occasional',
@@ -110,6 +117,9 @@ export interface User {
   subscriptionDate?: string;
   subscriptionAmount?: number;
   subscriptionPeriod?: string;
+  subscriptionTier?: SubscriptionTier;
+  matchesViewedToday?: number;
+  lastMatchViewDate?: string;
   readinessScore?: number;
   seriousnessLevel?: number;
   trustScore?: number;

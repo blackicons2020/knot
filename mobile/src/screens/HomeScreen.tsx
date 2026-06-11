@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, Modal, Dimensions
+  ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, Modal, Dimensions, Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { Colors, BorderRadius, Spacing } from '../theme/colors';
-import { RootStackParamList, Match } from '../types';
+import { RootStackParamList, Match, SubscriptionTier } from '../types';
 import { MATCHES_DATA } from '../constants';
 import { db } from '../services/apiService';
 import AppHeader from '../components/AppHeader';
@@ -24,6 +24,7 @@ export default function HomeScreen() {
   const { userProfile } = useAuth();
   const { isDarkMode } = useTheme();
   const { addToast } = useToast();
+  const { setUserProfile } = useAuth();
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
@@ -92,20 +93,54 @@ export default function HomeScreen() {
     ? activeMatch.profileImageUrls
     : ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800'];
 
-  const handlePass = () => {
-    setPhotoIndex(0);
-    if (currentMatchIndex < matches.length - 1) {
-      setCurrentMatchIndex((prev) => prev + 1);
-    } else {
-      addToast('You have reviewed all daily matches.', 'info');
-      setCurrentMatchIndex(0); // Wrap around for testing
+  const getDailyLimit = () => {
+    switch (userProfile?.subscriptionTier) {
+      case SubscriptionTier.Executive: return 100;
+      case SubscriptionTier.Elite: return 25;
+      case SubscriptionTier.Premium: return 15;
+      default: return 3; // Free / Essential
     }
   };
 
-  const handleConnect = () => {
-    if (activeMatch) {
-      navigation.navigate('ProfileDetail', { match: activeMatch });
+  const checkLimitAndProceed = (action: () => void) => {
+    const limit = getDailyLimit();
+    const viewed = userProfile?.matchesViewedToday || 0;
+    
+    if (viewed >= limit) {
+      Alert.alert(
+        'Daily Limit Reached',
+        `You have reached your limit of ${limit} curated matches for today.\n\nUpgrade your subscription to unlock more matches and features!`,
+        [
+          { text: 'Later', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => navigation.navigate('Payment', { user: userProfile! }) }
+        ]
+      );
+      return;
     }
+    
+    // Increment local state viewed count
+    setUserProfile({ ...userProfile!, matchesViewedToday: viewed + 1 });
+    action();
+  };
+
+  const handlePass = () => {
+    checkLimitAndProceed(() => {
+      setPhotoIndex(0);
+      if (currentMatchIndex < matches.length - 1) {
+        setCurrentMatchIndex((prev) => prev + 1);
+      } else {
+        addToast('You have reviewed all curated matches for today.', 'info');
+        setCurrentMatchIndex(0); // Wrap around for testing
+      }
+    });
+  };
+
+  const handleConnect = () => {
+    checkLimitAndProceed(() => {
+      if (activeMatch) {
+        navigation.navigate('ProfileDetail', { match: activeMatch });
+      }
+    });
   };
 
   const startConversation = () => {
