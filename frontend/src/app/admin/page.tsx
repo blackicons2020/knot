@@ -193,7 +193,6 @@ export default function AdminDashboard() {
           marriageTimeline: newMarriageTimeline,
           willingToRelocate: newWillingToRelocate,
           childrenPreference: newChildrenPreference,
-          bio: newBio,
           education: newEducation,
           culturalBackground: newCulturalBackground,
           careerGoals: newCareerGoals,
