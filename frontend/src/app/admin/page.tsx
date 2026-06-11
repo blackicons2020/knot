@@ -94,7 +94,6 @@ export default function AdminDashboard() {
   const [newChildrenPreference, setNewChildrenPreference] = useState("");
   
   // Extra Fields
-  const [newBio, setNewBio] = useState("");
   const [newEducation, setNewEducation] = useState("");
   const [newCulturalBackground, setNewCulturalBackground] = useState("");
   const [newCareerGoals, setNewCareerGoals] = useState("");
