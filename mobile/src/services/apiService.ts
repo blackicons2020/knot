@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { User, Match, Message } from '../types';
 
 const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.43.103:8080';
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'https://knot-backend-core.onrender.com');
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'http://16.192.76.171:8080');
 // Base URL for backend resources
 const BASE_URL = API_URL;
 
@@ -43,11 +43,23 @@ class ApiService {
         signal: controller.signal 
       });
       clearTimeout(timeoutId);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error || 'Request failed');
-      return data as T;
-    } catch (error) {
+      
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || data.error || `Request failed with status ${res.status}`);
+        return data as T;
+      } else {
+        const textData = await res.text();
+        if (!res.ok) throw new Error(`Server error (${res.status}): The service might be unavailable or waking up.`);
+        // If somehow ok but not json (should not happen in this API)
+        return textData as any as T;
+      }
+    } catch (error: any) {
       clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. The server might be waking up, please try again.');
+      }
       throw error;
     }
   }

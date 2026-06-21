@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  db:
+    image: ankane/pgvector:v0.5.1
+    container_name: knot-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-supersecretpassword}
+      POSTGRES_DB: knot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: knot-redis-prod
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_prod:/data
+
+  backend-ai:
+    build:
+      context: ./backend-ai
+      dockerfile: Dockerfile
+    container_name: knot-backend-ai-prod
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - db
+
+  backend-core:
+    build:
+      context: ./backend-core
+      dockerfile: Dockerfile
+    container_name: knot-backend-core-prod
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-supersecretpassword}@db:5432/knot?schema=public
+      - REDIS_URL=redis://redis:6379
+      - AI_SERVICE_URL=http://backend-ai:8000
+      - JWT_SECRET=${JWT_SECRET:-supersecretprodtoken}
+      - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    container_name: knot-frontend-prod
+    restart: always
+    ports:
+      - "80:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend-core
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
