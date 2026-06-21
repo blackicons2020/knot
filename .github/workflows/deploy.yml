@@ -15,8 +15,9 @@ jobs:
 
       - name: Create Deployment Archive
         run: |
-          # Exclude .git, node_modules, and the archive itself to prevent read errors
-          tar --exclude='./.git' --exclude='./node_modules' --exclude='./backend-core/node_modules' --exclude='./backend-ai/node_modules' --exclude='./frontend/node_modules' --exclude='./mobile/node_modules' --exclude='./knot-deploy.tar.gz' -czf knot-deploy.tar.gz .
+          # Create a dedicated directory for the archive to prevent read errors
+          mkdir -p build_archive
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./backend-core/node_modules' --exclude='./backend-ai/node_modules' --exclude='./frontend/node_modules' --exclude='./mobile/node_modules' --exclude='./build_archive' -czf build_archive/knot-deploy.tar.gz .
 
       - name: Copy Archive to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -24,8 +25,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "knot-deploy.tar.gz"
+          source: "build_archive/knot-deploy.tar.gz"
           target: "~/"
+          strip_components: 1
 
       - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v1.0.3
