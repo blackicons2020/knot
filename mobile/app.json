@@ -71,6 +71,10 @@
         "projectId": "45b39bd1-1cb0-4f70-af84-f4c54f02a5d4"
       }
     },
+    "updates": {
+      "url": "https://u.expo.dev/45b39bd1-1cb0-4f70-af84-f4c54f02a5d4"
+    },
+    "runtimeVersion": "1.0.0",
     "owner": "johnmeke2026"
   }
 }
