@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('messages')
@@ -40,6 +40,25 @@ export class MessagesController {
   ) {
     // If senderId isn't provided, use a dummy one (in reality, use JWT)
     const senderId = body.senderId || 'user-1';
+
+    // Check if sender is premium
+    const sender = await this.prisma.user.findUnique({ where: { id: senderId } });
+    if (!sender?.isPremium) {
+      // Get distinct users the sender has already messaged
+      const previousMessages = await this.prisma.message.findMany({
+        where: { senderId },
+        select: { receiverId: true },
+        distinct: ['receiverId'],
+      });
+      
+      const distinctReceivers = previousMessages.map(m => m.receiverId);
+      
+      // If they have messaged someone, and it's NOT this match, block them!
+      if (distinctReceivers.length >= 1 && !distinctReceivers.includes(matchId)) {
+        throw new HttpException({ success: false, error: 'FREE_TIER_LIMIT' }, HttpStatus.FORBIDDEN);
+      }
+    }
+
     return this.prisma.message.create({
       data: {
         content: body.text,

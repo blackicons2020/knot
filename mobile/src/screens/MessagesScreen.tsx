@@ -33,29 +33,6 @@ export default function MessagesScreen() {
     });
   }, [userProfile]);
 
-  if (!userProfile?.isPremium) {
-    return (
-      <View style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
-        <AppHeader />
-        <View style={s.lockWrap}>
-          <View style={[s.lockCircle, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.light }]}>
-            <Ionicons name="chatbubbles" size={32} color={isDarkMode ? Colors.accent : Colors.primary} />
-          </View>
-          <Text style={[s.lockTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>Messaging Restricted</Text>
-          <Text style={[s.lockDesc, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-            Subscribe to start chatting with your matches and build real connections.
-          </Text>
-          <TouchableOpacity
-            style={[s.upgradeBtn, { backgroundColor: isDarkMode ? Colors.accent : Colors.primary }]}
-            onPress={() => navigation.navigate('Payment', { user: userProfile! })}
-          >
-            <Text style={[s.upgradeBtnText, { color: isDarkMode ? Colors.dark : Colors.white }]}>Upgrade to Premium</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
   if (loading) {
     return (
       <View style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>

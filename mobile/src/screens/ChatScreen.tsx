@@ -76,9 +76,14 @@ export default function ChatScreen() {
       } else {
         setAiChatTip('');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      addToast('Failed to send message', 'error');
+      if (err.message && err.message.includes('FREE_TIER_LIMIT')) {
+        addToast('Free tier limit reached. Upgrade to chat with more matches.', 'error');
+        navigation.navigate('Payment', { user });
+      } else {
+        addToast('Failed to send message', 'error');
+      }
       setText(msg);
       setAiChatTip('');
     }
