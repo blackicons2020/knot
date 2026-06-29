@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  FlatList, Image, Keyboard, Platform, StyleSheet, Text,
-  TextInput, TouchableOpacity, View, Animated,
+  FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text,
+  TextInput, TouchableOpacity, View,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -31,19 +31,6 @@ export default function ChatScreen() {
     'AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory.'
   );
   const flatListRef = useRef<FlatList>(null);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => { setKeyboardHeight(e.endCoordinates.height); }
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => { setKeyboardHeight(0); }
-    );
-    return () => { showSub.remove(); hideSub.remove(); };
-  }, []);
 
   useEffect(() => {
     const unsub = db.subscribeToMessages(match.id, setMessages);
@@ -52,9 +39,9 @@ export default function ChatScreen() {
 
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 150);
     }
-  }, [messages, keyboardHeight]);
+  }, [messages]);
 
   const send = async () => {
     const msg = text.trim();
@@ -124,43 +111,53 @@ export default function ChatScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Messages */}
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(m) => m.id}
-        renderItem={renderMsg}
-        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 16 }}
-        ListEmptyComponent={
-          <View style={s.emptyWrap}>
-            <Text style={s.emptyText}>Start of conversation</Text>
-          </View>
-        }
-      />
-
-      {/* AI Guided Chat Tip Prompt Bar */}
-      {aiChatTip ? (
-        <View style={[s.tipBar, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.03)', borderTopColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)', borderBottomColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)' }]}>
-          <Ionicons name="sparkles" size={14} color={Colors.accent} style={{ marginRight: 8 }} />
-          <Text style={[s.tipText, { color: Colors.accent }]}>{aiChatTip}</Text>
-        </View>
-      ) : null}
-
-      {/* Input */}
-      <View style={[s.inputBar, { paddingBottom: (keyboardHeight > 0 ? keyboardHeight : insets.bottom) + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder="Type a message..."
-          placeholderTextColor={Colors.gray400}
-          style={[s.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, color: isDarkMode ? Colors.white : Colors.gray900 }]}
-          onSubmitEditing={send}
-          returnKeyType="send"
+      {/* KeyboardAvoidingView wraps the chat body + input so keyboard pushes everything up */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        {/* Messages */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(m) => m.id}
+          renderItem={renderMsg}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: Spacing.md, paddingBottom: 16 }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          ListEmptyComponent={
+            <View style={s.emptyWrap}>
+              <Text style={s.emptyText}>Start of conversation</Text>
+            </View>
+          }
         />
-        <TouchableOpacity style={s.sendBtn} onPress={send}>
-          <Ionicons name="send" size={20} color={Colors.white} />
-        </TouchableOpacity>
-      </View>
+
+        {/* AI Guided Chat Tip Prompt Bar */}
+        {aiChatTip ? (
+          <View style={[s.tipBar, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.08)' : 'rgba(212,175,55,0.03)', borderTopColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)', borderBottomColor: isDarkMode ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.2)' }]}>
+            <Ionicons name="sparkles" size={14} color={Colors.accent} style={{ marginRight: 8 }} />
+            <Text style={[s.tipText, { color: Colors.accent }]}>{aiChatTip}</Text>
+          </View>
+        ) : null}
+
+        {/* Input */}
+        <View style={[s.inputBar, { paddingBottom: insets.bottom + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            placeholder="Type a message..."
+            placeholderTextColor={Colors.gray400}
+            style={[s.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, color: isDarkMode ? Colors.white : Colors.gray900 }]}
+            onSubmitEditing={send}
+            returnKeyType="send"
+          />
+          <TouchableOpacity style={s.sendBtn} onPress={send}>
+            <Ionicons name="send" size={20} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
