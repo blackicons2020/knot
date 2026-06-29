@@ -865,7 +865,7 @@ export default function OnboardingScreen() {
                 </View>
 
                 <View style={styles.formGroup}>
-                  <Text style={styles.label}>REGISTRY EXPECTATIONS</Text>
+                  <Text style={styles.label}>MARRIAGE EXPECTATIONS</Text>
                   <TextInput
                     style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, minHeight: 80, textAlignVertical: 'top' }]}
                     value={form.marriageExpectations}

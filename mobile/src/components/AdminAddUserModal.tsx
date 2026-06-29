@@ -205,7 +205,7 @@ export const AdminAddUserModal: React.FC<Props> = ({ visible, onClose, onUserAdd
           {renderInput('Marriage Timeline', marriageTimeline, setMarriageTimeline, 'e.g. 1-2 years')}
           {renderInput('Willing To Relocate', willingToRelocate, setWillingToRelocate, 'e.g. Yes')}
           {renderInput('Children Preference', childrenPreference, setChildrenPreference, 'e.g. Want kids')}
-          {renderInput('Registry Expectations', marriageExpectations, setMarriageExpectations, 'e.g. Traditional')}
+          {renderInput('Marriage Expectations', marriageExpectations, setMarriageExpectations, 'e.g. Traditional')}
           {renderInput('Career Goals', careerGoals, setCareerGoals, 'e.g. CEO')}
           {renderInput('Languages Spoken', languagesSpoken, setLanguagesSpoken, 'Comma separated')}
           {renderInput('Ideal Partner Traits', idealPartnerTraits, setIdealPartnerTraits, 'Comma separated')}
