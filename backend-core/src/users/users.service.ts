@@ -138,11 +138,11 @@ export class UsersService {
   }
 
   async validateOnboardingAnswer(question: string, answer: string) {
-    return this.aiService.validateResponse(question, answer);
+    return this.aiService.validateOnboardingAnswer(question, answer);
   }
 
   async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, firstName: string, lastName: string, dateOfBirth: string) {
-    return this.aiService.verifyIdentity(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
+    return this.aiService.verifyOnboardingDocuments(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
   }
 
   async deleteUser(id: string) {
