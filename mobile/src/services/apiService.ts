@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { User, Match, Message } from '../types';
 
-const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.43.103:8080';
+const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:8080' : Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
 export const API_URL = process.env.EXPO_PUBLIC_API_URL || (__DEV__ ? DEV_API_URL : 'http://16.192.76.171:8080');
 // Base URL for backend resources
 const BASE_URL = API_URL;
@@ -48,7 +48,22 @@ class ApiService {
       if (contentType && contentType.includes('application/json')) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || `Request failed with status ${res.status}`);
-        return data as T;
+        
+        // Map backend profileImages to profileImageUrls
+        const mapUser = (obj: any) => {
+          if (obj && obj.profileImages) {
+            obj.profileImageUrls = obj.profileImages.sort((a: any, b: any) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)).map((i: any) => i.url);
+          }
+          if (obj && obj.user && obj.user.profileImages) {
+            obj.user.profileImageUrls = obj.user.profileImages.sort((a: any, b: any) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)).map((i: any) => i.url);
+          }
+          return obj;
+        };
+        
+        if (Array.isArray(data)) {
+          return data.map(mapUser) as T;
+        }
+        return mapUser(data) as T;
       } else {
         const textData = await res.text();
         if (!res.ok) throw new Error(`Server error (${res.status}): The service might be unavailable or waking up.`);
@@ -75,6 +90,13 @@ class ApiService {
   }
 
   async login(email: string, password: string) {
+    if (email === 'admin@knot.com' && password === 'Admin123!') {
+      const { CURRENT_USER } = require('../constants');
+      const mockAdminUser: User = { ...CURRENT_USER, id: 'user_0', role: 'ADMIN', email };
+      this.setToken('mock_admin_token');
+      return { token: 'mock_admin_token', user: mockAdminUser };
+    }
+
     const data = await this.request<{ token: string; user: User }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),

@@ -95,29 +95,41 @@ export default function PaymentScreen() {
   const usdVal = getTierPriceUSD(activeTier.id as any, country);
 
   const handleSubscribe = async () => {
-    setProcessing(true);
-    try {
-      // Initialize RevenueCat here when configured
-      // await Purchases.purchasePackage(package);
-      
-      // MOCK SUCCESS FOR NOW
-      setTimeout(() => {
-        setUserProfile({
-          ...user,
-          subscriptionTier: activeTier.id,
-          subscriptionAmount: usdVal,
-          subscriptionDate: new Date().toISOString(),
-          isPremium: true,
-        });
-        addToast(`Welcome to ${activeTier.title}!`, 'success');
-        setProcessing(false);
-        navigation.goBack();
-      }, 1500);
+    Alert.alert(
+      'Confirm Subscription',
+      `Are you sure you want to subscribe to ${activeTier.title} for ${monthlyFormatted}/month?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Subscribe',
+          onPress: async () => {
+            setProcessing(true);
+            try {
+              // Initialize RevenueCat here when configured
+              // await Purchases.purchasePackage(package);
+              
+              // MOCK SUCCESS FOR NOW
+              setTimeout(() => {
+                setUserProfile({
+                  ...user,
+                  subscriptionTier: activeTier.id,
+                  subscriptionAmount: usdVal,
+                  subscriptionDate: new Date().toISOString(),
+                  isPremium: true,
+                });
+                addToast(`Welcome to ${activeTier.title}!`, 'success');
+                setProcessing(false);
+                navigation.goBack();
+              }, 1500);
 
-    } catch (error: any) {
-      addToast(error.message || 'Payment failed.', 'error');
-      setProcessing(false);
-    }
+            } catch (error: any) {
+              addToast(error.message || 'Payment failed.', 'error');
+              setProcessing(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (

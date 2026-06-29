@@ -1,5 +1,6 @@
 node_modules/
 android/
+android_old/
 ios/
 .expo/
 dist/
@@ -7,3 +8,5 @@ build/
 .git/
 *.tgz
 *.log
+*.sqlite
+server/

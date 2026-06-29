@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4A0D67"
+      "backgroundColor": "#121721"
     },
     "ios": {
       "supportsTablet": false,
@@ -23,7 +23,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#4A0D67"
+        "backgroundColor": "#121721"
       },
       "package": "com.knot.app",
       "permissions": [
@@ -61,7 +61,9 @@
         {
           "android": {
             "extraParams": "-Dorg.gradle.jvmargs=-Xmx4096m",
-            "minSdkVersion": 26
+            "minSdkVersion": 26,
+            "ndkVersion": "27.1.12297006",
+            "usesCleartextTraffic": true
           }
         }
       ]

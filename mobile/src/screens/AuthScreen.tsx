@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAuth } from '../contexts/AuthContext';
 import { Colors, BorderRadius, Spacing } from '../theme/colors';
@@ -25,6 +26,7 @@ export default function AuthScreen() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { login, register } = useAuth();
   const { addToast } = useToast();
@@ -78,7 +80,7 @@ export default function AuthScreen() {
           Fraud-Proof AI Matching High-Trust
         </Text>
 
-        {/* Social Buttons */}
+        {/* Google Sign-in temporarily disabled
         <View style={styles.socialContainer}>
           <TouchableOpacity
             style={styles.socialBtn}
@@ -97,21 +99,28 @@ export default function AuthScreen() {
           <Text style={styles.dividerText}>OR</Text>
           <View style={[styles.divider, { backgroundColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]} />
         </View>
+        */}
 
         {!showEmailForm ? (
           <TouchableOpacity
             style={[
               styles.emailToggleBtn,
               {
-                backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : Colors.white,
-                borderColor: isDarkMode ? Colors.primary + '80' : Colors.primary,
+                borderWidth: 0,
+                shadowColor: Colors.primary,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.35,
+                shadowRadius: 10,
+                elevation: 8,
+                overflow: 'hidden',
               },
             ]}
             onPress={() => setShowEmailForm(true)}
             activeOpacity={0.8}
           >
-            <Ionicons name="mail-outline" size={20} color={Colors.primary} />
-            <Text style={[styles.emailToggleBtnText, { color: Colors.primary }]}>Continue with Email</Text>
+            <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+            <Ionicons name="mail" size={20} color={Colors.white} />
+            <Text style={[styles.emailToggleBtnText, { color: Colors.white }]}>Continue with Email</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.form}>
@@ -136,32 +145,68 @@ export default function AuthScreen() {
                 placeholderTextColor={Colors.gray400}
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 textContentType="password"
                 autoComplete={isLogin ? "password" : "new-password"}
               />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 8 }}>
+                <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={18} color={Colors.gray400} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={[styles.submitBtn, isProcessing && styles.submitBtnDisabled]}
-              onPress={handleEmailSubmit}
-              disabled={isProcessing}
-              activeOpacity={0.8}
-            >
-              {isProcessing ? (
-                <ActivityIndicator color={Colors.white} />
-              ) : (
-                <Text style={styles.submitBtnText}>
-                  {isLogin ? 'Sign In' : 'Create Account'}
-                </Text>
-              )}
-            </TouchableOpacity>
+            {!isLogin ? (
+              <TouchableOpacity
+                onPress={handleEmailSubmit}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+                style={{ marginTop: 4 }}
+              >
+                <LinearGradient
+                  colors={['#E27D8D', '#2D1B4E']}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={[styles.gradientBtn, isProcessing && styles.submitBtnDisabled]}
+                >
+                  {isProcessing ? (
+                    <ActivityIndicator color={Colors.white} />
+                  ) : (
+                    <View style={styles.gradientBtnContent}>
+                      <Text style={styles.gradientBtnText}>Create Account</Text>
+                      <Ionicons name="arrow-forward" size={18} color={Colors.white} style={{ marginLeft: 8 }} />
+                    </View>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={handleEmailSubmit}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+                style={{ marginTop: 4 }}
+              >
+                <LinearGradient
+                  colors={['#2D1B4E', '#E27D8D']}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={[styles.gradientBtn, isProcessing && styles.submitBtnDisabled]}
+                >
+                  {isProcessing ? (
+                    <ActivityIndicator color={Colors.white} />
+                  ) : (
+                    <View style={styles.gradientBtnContent}>
+                      <Text style={styles.gradientBtnText}>{isLogin ? 'Access Registry' : 'Apply Here'}</Text>
+                      <Ionicons name="arrow-forward" size={18} color={Colors.white} style={{ marginLeft: 8 }} />
+                    </View>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
         <TouchableOpacity onPress={() => { setIsLogin(!isLogin); setShowEmailForm(false); }} style={styles.toggleRow}>
           <Text style={[styles.toggleText, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
             {isLogin ? "Don't have an account? " : 'Already registered? '}
-            <Text style={styles.toggleLink}>{isLogin ? 'Sign Up' : 'Sign In'}</Text>
+            <Text style={styles.toggleLink}>{isLogin ? 'Apply Here' : 'Access Registry'}</Text>
           </Text>
         </TouchableOpacity>
 
@@ -305,6 +350,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  gradientBtn: {
+    borderRadius: 999,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#2D1B4E',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  gradientBtnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gradientBtnText: {
+    color: Colors.white,
+    fontWeight: '800',
+    fontSize: 16,
   },
   toggleRow: {
     marginTop: 24,

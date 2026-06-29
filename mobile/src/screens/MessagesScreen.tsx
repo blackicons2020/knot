@@ -27,6 +27,9 @@ export default function MessagesScreen() {
     db.getLikedMatches(userProfile.id).then((m) => {
       setMatches(m);
       setLoading(false);
+    }).catch(() => {
+      setMatches([]);
+      setLoading(false);
     });
   }, [userProfile]);
 

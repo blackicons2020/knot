@@ -11,17 +11,19 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, User } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import { db } from '../services/apiService';
 import { MATCHES_DATA } from '../constants';
 import { AdminAddUserModal } from '../components/AdminAddUserModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type AdminTab = 'all' | 'pending' | 'verified' | 'subscribers';
+type AdminTab = 'all' | 'subscribers';
 
 export default function AdminScreen() {
   const navigation = useNavigation<Nav>();
   const { isDarkMode } = useTheme();
   const { addToast } = useToast();
+  const { logout } = useAuth();
 
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +82,7 @@ export default function AdminScreen() {
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((m) =>
-        m.name.toLowerCase().includes(q) ||
+        (m.name || '').toLowerCase().includes(q) ||
         (m.occupation && m.occupation.toLowerCase().includes(q)) ||
         (m.email && m.email.toLowerCase().includes(q))
       );
@@ -95,31 +97,40 @@ export default function AdminScreen() {
       {/* Header */}
       <View style={s.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Ionicons name="shield-checkmark" size={22} color={Colors.accent} />
+          <Ionicons name="shield-checkmark" size={28} color="#D4AF37" />
           <View>
-            <Text style={s.headerTitle}>Management Panel</Text>
+            <Text style={[s.headerTitle, { color: '#D4AF37' }]}>Management Panel</Text>
             <Text style={s.headerSub}>Registry Administration</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <TouchableOpacity style={s.seedBtn} onPress={() => setIsAddUserModalOpen(true)}>
-            <Text style={s.seedBtnText}>ADD USER</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.seedBtn} onPress={handleSeed} disabled={loading}>
-            <Text style={s.seedBtnText}>{loading ? 'SEEDING...' : 'SEED DATA'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.closeBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="close" size={22} color={Colors.white} />
-          </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {navigation.canGoBack() ? (
+            <TouchableOpacity style={s.closeBtn} onPress={() => navigation.goBack()}>
+              <Ionicons name="close" size={24} color={Colors.white} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={[s.seedBtn, { backgroundColor: '#1A1A1A', borderColor: '#333', borderWidth: 1, paddingHorizontal: 16 }]} onPress={() => logout()}>
+              <Ionicons name="log-out-outline" size={16} color={Colors.error} style={{ marginBottom: 2 }} />
+              <Text style={[s.seedBtnText, { color: Colors.error, fontSize: 10 }]}>LOGOUT</Text>
+            </TouchableOpacity>
+          )}
         </View>
+      </View>
+
+      {/* Action Buttons Row */}
+      <View style={{ flexDirection: 'row', paddingHorizontal: Spacing.md, gap: 12, marginBottom: 16, marginTop: 4 }}>
+        <TouchableOpacity style={[s.seedBtn, { flex: 1, backgroundColor: '#1A1A1A', borderColor: '#333', borderWidth: 1, alignItems: 'center' }]} onPress={() => setIsAddUserModalOpen(true)}>
+          <Text style={[s.seedBtnText, { color: '#D4AF37' }]}>+ ADD USER</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[s.seedBtn, { flex: 1, backgroundColor: '#1A1A1A', borderColor: '#333', borderWidth: 1, alignItems: 'center' }]} onPress={handleSeed} disabled={loading}>
+          <Text style={[s.seedBtnText, { color: Colors.gray300 }]}>{loading ? 'SEEDING...' : 'SEED MOCK DATA'}</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Stats */}
       <View style={s.statsRow}>
-        <View style={s.statCard}><Text style={s.statLabel}>Total</Text><Text style={[s.statValue, { color: Colors.primary }]}>{members.length}</Text></View>
-        <View style={s.statCard}><Text style={s.statLabel}>Revenue</Text><Text style={[s.statValue, { color: Colors.secondary }]}>${revenue.toFixed(2)}</Text></View>
-        <View style={s.statCard}><Text style={s.statLabel}>Pending</Text><Text style={[s.statValue, { color: '#f97316' }]}>{members.filter((m) => !m.isVerified).length}</Text></View>
-        <View style={s.statCard}><Text style={s.statLabel}>Verified</Text><Text style={[s.statValue, { color: '#16a34a' }]}>{members.filter((m) => m.isVerified).length}</Text></View>
+        <View style={s.statCard}><Text style={s.statLabel}>Total</Text><Text style={[s.statValue, { color: Colors.white }]}>{members.length}</Text></View>
+        <View style={s.statCard}><Text style={s.statLabel}>Revenue</Text><Text style={[s.statValue, { color: Colors.white }]}>${revenue.toFixed(2)}</Text></View>
       </View>
 
       {/* Search */}
@@ -135,7 +146,7 @@ export default function AdminScreen() {
 
       {/* Tabs */}
       <View style={s.tabRow}>
-        {(['all', 'pending', 'verified', 'subscribers'] as AdminTab[]).map((t) => (
+        {(['all', 'subscribers'] as AdminTab[]).map((t) => (
           <TouchableOpacity key={t} style={[s.tab, tab === t && s.tabActive]} onPress={() => setTab(t)}>
             <Text style={[s.tabText, tab === t && s.tabTextActive]}>{t}</Text>
           </TouchableOpacity>
@@ -151,33 +162,27 @@ export default function AdminScreen() {
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ padding: Spacing.md, paddingBottom: 100, gap: 12 }}
           renderItem={({ item }) => {
-            const photo = item.profileImageUrls?.[0] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200';
+            const photo = item.profileImageUrls?.[0] || 'https://ui-avatars.com/api/?name=User&background=1E1E1E&color=FFFFFF&size=200';
             return (
-              <View style={[s.memberCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+              <TouchableOpacity 
+                style={[s.memberCard, { backgroundColor: '#1A1A1A', borderColor: '#333' }]}
+                onPress={() => navigation.navigate('ProfileDetail' as any, { match: item })}
+                activeOpacity={0.8}
+              >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
                   <Image source={{ uri: photo }} style={s.memberAvatar} />
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Text style={[s.memberName, { color: isDarkMode ? Colors.white : Colors.dark }]}>{item.name}, {item.age}</Text>
-                      {item.isVerified && <Ionicons name="checkmark-circle" size={16} color="#22c55e" />}
+                      <Text style={[s.memberName, { color: Colors.white }]}>{item.name}, {item.age}</Text>
+                      {item.isVerified && <Ionicons name="checkmark-circle" size={16} color="#D4AF37" />}
                     </View>
                     <Text style={s.memberOcc}>{item.occupation}</Text>
                   </View>
-                </View>
-                <View style={s.memberActions}>
-                  <TouchableOpacity
-                    style={[s.verifyBtn, item.isVerified && s.verifyBtnRevoke]}
-                    onPress={() => toggleVerify(item)}
-                  >
-                    <Text style={[s.verifyBtnText, item.isVerified && { color: Colors.gray600 }]}>
-                      {item.isVerified ? 'Revoke Verification' : 'Approve User'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                    <Ionicons name="trash" size={20} color="#ef4444" />
+                  <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ padding: 8, backgroundColor: '#EF44442A', borderRadius: 12 }}>
+                    <Ionicons name="trash" size={18} color="#ef4444" />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
           ListEmptyComponent={
@@ -210,15 +215,15 @@ const s = StyleSheet.create({
   seedBtnText: { fontSize: 10, fontWeight: '900', color: Colors.dark, textTransform: 'uppercase', letterSpacing: 1 },
   closeBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 16 },
   statsRow: { flexDirection: 'row', gap: 8, padding: Spacing.md },
-  statCard: { flex: 1, backgroundColor: Colors.white, padding: 12, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: Colors.gray100 },
+  statCard: { flex: 1, backgroundColor: '#1A1A1A', padding: 14, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: '#333' },
   statLabel: { fontSize: 10, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1 },
   statValue: { fontSize: 20, fontWeight: '900', marginTop: 4 },
-  searchInput: { borderWidth: 1, borderColor: Colors.gray100, borderRadius: BorderRadius.lg, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, marginBottom: 12 },
-  tabRow: { flexDirection: 'row', marginHorizontal: Spacing.md, backgroundColor: Colors.gray100, borderRadius: BorderRadius.lg, padding: 4, gap: 4, marginBottom: 4 },
-  tab: { flex: 1, paddingVertical: 8, borderRadius: BorderRadius.md, alignItems: 'center' },
-  tabActive: { backgroundColor: Colors.white, elevation: 1 },
-  tabText: { fontSize: 10, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 1 },
-  tabTextActive: { color: Colors.primary },
+  searchInput: { borderWidth: 1, borderColor: '#333', borderRadius: BorderRadius.lg, paddingHorizontal: 16, paddingVertical: 14, fontSize: 14, marginBottom: 16, backgroundColor: '#121212', color: Colors.white },
+  tabRow: { flexDirection: 'row', marginHorizontal: Spacing.md, backgroundColor: '#121212', borderRadius: BorderRadius.lg, padding: 4, gap: 4, marginBottom: 4, borderWidth: 1, borderColor: '#333' },
+  tab: { flex: 1, paddingVertical: 10, borderRadius: BorderRadius.md, alignItems: 'center' },
+  tabActive: { backgroundColor: '#222', elevation: 1, borderWidth: 1, borderColor: '#444' },
+  tabText: { fontSize: 10, fontWeight: '900', color: Colors.gray500, textTransform: 'uppercase', letterSpacing: 1 },
+  tabTextActive: { color: '#D4AF37' },
   memberCard: { padding: 16, borderRadius: 20, borderWidth: 1, borderColor: Colors.gray100, elevation: 1 },
   memberAvatar: { width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: Colors.white },
   memberName: { fontSize: 16, fontWeight: '900' },

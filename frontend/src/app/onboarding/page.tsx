@@ -70,6 +70,9 @@ const BIOMETRIC_ID_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/
 
 export default function Onboarding() {
   const [step, setStep] = useState(1); // 1: Welcome, 2: Essentials Form, 3: AI Interview, 4: Processing, 5: Results Card
+  const [subStep, setSubStep] = useState(0);
+  const [gender, setGender] = useState("");
+  const [preferredGender, setPreferredGender] = useState("");
   
   // Essentials Form Fields
   const [firstName, setFirstName] = useState("");
@@ -621,269 +624,136 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 2: Essentials Form (Harmonized with Mobile) */}
+        {/* Step 2: Personal Essentials (Sequential Fly-In) */}
         {step === 2 && (
-          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-6">
-            <div className="text-center space-y-1">
-              <h2 className="text-2xl font-serif font-black">Personal Essentials</h2>
-              <p className="text-xs text-gray-400">Complete your profile setup to launch the AI guide</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-6 relative overflow-hidden min-h-[400px] flex flex-col justify-center">
+            
+            {subStep === 0 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">What is your name?</h2>
+                </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">First Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input 
-                      type="text" 
-                      value={firstName} 
-                      onChange={e => setFirstName(e.target.value)}
-                      placeholder="e.g. John" 
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+                  <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First Name" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Surname</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input 
-                      type="text" 
-                      value={lastName} 
-                      onChange={e => setLastName(e.target.value)}
-                      placeholder="e.g. Doe" 
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Last Name</label>
+                  <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last Name" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
+                <button onClick={() => setSubStep(1)} disabled={!firstName || !lastName} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-              {/* Age & Occupation */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {subStep === 1 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Your Gender Preferences</h2>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Your Gender</label>
+                  <select value={gender} onChange={e => setGender(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+                <button onClick={() => setSubStep(2)} disabled={!gender} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
+
+            {subStep === 2 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Basic Info</h2>
+                </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Date of Birth</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input 
-                      type="date" 
-                      value={dateOfBirth} 
-                      onChange={e => setDateOfBirth(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+                  <input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Occupation</label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input 
-                      type="text" 
-                      value={occupation} 
-                      onChange={e => setOccupation(e.target.value)}
-                      placeholder="e.g. Software Engineer" 
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+                  <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)} placeholder="e.g. Software Engineer" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
+                <button onClick={() => setSubStep(3)} disabled={!dateOfBirth || !occupation} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-
-
-              {/* Religion & Occupation */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            {subStep === 3 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Religion & Faith</h2>
+                </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Religion / Faith</label>
-                  <select
-                    value={religionSelect}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setReligionSelect(val);
-                      if (val !== "Other") {
-                        setReligion(val);
-                      } else {
-                        setReligion(religionCustom);
-                      }
-                    }}
-                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50"
-                  >
-                    <option value="">Select Religion</option>
-                    <option value="Christian">Christian</option>
-                    <option value="Muslim">Muslim</option>
-                    <option value="Jewish">Jewish</option>
-                    <option value="Hindu">Hindu</option>
-                    <option value="Buddhist">Buddhist</option>
-                    <option value="Atheist">Atheist</option>
-                    <option value="Agnostic">Agnostic</option>
-                    <option value="Other">Other</option>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Religion</label>
+                  <select value={religionSelect} onChange={e => { setReligionSelect(e.target.value); if(e.target.value !== 'Other') setReligion(e.target.value); }} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select religion / faith</option>
+                    {['Christian', 'Muslim', 'Jewish', 'Hindu', 'Buddhist', 'Atheist', 'Agnostic', 'Other'].map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
-                  {religionSelect === "Other" && (
-                    <input 
-                      type="text" 
-                      value={religionCustom} 
-                      onChange={e => {
-                        setReligionCustom(e.target.value);
-                        setReligion(e.target.value);
-                      }}
-                      placeholder="Please specify your religion" 
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50 mt-2"
-                    />
-                  )}
                 </div>
+                {religionSelect === 'Other' && (
+                  <input type="text" value={religionCustom} onChange={e => { setReligionCustom(e.target.value); setReligion(e.target.value); }} placeholder="Specify your religion" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                )}
+                <button onClick={() => setSubStep(4)} disabled={!religion} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-              {/* Current Residence Location Selectors (Reordered to Country, State, City) */}
-              <div className="pt-2 border-t border-white/5 space-y-3">
-                <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Current Residence Location</span>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">Country</label>
-                    <select
-                      value={residenceCountry}
-                      onChange={(e) => {
-                        setResidenceCountry(e.target.value);
-                        setResidenceState("");
-                        setResidenceCity("");
-                      }}
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
-                      <option value="">Select</option>
-                      {COUNTRIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
-                    {residenceStates.length > 0 ? (
-                      <select
-                        value={residenceState}
-                        onChange={(e) => {
-                          setResidenceState(e.target.value);
-                        }}
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      >
-                        <option value="">Select</option>
-                        {residenceStates.map((s) => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={residenceState}
-                        onChange={(e) => {
-                          setResidenceState(e.target.value);
-                        }}
-                        placeholder="State"
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    <input
-                      type="text"
-                      value={residenceCity}
-                      onChange={(e) => setResidenceCity(e.target.value)}
-                      placeholder="City"
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+            {subStep === 4 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Where do you live?</h2>
                 </div>
-              </div>
-
-              {/* Heritage & Origin Location Selectors (Reordered to Country, State, City) */}
-              <div className="pt-2 border-t border-white/5 space-y-3">
-                <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Heritage & Origin</span>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">Country</label>
-                    <select
-                      value={originCountry}
-                      onChange={(e) => {
-                        setOriginCountry(e.target.value);
-                        setOriginState("");
-                        setOriginCity("");
-                      }}
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
-                      <option value="">Select</option>
-                      {COUNTRIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">State / Province</label>
-                    {originStates.length > 0 ? (
-                      <select
-                        value={originState}
-                        onChange={(e) => {
-                          setOriginState(e.target.value);
-                        }}
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      >
-                        <option value="">Select</option>
-                        {originStates.map((s) => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type="text"
-                        value={originState}
-                        onChange={(e) => {
-                          setOriginState(e.target.value);
-                        }}
-                        placeholder="State"
-                        className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <label className="text-[9px] uppercase text-gray-500 font-bold block mb-1">City / Town</label>
-                    <input
-                      type="text"
-                      value={originCity}
-                      onChange={(e) => setOriginCity(e.target.value)}
-                      placeholder="City"
-                      className="w-full bg-[#121721] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    />
-                  </div>
+                <div className="space-y-4">
+                  <select value={residenceCountry} onChange={e => { setResidenceCountry(e.target.value); setResidenceState(""); setResidenceCity(""); }} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Country</option>
+                    {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <input type="text" value={residenceState} onChange={e => setResidenceState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  <input type="text" value={residenceCity} onChange={e => setResidenceCity(e.target.value)} placeholder="City / Town" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
+                <button onClick={() => setSubStep(5)} disabled={!residenceCountry || !residenceCity} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-              {/* Lifestyle & Expectations */}
-              <div className="pt-2 border-t border-white/5 space-y-4">
-                <span className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-black block">Lifestyle & Expectations</span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <MultiSelectDropdown
-                      label="Languages Spoken"
-                      options={[...MAJOR_LANGUAGES, "Other"]}
-                      values={languagesSpoken}
-                      onChange={setLanguagesSpoken}
-                      placeholder="Select primary language"
-                    />
-                    {languagesSpoken.includes("Other") && (
-                      <input
-                        type="text"
-                        value={otherLanguageInput}
-                        onChange={(e) => setOtherLanguageInput(e.target.value)}
-                        placeholder="Please specify other language(s)"
-                        className="w-full bg-[#121721] border border-[#D4AF37]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]"
-                      />
-                    )}
-                  </div>
+            {subStep === 5 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Heritage & Origin</h2>
+                </div>
+                <div className="space-y-4">
+                  <select value={originCountry} onChange={e => { setOriginCountry(e.target.value); setOriginState(""); setOriginCity(""); }} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Country</option>
+                    {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <input type="text" value={originState} onChange={e => setOriginState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  <input type="text" value={originCity} onChange={e => setOriginCity(e.target.value)} placeholder="City / Town" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                </div>
+                <button onClick={() => setSubStep(6)} disabled={!originCountry || !originCity} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
+
+            {subStep === 6 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Languages</h2>
+                </div>
+                <MultiSelectDropdown label="Languages Spoken" options={[...MAJOR_LANGUAGES]} values={languagesSpoken} onChange={setLanguagesSpoken} placeholder="Select languages" />
+                {languagesSpoken.includes("Other") && (
+                  <input type="text" value={languageCustom} onChange={e => setLanguageCustom(e.target.value)} placeholder="Specify other language" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                )}
+                <button onClick={() => setSubStep(7)} disabled={languagesSpoken.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
+
+            {subStep === 7 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Lifestyle Habits</h2>
+                </div>
+                <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Marriage History</label>
-                    <select
-                      value={maritalStatus}
-                      onChange={(e) => setMaritalStatus(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Marriage History</label>
+                    <select value={maritalStatus} onChange={e => setMaritalStatus(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select history</option>
                       <option value="Never married">Never married</option>
                       <option value="Divorced">Divorced</option>
@@ -891,73 +761,47 @@ export default function Onboarding() {
                       <option value="Annulled">Annulled</option>
                     </select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Smoking</label>
-                    <select
-                      value={smoking}
-                      onChange={(e) => setSmoking(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Smoking</label>
+                    <select value={smoking} onChange={e => setSmoking(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select</option>
                       <option value="Non-smoker">Non-smoker</option>
                       <option value="Occasional">Occasional</option>
-                      <option value="Smoker">Smoker</option>
+                      <option value="Regular smoker">Regular smoker</option>
+                      <option value="Trying to quit">Trying to quit</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Drinking</label>
-                    <select
-                      value={drinking}
-                      onChange={(e) => setDrinking(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Drinking</label>
+                    <select value={drinking} onChange={e => setDrinking(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select</option>
-                      <option value="Never">Never</option>
+                      <option value="Non-drinker">Non-drinker</option>
                       <option value="Socially">Socially</option>
-                      <option value="Often">Often</option>
+                      <option value="Regularly">Regularly</option>
                     </select>
                   </div>
                 </div>
+                <button onClick={() => setSubStep(8)} disabled={!maritalStatus || !smoking || !drinking} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {subStep === 8 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Future Plans</h2>
+                </div>
+                <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Children Status</label>
-                    <select
-                      value={childrenStatus}
-                      onChange={(e) => setChildrenStatus(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Children Status</label>
+                    <select value={childrenStatus} onChange={e => setChildrenStatus(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select status</option>
                       <option value="No kids">No kids</option>
                       <option value="Has children">Has children</option>
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Children Intent</label>
-                    <select
-                      value={childrenPreference}
-                      onChange={(e) => setChildrenPreference(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
-                      <option value="">Select intent</option>
-                      <option value="Wants children">Wants children</option>
-                      <option value="Open to children">Open to children</option>
-                      <option value="Does not want children">Does not want children</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Vow Timeline</label>
-                    <select
-                      value={marriageTimeline}
-                      onChange={(e) => setMarriageTimeline(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Vow Timeline</label>
+                    <select value={marriageTimeline} onChange={e => setMarriageTimeline(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Timeline</option>
                       <option value="ASAP">ASAP</option>
                       <option value="1-2 years">1-2 years</option>
@@ -966,168 +810,59 @@ export default function Onboarding() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase text-gray-500 font-bold block mb-1">Relocation</label>
-                    <select
-                      value={willingToRelocate}
-                      onChange={(e) => setWillingToRelocate(e.target.value)}
-                      className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3 px-4 text-xs text-white focus:outline-none focus:border-[#D4AF37]/50"
-                    >
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Relocation</label>
+                    <select value={willingToRelocate} onChange={e => setWillingToRelocate(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Relocate</option>
                       <option value="Yes">Yes</option>
-                      <option value="Maybe">Maybe</option>
                       <option value="No">No</option>
+                      <option value="Maybe">Maybe</option>
                     </select>
                   </div>
                 </div>
-
-                <div className="space-y-2 mt-4 sm:col-span-2">
-                  <MultiSelectDropdown
-                    label="Ideal Partner Traits"
-                    options={[...MAJOR_TRAITS, "Other"]}
-                    values={idealPartnerTraits}
-                    onChange={setIdealPartnerTraits}
-                    placeholder="Select primary trait"
-                  />
-                  {idealPartnerTraits.includes("Other") && (
-                    <input
-                      type="text"
-                      value={otherTraitInput}
-                      onChange={(e) => setOtherTraitInput(e.target.value)}
-                      placeholder="Please specify other ideal trait(s)"
-                      className="w-full bg-[#121721] border border-[#D4AF37]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#D4AF37]"
-                    />
-                  )}
-                </div>
+                <button onClick={() => setSubStep(9)} disabled={!childrenStatus || !marriageTimeline || !willingToRelocate} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-              {/* Profile Picture Upload */}
-              <div className="pt-2 border-t border-white/5">
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Profile Picture</label>
-                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
-                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
-                    {profilePicture ? (
-                      <img src={profilePicture} alt="Profile Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-6 h-6 text-gray-500" />
-                    )}
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex flex-wrap gap-2">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        id="profile-upload" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setProfilePicture(reader.result as string);
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      <label 
-                        htmlFor="profile-upload" 
-                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 cursor-pointer transition-colors flex items-center gap-1"
-                      >
-                        <Upload className="w-3 h-3" /> Upload Photo
-                      </label>
-                    </div>
-                    <p className="text-[9px] text-gray-500">This photo will be displayed on your profile for matches to see.</p>
-                  </div>
+            {subStep === 9 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Family Goals</h2>
                 </div>
-              </div>
-
-              {/* Selfie Picture Verification with Live Camera simulation */}
-              <div className="pt-2 border-t border-white/5">
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-2">Selfie Scan for Verification</label>
-                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
-                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
-                    {verificationSelfie ? (
-                      <img src={verificationSelfie} alt="Selfie Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <Smile className="w-6 h-6 text-gray-500" />
-                    )}
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={startLivenessScanner}
-                        className="px-4 py-2 bg-[#D4AF37]/15 border border-[#D4AF37]/35 rounded-xl text-xs font-black text-[#D4AF37] hover:bg-[#D4AF37]/25 transition-all flex items-center gap-1.5"
-                      >
-                        <Camera className="w-3.5 h-3.5" /> Start Live Face Scan
-                      </button>
-                    </div>
-                    <p className="text-[9px] text-gray-500">This selfie is strictly for verification</p>
-                  </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Children Intent</label>
+                  <select value={childrenPreference} onChange={e => setChildrenPreference(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select intent</option>
+                    <option value="Want children">Want children</option>
+                    <option value="Don't want children">Don't want children</option>
+                    <option value="Open to children">Open to children</option>
+                  </select>
                 </div>
+                <button onClick={() => setSubStep(10)} disabled={!childrenPreference} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
+            )}
 
-              {/* Government ID Scan (Passport/DL) */}
-              <div>
-                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Government ID Scan</label>
-                <p className="text-[9px] text-gray-500 mb-2">Int’l Passport, Driver’s License, voters card or National ID</p>
-                <div className="flex items-center gap-4 p-4 bg-[#121721] border border-white/10 rounded-2xl">
-                  <div className="w-16 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {governmentId ? (
-                      <img src={governmentId} alt="ID Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <ShieldCheck className="w-6 h-6 text-gray-500" />
-                    )}
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={startIdScanner}
-                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 transition-colors flex items-center gap-1.5"
-                      >
-                        <Eye className="w-3.5 h-3.5" /> Scan ID Document
-                      </button>
-
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        id="id-upload" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setGovernmentId(reader.result as string);
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      <label 
-                        htmlFor="id-upload" 
-                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:bg-white/10 cursor-pointer transition-colors flex items-center gap-1"
-                      >
-                        <Upload className="w-3 h-3" /> Upload ID
-                      </label>
-                    </div>
-                    <p className="text-[9px] text-gray-500">ID for Verification</p>
-                  </div>
+            {subStep === 10 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Ideal Partner Traits</h2>
                 </div>
+                <MultiSelectDropdown label="Traits" options={[...MAJOR_TRAITS]} values={idealPartnerTraits} onChange={setIdealPartnerTraits} placeholder="Select traits" />
+                {idealPartnerTraits.includes("Other") && (
+                  <input type="text" value={traitCustom} onChange={e => setTraitCustom(e.target.value)} placeholder="Specify other trait" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                )}
+                <button onClick={() => setStep(3)} disabled={idealPartnerTraits.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Proceed to Verification</button>
               </div>
-            </div>
+            )}
 
-            <button 
-              onClick={handleProcessAIVerification}
-              disabled={!firstName || !lastName || !dateOfBirth || !email || !password || !profilePicture || !verificationSelfie || !governmentId || !residenceCountry || !originCountry}
-              className="w-full py-4 rounded-full text-sm font-black rose-glow-btn text-white disabled:opacity-40"
-            >
-              Verify Identity & Documents
-            </button>
+            {/* Back Button if subStep > 0 */}
+            {subStep > 0 && (
+              <button onClick={() => setSubStep(subStep - 1)} className="absolute top-6 left-6 text-gray-500 hover:text-white flex items-center gap-1 text-xs">
+                &larr; Back
+              </button>
+            )}
           </div>
         )}
-
+        
         {/* Step 3: Futuristic AI Identity & Document Verification Scan */}
         {step === 4 && (
           <div className="glass-card rounded-[32px] border border-white/10 flex flex-col h-[500px] overflow-hidden">

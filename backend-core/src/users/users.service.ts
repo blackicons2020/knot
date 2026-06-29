@@ -126,20 +126,59 @@ export class UsersService {
   async getInsights(id: string) {
     const user = await this.findOne(id);
     return {
-      trustScore: user.trustScore,
       readinessScore: user.readinessScore,
       seriousnessLevel: user.seriousnessLevel,
-      personalityArchetype: user.personalityArchetype,
-      attachmentStyle: user.attachmentStyle,
-      personalValues: user.personalValues,
+      trustScore: user.trustScore,
+      actionableAdvice: [
+        'Complete your bio to improve matching by 40%.',
+        'Verify your ID to unlock the Verified badge.',
+        'Upload 2 more photos for a complete profile.'
+      ],
     };
   }
 
   async validateOnboardingAnswer(question: string, answer: string) {
-    return this.aiService.validateOnboardingAnswer(question, answer);
+    return this.aiService.validateResponse(question, answer);
   }
 
   async verifyOnboardingDocuments(selfieUrl: string, idUrl: string, firstName: string, lastName: string, dateOfBirth: string) {
-    return this.aiService.verifyOnboardingDocuments(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
+    return this.aiService.verifyIdentity(selfieUrl, idUrl, firstName, lastName, dateOfBirth);
+  }
+
+  async deleteUser(id: string) {
+    try {
+      await this.prisma.user.delete({ where: { id } });
+      return { success: true };
+    } catch (error) {
+      throw new NotFoundException('User not found or could not be deleted.');
+    }
+  }
+
+  async seedUsers(users: any[]) {
+    // If the mock array is empty, this just returns success.
+    for (const u of users) {
+      const existing = await this.prisma.user.findUnique({ where: { email: u.email || `${u.id}@mock.com` } });
+      if (!existing) {
+        await this.prisma.user.create({
+          data: {
+            id: u.id,
+            email: u.email || `${u.id}@mock.com`,
+            passwordHash: 'mock',
+            firstName: u.firstName || u.name || 'Mock',
+            lastName: u.lastName || '',
+            dateOfBirth: u.dateOfBirth || new Date(new Date().setFullYear(new Date().getFullYear() - (u.age || 25))).toISOString(),
+            isVerified: true,
+            isPremium: true,
+            profileImages: u.profileImageUrls?.length > 0 ? {
+              create: u.profileImageUrls.map((url: string, index: number) => ({
+                url,
+                isPrimary: index === 0
+              }))
+            } : undefined
+          }
+        });
+      }
+    }
+    return { success: true };
   }
 }

@@ -19,6 +19,8 @@ model User {
   passwordHash         String
   firstName            String    @default("")
   lastName             String    @default("")
+  gender               String    @default("")
+  preferredGender      String    @default("")
   dateOfBirth          String    @default("")
   bio                  String    @default("")
   occupation           String    @default("")

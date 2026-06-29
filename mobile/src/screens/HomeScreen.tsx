@@ -37,8 +37,8 @@ export default function HomeScreen() {
     (async () => {
       setLoading(true);
       try {
-        // Force MATCHES_DATA to mirror the web app exactly
-        setMatches(MATCHES_DATA);
+        // Force MATCHES_DATA to mirror the web app exactly, filtered by preferred gender
+        setMatches(MATCHES_DATA.filter((m) => userProfile.preferredGender ? m.gender === userProfile.preferredGender : true));
       } catch (err) {
         console.error('Failed to load matches:', err);
         addToast('Failed to sync latest curated matches.', 'error');

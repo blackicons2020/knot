@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { db } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
@@ -110,7 +111,8 @@ export default function ProfileDetailScreen() {
     fetchMetrics();
   }, [match.id, userProfile?.id]);
 
-  const isRestricted = !userProfile?.isPremium || !match.isPremium;
+  const isAdmin = userProfile?.role === 'ADMIN' || userProfile?.id === 'user_0';
+  const isRestricted = !isAdmin && (!userProfile?.isPremium || !match.isPremium);
   const bothDisabled = userProfile?.isPremium === true && !match.isPremium;
 
   const nextPhoto = () => setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
@@ -355,33 +357,35 @@ export default function ProfileDetailScreen() {
       </ScrollView>
 
       {/* ─── Bottom action bar ─── */}
-      <View style={[st.actionBar, {
-        paddingBottom: insets.bottom + 16,
-        backgroundColor: isDarkMode ? Colors.darkCard : Colors.white,
-        borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray100,
-      }]}>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          disabled={bothDisabled}
-          onPress={() => {
-            if (!userProfile?.isPremium) {
-              navigation.navigate('Payment', { user: userProfile! });
-            } else {
-              navigation.navigate('Chat', { match, user: userProfile! });
-            }
-          }}
-        >
-          <LinearGradient
-            colors={bothDisabled ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[st.chatBtn, bothDisabled && st.disabledBtn]}
+      {!isAdmin && (
+        <View style={[st.actionBar, { 
+          paddingBottom: insets.bottom + 16,
+          backgroundColor: isDarkMode ? Colors.darkCard : Colors.white,
+          borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray100,
+        }]}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            disabled={bothDisabled}
+            onPress={() => {
+              if (!userProfile?.isPremium) {
+                navigation.navigate('Payment', { user: userProfile! });
+              } else {
+                navigation.navigate('Chat', { match, user: userProfile! });
+              }
+            }}
           >
-            <Ionicons name="chatbubbles" size={22} color={bothDisabled ? Colors.gray400 : Colors.white} />
-            <Text style={[st.chatBtnText, bothDisabled && { color: Colors.gray400 }]}>Chats</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+            <LinearGradient
+              colors={bothDisabled ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[st.chatBtn, bothDisabled && st.disabledBtn]}
+            >
+              <Ionicons name="chatbubbles" size={22} color={bothDisabled ? Colors.gray400 : Colors.white} />
+              <Text style={[st.chatBtnText, bothDisabled && { color: Colors.gray400 }]}>Chats</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

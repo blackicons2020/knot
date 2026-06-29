@@ -16,10 +16,11 @@ import {
   Animated,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -43,7 +44,76 @@ export default function OnboardingScreen() {
   // 4: AI Liveness & Biometric Verification Scan
   // 5: Relationship Certificate Reveal
   const [step, setStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 6;
+  const [subStep, setSubStep] = useState(0);
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (step === 2) {
+      slideAnim.setValue(50);
+      fadeAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(slideAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [subStep, step]);
+
+  const nextSubStep = () => {
+    // Validation Guardrails
+    if (subStep === 2) {
+      if (form.dateOfBirth) {
+        const dob = new Date(form.dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+        if (age < 18) {
+          Alert.alert("Age Restriction", "You must be at least 18 years old to join the registry.");
+          return;
+        }
+      }
+      if (form.occupation) {
+        if (form.occupation.trim().length < 2) {
+          Alert.alert("Invalid Occupation", "Please enter a valid occupation.");
+          return;
+        }
+        if (!/[a-zA-Z]/.test(form.occupation)) {
+          Alert.alert("Invalid Occupation", "Occupation must contain letters.");
+          return;
+        }
+      }
+    } else if (subStep === 10) {
+      if (form.preferredPartnerAgeRange) {
+        const minAge = form.preferredPartnerAgeRange[0] || 0;
+        const maxAge = form.preferredPartnerAgeRange[1] || 0;
+        if (minAge < 18) {
+          Alert.alert("Invalid Age", "The minimum age for a partner must be 18 or older.");
+          return;
+        }
+        if (maxAge < minAge) {
+          Alert.alert("Invalid Age Range", "The maximum age cannot be less than the minimum age.");
+          return;
+        }
+        if (maxAge > 99) {
+          Alert.alert("Invalid Age Range", "Please enter a feasible maximum age (e.g., 99 or below).");
+          return;
+        }
+      }
+    }
+
+    setSubStep(s => {
+      let next = s + 1;
+      // Skip email step if already fetched from Auth
+      if (next === 3 && form.email) {
+        next = 4;
+      }
+      return next;
+    });
+  };
 
   // Image Upload State
   const [govIdUri, setGovIdUri] = useState<string | null>(null);
@@ -133,11 +203,9 @@ export default function OnboardingScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
-      cameraType: 'back',
     });
 
     if (!result.canceled && result.assets?.[0]) {
@@ -286,7 +354,7 @@ export default function OnboardingScreen() {
   };
 
   const handleProcessAIVerification = async () => {
-    setStep(3);
+    setStep(4);
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
@@ -333,7 +401,7 @@ export default function OnboardingScreen() {
             { 
               text: "Try Again", 
               onPress: () => {
-                setStep(2); // Go back to files upload step
+                setStep(3); // Go back to files upload step
               } 
             }
           ]
@@ -350,7 +418,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4); // Approval
             setTimeout(() => {
-              setStep(4); // Go to Interview next!
+              setStep(5); // Go to Interview next!
             }, 1200);
           }, 1500);
         }, 1500);
@@ -367,7 +435,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4);
             setTimeout(() => {
-              setStep(4);
+              setStep(5);
             }, 1200);
           }, 1500);
         }, 1500);
@@ -424,7 +492,7 @@ export default function OnboardingScreen() {
     <View style={{ marginBottom: 12 }}>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
-        style={[styles.dropdownBtn, { backgroundColor: Colors.white + '05', borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+        style={[styles.dropdownBtn, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
         onPress={() => openDropdown(label, options, onSelect)}
         activeOpacity={0.7}
       >
@@ -440,7 +508,7 @@ export default function OnboardingScreen() {
     <View style={{ marginBottom: 12 }}>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
-        style={[styles.dropdownBtn, { backgroundColor: Colors.white + '05', borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+        style={[styles.dropdownBtn, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
         onPress={() => openMultiDropdown(label, options, values, onSelect)}
         activeOpacity={0.7}
       >
@@ -499,22 +567,44 @@ export default function OnboardingScreen() {
   const textStyle = { color: isDarkMode ? Colors.white : Colors.dark };
 
   return (
-    <KeyboardAvoidingView style={[styles.root, bgStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={[styles.root, bgStyle, { flex: 1 }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       {/* Header bar (only show in early steps) */}
-      {step < 3 && (
+      {step <= 3 && (
         <View style={[styles.headerRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
-          <View>
-            <Text style={styles.headerSubtitle}>KNOT Registry</Text>
-            <Text style={[styles.headerTitle, textStyle]}>
-              {step === 1 && 'Cinematic Setup'}
-              {step === 2 && 'Personal Essentials'}
-            </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {((step === 2 && subStep > 0) || step === 3) && (
+              <TouchableOpacity 
+                onPress={() => {
+                  if (step === 3) {
+                    setStep(2);
+                    setSubStep(10); // Return to Ideal Partner Traits
+                  } else {
+                    setSubStep(s => {
+                      let prev = s - 1;
+                      if (prev === 3 && form.email) prev = 2;
+                      return prev;
+                    });
+                  }
+                }} 
+                style={{ marginRight: 16 }}
+              >
+                <Ionicons name="arrow-back" size={24} color={isDarkMode ? Colors.white : Colors.dark} />
+              </TouchableOpacity>
+            )}
+            <View>
+              <Text style={styles.headerSubtitle}>KNOT Registry</Text>
+              <Text style={[styles.headerTitle, textStyle]}>
+                {step === 1 && 'Cinematic Setup'}
+                {step === 2 && 'Personal Essentials'}
+                {step === 3 && 'Identity & Trust'}
+              </Text>
+            </View>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
               <Ionicons name="close" size={24} color={Colors.gray400} />
             </TouchableOpacity>
-            <Text style={styles.stepCounter}>Step {step} of 5</Text>
+            <Text style={styles.stepCounter}>Step {step} of 6</Text>
           </View>
         </View>
       )}
@@ -545,194 +635,279 @@ export default function OnboardingScreen() {
             </TouchableOpacity>
             
             <View style={{ marginTop: 40, alignItems: 'center' }}>
-              <Text style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: Colors.gray500, fontWeight: 'bold' }}>
+              <Text 
+                numberOfLines={1} 
+                adjustsFontSizeToFit 
+                style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: Colors.gray500, fontWeight: 'bold', width: '100%', textAlign: 'center' }}
+              >
                 FRAUD-PROOF | AI MATCHMAKING | HIGH-TRUST
               </Text>
             </View>
           </View>
         )}
 
-        {/* Step 2: Essentials Form & Uploads */}
+        {/* Step 2: Personal Essentials (Typeform Style) */}
         {step === 2 && (
-          <View style={styles.formContainer}>
-            
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>First Name</Text>
-                <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
-                  <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
-                  <TextInput
-                    style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
-                    value={form.firstName}
-                    onChangeText={(v) => set('firstName', v)}
-                    placeholder="First Name"
-                    placeholderTextColor={Colors.gray400}
-                  />
+          <Animated.View style={[styles.formContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+            {subStep === 0 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>What is your name?</Text>
+                <View style={{ gap: 16 }}>
+                  <View>
+                    <Text style={styles.label}>First Name</Text>
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.firstName} onChangeText={(v) => set('firstName', v)} placeholder="First Name" placeholderTextColor={Colors.gray400} />
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Last Name</Text>
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.lastName} onChangeText={(v) => set('lastName', v)} placeholder="Last Name" placeholderTextColor={Colors.gray400} />
+                  </View>
                 </View>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Surname</Text>
-                <View style={[styles.inputWrapper, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
-                  <Ionicons name="person-outline" size={18} color={Colors.gray400} style={styles.inputIcon} />
-                  <TextInput
-                    style={[styles.inputField, { color: isDarkMode ? Colors.white : Colors.dark }]}
-                    value={form.lastName}
-                    onChangeText={(v) => set('lastName', v)}
-                    placeholder="Surname"
-                    placeholderTextColor={Colors.gray400}
-                  />
-                </View>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Date of Birth</Text>
-                <TouchableOpacity
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, justifyContent: 'center' }]}
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <Text style={{ color: form.dateOfBirth ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }}>
-                    {form.dateOfBirth || "YYYY-MM-DD"}
-                  </Text>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.firstName || !form.lastName) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.firstName || !form.lastName}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
                 </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={form.dateOfBirth ? new Date(form.dateOfBirth) : new Date()}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowDatePicker(false);
-                      if (selectedDate) {
-                        set('dateOfBirth', selectedDate.toISOString().split('T')[0]);
-                      }
-                    }}
-                  />
-                )}
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Occupation</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={form.occupation}
-                  onChangeText={(v) => set('occupation', v)}
-                  placeholder="e.g. Software Engineer"
-                  placeholderTextColor={Colors.gray400}
-                />
-              </View>
-            </View>
+            )}
 
-            <View style={{ marginTop: 12 }}>
-              <Text style={styles.label}>Email Address</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                value={form.email}
-                onChangeText={(v) => set('email', v)}
-                placeholder="name@email.com"
-                placeholderTextColor={Colors.gray400}
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={{ marginTop: 12 }}>
-              {renderDropdownField(
-                'Religion / Faith',
-                religionSelect,
-                'Select religion / faith',
-                [
-                  'Christian',
-                  'Muslim',
-                  'Jewish',
-                  'Hindu',
-                  'Buddhist',
-                  'Atheist',
-                  'Agnostic',
-                  'Other',
-                ],
-                (val) => {
-                  setReligionSelect(val);
-                  if (val !== 'Other') {
-                    set('religion', val);
-                  } else {
-                    set('religion', religionCustom);
-                  }
-                }
-              )}
-              {religionSelect === 'Other' && (
-                <TextInput
-                  style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                  value={religionCustom}
-                  onChangeText={(v) => {
-                    setReligionCustom(v);
-                    set('religion', v);
-                  }}
-                  placeholder="Specify your religion"
-                  placeholderTextColor={Colors.gray400}
-                />
-              )}
-            </View>
-
-            {renderLocationGroup('residence', 'Current Residence')}
-            {renderLocationGroup('origin', 'Heritage & Origin')}
-
-            {/* Lifestyle & Expectations */}
-            <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200, paddingTop: 16 }}>
-              <Text style={[styles.subSectionTitle, { color: Colors.primary, marginBottom: 16 }]}>Lifestyle & Expectations</Text>
-              
-              <View style={{ marginBottom: 12 }}>
-                {renderMultiDropdownField('Languages Spoken', form.languagesSpoken || [], 'Select languages', ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Other', 'Chinese'], (v) => set('languagesSpoken', v))}
-                {(form.languagesSpoken || []).includes('Other') && (
-                  <TextInput
-                    style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                    value={languageCustom}
-                    onChangeText={setLanguageCustom}
-                    placeholder="Specify other language"
-                    placeholderTextColor={Colors.gray400}
-                  />
-                )}
-              </View>
-
-              {renderDropdownField('Marriage History', form.maritalStatus, 'Select history', Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
-              
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <View style={{ flex: 1 }}>
-                  {renderDropdownField('Smoking', form.smoking, 'Select', Object.values(SmokingHabits), (v) => set('smoking', v))}
+            {subStep === 1 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Your Gender</Text>
+                <View style={{ gap: 16 }}>
+                  {renderDropdownField('Your Gender', form.gender || '', 'Select', ['male', 'female'], (v) => {
+                    set('gender', v);
+                    set('preferredGender', v === 'male' ? 'female' : 'male');
+                  })}
                 </View>
-                <View style={{ flex: 1 }}>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.gender) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.gender}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 2 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Basic Info</Text>
+                <View style={{ gap: 16 }}>
+                  <View>
+                    <Text style={styles.label}>Date of Birth</Text>
+                    <TouchableOpacity style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, justifyContent: 'center' }]} onPress={() => setShowDatePicker(true)}>
+                      <Text style={{ color: form.dateOfBirth ? (isDarkMode ? Colors.white : Colors.gray900) : Colors.gray400 }}>{form.dateOfBirth || "YYYY-MM-DD"}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View>
+                    <Text style={styles.label}>Occupation</Text>
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.occupation} onChangeText={(v) => set('occupation', v)} placeholder="e.g. Software Engineer" placeholderTextColor={Colors.gray400} />
+                  </View>
+                </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.dateOfBirth || !form.occupation) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.dateOfBirth || !form.occupation}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 3 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Email Address</Text>
+                <View>
+                  <Text style={styles.label}>Email Address</Text>
+                  <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.email} onChangeText={(v) => set('email', v)} placeholder="name@email.com" placeholderTextColor={Colors.gray400} autoCapitalize="none" />
+                </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.email) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.email}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 4 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Religion & Faith</Text>
+                <View style={{ gap: 16 }}>
+                  {renderDropdownField('Religion / Faith', religionSelect, 'Select religion / faith', ['Christian', 'Muslim', 'Jewish', 'Hindu', 'Buddhist', 'Atheist', 'Agnostic', 'Other'], (val) => {
+                    setReligionSelect(val);
+                    if (val !== 'Other') set('religion', val);
+                    else set('religion', religionCustom);
+                  })}
+                  {religionSelect === 'Other' && (
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={religionCustom} onChangeText={(v) => { setReligionCustom(v); set('religion', v); }} placeholder="Specify your religion" placeholderTextColor={Colors.gray400} />
+                  )}
+                </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.religion) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.religion}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 5 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Where do you live?</Text>
+                {renderLocationGroup('residence', 'Current Residence')}
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.residenceCountry || !form.residenceCity) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.residenceCountry || !form.residenceCity}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 6 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Heritage & Origin</Text>
+                {renderLocationGroup('origin', 'Heritage & Origin')}
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.originCountry || !form.originCity) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.originCountry || !form.originCity}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 7 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Languages</Text>
+                <View style={{ gap: 16 }}>
+                  {renderMultiDropdownField('Languages Spoken', form.languagesSpoken || [], 'Select languages', ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Chinese', 'Other'], (v) => set('languagesSpoken', v))}
+                  {(form.languagesSpoken || []).includes('Other') && (
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={languageCustom} onChangeText={setLanguageCustom} placeholder="Specify other language" placeholderTextColor={Colors.gray400} />
+                  )}
+                </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (form.languagesSpoken?.length === 0) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={form.languagesSpoken?.length === 0}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 8 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Lifestyle Habits</Text>
+                <View style={{ gap: 16 }}>
+                  {renderDropdownField('Marriage History', form.maritalStatus, 'Select history', Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
+                  {renderDropdownField('Smoking', form.smoking, 'Select', Object.values(SmokingHabits), (v) => set('smoking', v))}
                   {renderDropdownField('Drinking', form.drinking, 'Select', Object.values(DrinkingHabits), (v) => set('drinking', v))}
                 </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.maritalStatus || !form.smoking || !form.drinking) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.maritalStatus || !form.smoking || !form.drinking}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
               </View>
+            )}
 
-              {renderDropdownField('Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
-              
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <View style={{ flex: 1 }}>
+            {subStep === 9 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Future Plans</Text>
+                <View style={{ gap: 16 }}>
+                  {renderDropdownField('Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
                   {renderDropdownField('Vow Timeline', form.marriageTimeline, 'Timeline', ['ASAP', '1-2 years', '3+ years', 'Not sure'], (v) => set('marriageTimeline', v))}
-                </View>
-                <View style={{ flex: 1 }}>
                   {renderDropdownField('Relocation', form.willingToRelocate, 'Relocate', Object.values(WillingToRelocate), (v) => set('willingToRelocate', v))}
                 </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.childrenStatus || !form.marriageTimeline || !form.willingToRelocate) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.childrenStatus || !form.marriageTimeline || !form.willingToRelocate}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
               </View>
+            )}
 
-              {renderDropdownField('Children Intent', form.childrenPreference, 'Select intent', Object.values(ChildrenPreference), (v) => set('childrenPreference', v))}
-
-              <View style={{ marginBottom: 12 }}>
-                <View style={styles.row}>
-                  {renderMultiDropdownField('Ideal Partner Traits', form.idealPartnerTraits || [], 'Select traits', ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'], (v) => set('idealPartnerTraits', v))}
+            {subStep === 10 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Family Goals</Text>
+                <View style={{ gap: 16 }}>
+                  {renderDropdownField('Children Intent', form.childrenPreference, 'Select intent', Object.values(ChildrenPreference), (v) => set('childrenPreference', v))}
                 </View>
-                {(form.idealPartnerTraits || []).includes('Other') && (
-                  <TextInput
-                    style={[styles.input, { marginTop: 8, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
-                    value={traitCustom}
-                    onChangeText={setTraitCustom}
-                    placeholder="Specify other trait"
-                    placeholderTextColor={Colors.gray400}
-                  />
-                )}
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.childrenPreference) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.childrenPreference}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
               </View>
-            </View>
+            )}
 
-            {/* Profile Picture Upload */}
+            {subStep === 11 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Ideal Partner Traits</Text>
+                <View style={{ gap: 16 }}>
+                  {renderMultiDropdownField('Ideal Partner Traits', form.idealPartnerTraits || [], 'Select traits', ['Kind', 'Ambitious', 'Family-oriented', 'Honest', 'Humorous', 'Intelligent', 'Empathetic', 'Adventurous', 'Loyal', 'Spiritual', 'Confident', 'Other'], (v) => set('idealPartnerTraits', v))}
+                  <View style={{ marginTop: 12 }}>
+                    <Text style={styles.label}>Ideal Partner Age Range</Text>
+                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                      <TextInput 
+                        style={[styles.input, { flex: 1, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} 
+                        placeholder="Min Age" 
+                        placeholderTextColor={Colors.gray400}
+                        keyboardType="numeric"
+                        value={form.preferredPartnerAgeRange?.[0] ? form.preferredPartnerAgeRange[0].toString() : ''}
+                        onChangeText={(val) => set('preferredPartnerAgeRange', [parseInt(val) || 0, form.preferredPartnerAgeRange?.[1] || 0])}
+                      />
+                      <TextInput 
+                        style={[styles.input, { flex: 1, backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} 
+                        placeholder="Max Age" 
+                        placeholderTextColor={Colors.gray400}
+                        keyboardType="numeric"
+                        value={form.preferredPartnerAgeRange?.[1] ? form.preferredPartnerAgeRange[1].toString() : ''}
+                        onChangeText={(val) => set('preferredPartnerAgeRange', [form.preferredPartnerAgeRange?.[0] || 0, parseInt(val) || 0])}
+                      />
+                    </View>
+                  </View>
+                  {(form.idealPartnerTraits || []).includes('Other') && (
+                    <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={traitCustom} onChangeText={setTraitCustom} placeholder="Specify other trait" placeholderTextColor={Colors.gray400} />
+                  )}
+                </View>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (form.idealPartnerTraits?.length === 0) ? 0.5 : 1 }]} onPress={() => {
+                  if (form.preferredPartnerAgeRange) {
+                    const minAge = form.preferredPartnerAgeRange[0] || 0;
+                    const maxAge = form.preferredPartnerAgeRange[1] || 0;
+                    if (minAge < 18) {
+                      Alert.alert("Invalid Age", "The minimum age for a partner must be 18 or older.");
+                      return;
+                    }
+                    if (maxAge < minAge) {
+                      Alert.alert("Invalid Age Range", "The maximum age cannot be less than the minimum age.");
+                      return;
+                    }
+                    if (maxAge > 99) {
+                      Alert.alert("Invalid Age Range", "Please enter a feasible maximum age (e.g., 99 or below).");
+                      return;
+                    }
+                  }
+                  setStep(3);
+                }} disabled={form.idealPartnerTraits?.length === 0}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Proceed to Identity Verification</Text>
+                  <Ionicons name="checkmark-circle" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+            
+            {showDatePicker && (
+              <DateTimePicker
+                value={form.dateOfBirth ? new Date(form.dateOfBirth) : new Date()}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) set('dateOfBirth', selectedDate.toISOString().split('T')[0]);
+                }}
+              />
+            )}
+          </Animated.View>
+        )}
+
+        {/* Step 3: Identity Verification Uploads */}
+        {step === 3 && (
+          <View style={styles.formContainer}>
+            <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24, textAlign: 'center' }]}>Identity & Trust Verification</Text>
+            
             <View style={styles.uploadSection}>
               <Text style={styles.label}>PROFILE PICTURE</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
@@ -753,7 +928,6 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            {/* Selfie Scan For Verification */}
             <View style={styles.uploadSection}>
               <Text style={styles.label}>SELFIE SCAN FOR VERIFICATION</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
@@ -774,7 +948,6 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            {/* Government ID Scan */}
             <View style={styles.uploadSection}>
               <Text style={styles.label}>GOVERNMENT ID SCAN</Text>
               <Text style={[styles.uploadSubtext, { marginBottom: 8 }]}>Int’l Passport, Driver’s License, voters card or National ID</Text>
@@ -802,27 +975,16 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-
-            <TouchableOpacity
-              style={{ marginTop: 24, opacity: (!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !livenessUri || !govIdUri) ? 0.4 : 1 }}
-              onPress={handleProcessAIVerification}
-              disabled={!form.firstName || !form.lastName || !form.dateOfBirth || !form.email || !form.profileImageUrls?.length || !livenessUri || !govIdUri}
-            >
-              <LinearGradient
-                colors={['#E27D8D', '#2D1B4E']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.actionButton}
-              >
+            <TouchableOpacity style={{ marginTop: 24, opacity: (!form.profileImageUrls?.length || !livenessUri || !govIdUri) ? 0.4 : 1 }} onPress={handleProcessAIVerification} disabled={!form.profileImageUrls?.length || !livenessUri || !govIdUri}>
+              <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionButton}>
                 <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
                 <Ionicons name="arrow-forward" size={18} color={Colors.white} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
         )}
-
-        {/* Step 3: Conversational AI Interview */}
-        {step === 4 && (
+{/* Step 4: Conversational AI Interview */}
+        {step === 5 && (
           <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
             <View style={[styles.chatHeader, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
               <View style={[styles.botAvatar, { backgroundColor: Colors.accent + '1A', borderColor: Colors.accent + '2B' }]}>
@@ -884,7 +1046,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 4: Futuristic AI Identity & Biometric Match Scanner */}
-        {step === 3 && (
+        {step === 4 && (
           <View style={[styles.scannerContainer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent + '33' }]}>
             <Text style={[styles.scannerTitle, textStyle]}>AI Biometric Liveness & ID Match</Text>
             <Text style={styles.scannerSubtitle}>Secure Verification Session In Progress</Text>
@@ -893,8 +1055,8 @@ export default function OnboardingScreen() {
               <View style={styles.feedColumn}>
                 <Text style={styles.feedLabel}>Selfie Feed</Text>
                 <View style={[styles.feedImageContainer, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
-                  {form.profileImageUrls?.length > 0 ? (
-                    <Image source={{ uri: form.profileImageUrls[0] }} style={styles.feedImage} />
+                  {livenessUri ? (
+                    <Image source={{ uri: livenessUri }} style={styles.feedImage} />
                   ) : (
                     <Ionicons name="person" size={32} color={Colors.gray500} />
                   )}
@@ -979,7 +1141,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 5: Digital Relationship Certificate Reveal */}
-        {step === 5 && (
+        {step === 6 && (
           <View style={styles.certificateContainer}>
             <View style={[styles.certCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent }]}>
               
@@ -1039,9 +1201,6 @@ export default function OnboardingScreen() {
             <TouchableOpacity style={{ marginTop: 24 }} onPress={complete}>
               <LinearGradient
                 colors={['#E27D8D', '#2D1B4E']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.actionButton}
               >
                 <Text style={styles.actionButtonText}>Activate Dashboard</Text>
                 <Ionicons name="arrow-forward" size={18} color={Colors.white} />
@@ -1077,11 +1236,16 @@ export default function OnboardingScreen() {
               data={filteredDropdownOptions}
               keyExtractor={(item) => item}
               keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
               renderItem={({ item }) => {
                 const isSelected = dropdownMultiSelect ? dropdownSelectedItems.includes(item) : false;
                 return (
                   <TouchableOpacity
-                    style={[styles.modalItem, isSelected && { backgroundColor: Colors.primary + '20' }]}
+                    style={[
+                      styles.modalItem, 
+                      { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }, 
+                      isSelected && { backgroundColor: '#7B5270', borderColor: '#7B5270' }
+                    ]}
                     onPress={() => {
                       if (dropdownMultiSelect) {
                         setDropdownSelectedItems(prev => 
@@ -1094,8 +1258,8 @@ export default function OnboardingScreen() {
                     }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-                      <Text style={[styles.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }]}>{item}</Text>
-                      {isSelected && <Ionicons name="checkmark" size={20} color={Colors.primary} />}
+                      <Text style={[styles.modalItemText, { color: isDarkMode ? Colors.white : Colors.gray900 }, isSelected && { color: Colors.white, fontWeight: 'bold' }]}>{item}</Text>
+                      {isSelected && <Ionicons name="checkmark-circle" size={24} color="rgba(255,255,255,0.8)" />}
                     </View>
                   </TouchableOpacity>
                 );
@@ -1103,15 +1267,19 @@ export default function OnboardingScreen() {
               ListEmptyComponent={<Text style={[styles.modalEmpty, { color: Colors.gray400 }]}>No results found</Text>}
             />
             {dropdownMultiSelect && (
-              <TouchableOpacity
-                style={{ padding: 16, backgroundColor: Colors.primary, alignItems: 'center', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}
-                onPress={() => {
-                  dropdownMultiCallback?.(dropdownSelectedItems);
-                  setDropdownVisible(false);
-                }}
-              >
-                <Text style={{ color: Colors.dark, fontWeight: 'bold', fontSize: 16 }}>Done</Text>
-              </TouchableOpacity>
+              <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => {
+                    dropdownMultiCallback?.(dropdownSelectedItems);
+                    setDropdownVisible(false);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 9999 }]} />
+                  <Text style={styles.actionButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>
@@ -1255,6 +1423,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 8,
+    overflow: 'hidden',
   },
   actionButtonText: {
     color: Colors.white,
@@ -1262,6 +1431,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 0.5,
   },
+  modalBody: { flex: 1, padding: Spacing.xl },
+  row: { flexDirection: 'row' },
   formContainer: {
     paddingTop: Spacing.lg,
   },
@@ -1721,10 +1892,12 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   modalItem: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.gray100,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   modalItemText: {
     fontSize: 15,

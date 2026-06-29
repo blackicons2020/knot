@@ -73,7 +73,7 @@ function GlassCard({ children, style }: { children: React.ReactNode; style?: any
 
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
-  const { userProfile, setUserProfile } = useAuth();
+  const { userProfile, setUserProfile, logout } = useAuth();
 
   if (!userProfile) return null;
 
@@ -99,8 +99,8 @@ export default function ProfileScreen() {
     }
   };
 
-  const photo = userProfile.profileImageUrls?.[0] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400';
-  const isAdmin = userProfile.id === 'user_0';
+  const photo = userProfile.profileImageUrls?.[0] || 'https://ui-avatars.com/api/?name=User&background=1E1E1E&color=FFFFFF&size=400';
+  const isAdmin = userProfile.role === 'ADMIN' || userProfile.id === 'user_0';
   const locationText = userProfile.residenceCity && userProfile.residenceCountry
     ? `${userProfile.residenceCity}, ${userProfile.residenceCountry}`
     : `${userProfile.city || ''}, ${userProfile.country || ''}`.replace(/^, |, $/g, '');
@@ -139,6 +139,12 @@ export default function ProfileScreen() {
               <Ionicons name="settings-outline" size={14} color={Colors.gray300} />
               <Text style={st.editBtnText}>Edit Profile Data</Text>
             </TouchableOpacity>
+            {isAdmin && (
+              <TouchableOpacity style={[st.editBtn, { backgroundColor: '#D4AF372A', marginTop: 8 }]} onPress={() => navigation.navigate('Admin' as any)}>
+                <Text style={[st.editBtnText, { color: '#D4AF37' }]}>Admin Panel</Text>
+              </TouchableOpacity>
+            )}
+
           </GlassCard>
 
           {/* Identity Verification Card */}
@@ -322,6 +328,13 @@ export default function ProfileScreen() {
           </GlassCard>
         </View>
 
+        <TouchableOpacity 
+          style={{ backgroundColor: '#EF444415', borderColor: Colors.error, borderWidth: 1, marginHorizontal: 16, marginTop: 24, marginBottom: 40, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 14, borderRadius: 12, gap: 8 }} 
+          onPress={() => logout()}
+        >
+          <Ionicons name="log-out-outline" size={18} color={Colors.error} />
+          <Text style={{ color: Colors.error, fontSize: 12, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' }}>Log Out</Text>
+        </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

@@ -40,7 +40,7 @@ export const searchRegistry = (query: string, matches: Match[]): Match[] => {
   const q = query.toLowerCase();
   return matches.filter(
     (m) =>
-      m.name.toLowerCase().includes(q) ||
+      (m.name || m.firstName || 'Unknown').toLowerCase().includes(q) ||
       m.occupation.toLowerCase().includes(q) ||
       m.city.toLowerCase().includes(q) ||
       m.country.toLowerCase().includes(q) ||

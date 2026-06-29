@@ -117,6 +117,14 @@ export const AdminAddUserModal: React.FC<Props> = ({ visible, onClose, onUserAdd
         throw new Error(data.message || data.error || 'Failed to create user');
       }
 
+      // Automatically attach the profile picture so it does not fallback to the mock picture
+      if (photoBase64) {
+        await api.saveUser({
+          id: data.user.id || data.user._id,
+          profileImageUrls: [photoBase64]
+        } as any);
+      }
+
       Alert.alert('Success', 'User has been added to the registry.');
       onUserAdded();
       onClose();

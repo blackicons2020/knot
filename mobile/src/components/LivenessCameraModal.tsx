@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Modal } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
-import { useFaceDetector, FaceDetectionOptions } from 'react-native-vision-camera-face-detector';
+import { useFaceDetector } from 'react-native-vision-camera-face-detector';
 import { Worklets, useSharedValue } from 'react-native-worklets-core';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -51,9 +51,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   const takePhoto = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePhoto({
-          qualityPrioritization: 'speed',
-        });
+        const photo = await cameraRef.current.takePhoto({});
         setTimeout(() => {
           onCapture(`file://${photo.path}`);
           onClose();
@@ -64,7 +62,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
     }
   };
 
-  const faceDetectorOptions: FaceDetectionOptions = {
+  const faceDetectorOptions: any = {
     performanceMode: 'fast',
     classificationMode: 'all',
   };

@@ -105,8 +105,9 @@ export default function VerificationScreen() {
         const verificationResult = await db.verifyOnboarding(
           uploadedSelfie || "", 
           uploadedId || "", 
-          user.name || "Unknown", 
-          user.age || 0
+          user.firstName || "Unknown", 
+          user.lastName || "Unknown",
+          user.dateOfBirth || ""
         );
 
         if (verificationResult.success) {
