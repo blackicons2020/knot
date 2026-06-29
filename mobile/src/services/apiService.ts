@@ -53,9 +53,13 @@ class ApiService {
         const mapUser = (obj: any) => {
           if (obj && obj.profileImages) {
             obj.profileImageUrls = obj.profileImages.sort((a: any, b: any) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)).map((i: any) => i.url);
+          } else if (obj && !obj.profileImageUrls?.length && obj.selfieUrl) {
+            obj.profileImageUrls = [obj.selfieUrl];
           }
           if (obj && obj.user && obj.user.profileImages) {
             obj.user.profileImageUrls = obj.user.profileImages.sort((a: any, b: any) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)).map((i: any) => i.url);
+          } else if (obj && obj.user && !obj.user.profileImageUrls?.length && obj.user.selfieUrl) {
+            obj.user.profileImageUrls = [obj.user.selfieUrl];
           }
           return obj;
         };

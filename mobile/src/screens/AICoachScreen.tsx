@@ -80,8 +80,8 @@ export default function AICoachScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <AppHeader />
 

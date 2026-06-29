@@ -90,8 +90,8 @@ export default function ChatScreen() {
   return (
     <KeyboardAvoidingView
       style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.light + '50' }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       {/* Header */}
       <View style={[s.header, { paddingTop: insets.top + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
