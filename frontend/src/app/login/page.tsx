@@ -35,12 +35,6 @@ export default function Login() {
     try {
 
 
-      if (isLogin && email === 'superadmin@knot.com' && password === 'KnotAdmin2026!') {
-        localStorage.setItem('knot_token', 'mock_admin_token');
-        router.push('/admin');
-        return;
-      }
-
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
         
       const res = await fetch(`${API_URL}/auth/login`, {

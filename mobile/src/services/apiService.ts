@@ -90,13 +90,6 @@ class ApiService {
   }
 
   async login(email: string, password: string) {
-    if (email === 'superadmin@knot.com' && (password === 'KnotAdmin2026!' || password === 'knotAdmin2026!')) {
-      const { CURRENT_USER } = require('../constants');
-      const mockAdminUser: User = { ...CURRENT_USER, id: 'user_0', role: 'ADMIN', email };
-      this.setToken('mock_admin_token');
-      return { token: 'mock_admin_token', user: mockAdminUser };
-    }
-
     const data = await this.request<{ token: string; user: User }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -107,10 +100,6 @@ class ApiService {
 
   async getMe(): Promise<User | null> {
     try {
-      if (this.token === 'mock_admin_token') {
-        const { CURRENT_USER } = require('../constants');
-        return { ...CURRENT_USER, id: 'user_0', role: 'ADMIN', email: 'superadmin@knot.com' } as User;
-      }
       return await this.request<User>('/auth/me');
     } catch {
       return null;
@@ -238,10 +227,6 @@ class ApiService {
 
   // Admin
   async getAllUsers(): Promise<User[]> {
-    if (this.token === 'mock_admin_token') {
-      const { MATCHES_DATA } = require('../constants');
-      return MATCHES_DATA;
-    }
     return this.request<User[]>('/users');
   }
 
