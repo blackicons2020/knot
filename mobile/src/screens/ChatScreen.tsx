@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text,
-  TextInput, TouchableOpacity, View,
+  FlatList, Image, Keyboard, Platform, StyleSheet, Text,
+  TextInput, TouchableOpacity, View, Animated,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -31,6 +31,19 @@ export default function ChatScreen() {
     'AI Message Assistant: You both value travel and family traditions. Ask about her favorite childhood memory.'
   );
   const flatListRef = useRef<FlatList>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => { setKeyboardHeight(e.endCoordinates.height); }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => { setKeyboardHeight(0); }
+    );
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
 
   useEffect(() => {
     const unsub = db.subscribeToMessages(match.id, setMessages);
@@ -88,10 +101,8 @@ export default function ChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.light + '50' }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       {/* Header */}
       <View style={[s.header, { paddingTop: insets.top + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
@@ -131,7 +142,7 @@ export default function ChatScreen() {
       ) : null}
 
       {/* Input */}
-      <View style={[s.inputBar, { paddingBottom: insets.bottom + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+      <View style={[s.inputBar, { paddingBottom: (keyboardHeight > 0 ? keyboardHeight : insets.bottom) + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
         <TextInput
           value={text}
           onChangeText={setText}
@@ -145,7 +156,7 @@ export default function ChatScreen() {
           <Ionicons name="send" size={20} color={Colors.white} />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text,
+  FlatList, Keyboard, Platform, StyleSheet, Text,
   TextInput, TouchableOpacity, View, ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +30,19 @@ export default function AICoachScreen() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => { setKeyboardHeight(e.endCoordinates.height); }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => { setKeyboardHeight(0); }
+    );
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -78,10 +91,8 @@ export default function AICoachScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <View
       style={[styles.container, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <AppHeader />
 
@@ -119,7 +130,7 @@ export default function AICoachScreen() {
       />
 
       {/* Input Bar */}
-      <View style={[styles.inputBar, { paddingBottom: insets.bottom + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+      <View style={[styles.inputBar, { paddingBottom: (keyboardHeight > 0 ? keyboardHeight : insets.bottom) + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
         <TextInput
           value={input}
           onChangeText={setInput}
@@ -133,7 +144,7 @@ export default function AICoachScreen() {
           <Ionicons name="send" size={18} color={Colors.white} />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

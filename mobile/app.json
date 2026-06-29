@@ -26,6 +26,7 @@
         "backgroundColor": "#121721"
       },
       "package": "com.knot.app",
+      "softwareKeyboardLayoutMode": "adjustResize",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",

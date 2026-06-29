@@ -130,6 +130,7 @@ export interface User {
   trustScore?: number;
   personalityArchetype?: string;
   attachmentStyle?: string;
+  selfieUrl?: string;
 }
 
 export interface Match extends User {

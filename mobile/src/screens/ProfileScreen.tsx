@@ -99,7 +99,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const photo = userProfile.profileImageUrls?.[0] || 'https://ui-avatars.com/api/?name=User&background=1E1E1E&color=FFFFFF&size=400';
+  const photo = userProfile.profileImageUrls?.[0] || (userProfile as any).selfieUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile.name || 'User')}&background=1E1E1E&color=FFFFFF&size=400`;
   const isAdmin = userProfile.role === 'ADMIN' || userProfile.id === 'user_0';
   const locationText = userProfile.residenceCity && userProfile.residenceCountry
     ? `${userProfile.residenceCity}, ${userProfile.residenceCountry}`
@@ -168,10 +168,10 @@ export default function ProfileScreen() {
         <View style={st.sectionBlock}>
           <View style={st.photosHeader}>
             <Text style={st.sectionHeader}>My Photos</Text>
-            <Text style={st.photosCount}>{userProfile.profileImageUrls?.length || 0} / 6 Uploaded</Text>
+            <Text style={st.photosCount}>{(userProfile.profileImageUrls?.length || ((userProfile as any).selfieUrl ? 1 : 0))} / 6 Uploaded</Text>
           </View>
           <View style={st.photosGrid}>
-            {userProfile.profileImageUrls?.map((url, idx) => (
+            {(userProfile.profileImageUrls?.length ? userProfile.profileImageUrls : ((userProfile as any).selfieUrl ? [(userProfile as any).selfieUrl] : []))?.map((url: string, idx: number) => (
               <View key={idx} style={st.photoWrapper}>
                 <Image source={{ uri: url }} style={st.photoImage} />
                 {idx === 0 && (
@@ -181,7 +181,7 @@ export default function ProfileScreen() {
                 )}
               </View>
             ))}
-            {(userProfile.profileImageUrls?.length || 0) < 6 && (
+            {(userProfile.profileImageUrls?.length || ((userProfile as any).selfieUrl ? 1 : 0)) < 6 && (
               <TouchableOpacity 
                 style={st.addPhotoBtn} 
                 onPress={() => navigation.navigate('EditProfile', { user: userProfile })}
