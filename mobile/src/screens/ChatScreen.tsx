@@ -96,7 +96,7 @@ export default function ChatScreen() {
     return (
       <View style={[s.msgRow, isMine && s.msgRowMine]}>
         {!isMine && <Image source={{ uri: photo }} style={s.msgAvatar} />}
-        <View style={[s.bubble, isMine ? s.bubbleMine : s.bubbleTheirs]}>
+        <View style={[s.bubble, isMine ? s.bubbleMine : [s.bubbleTheirs, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]]}>
           <Text style={[s.bubbleText, isMine ? { color: Colors.white } : { color: isDarkMode ? Colors.white : Colors.gray900 }]}>
             {item.text}
           </Text>
