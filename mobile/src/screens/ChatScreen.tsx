@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  FlatList, Image, Keyboard, Platform, StyleSheet, Text,
+  FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text,
   TextInput, TouchableOpacity, View,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -32,32 +32,16 @@ export default function ChatScreen() {
   );
   const flatListRef = useRef<FlatList>(null);
 
-  // ── Keyboard height tracking (identical to AICoachScreen) ──
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    const showSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => { setKeyboardHeight(e.endCoordinates.height); }
-    );
-    const hideSub = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => { setKeyboardHeight(0); }
-    );
-    return () => { showSub.remove(); hideSub.remove(); };
-  }, []);
-
   useEffect(() => {
     const unsub = db.subscribeToMessages(match.id, setMessages);
     return () => unsub();
   }, [match.id]);
 
-  // ── Auto-scroll when messages change OR keyboard opens (identical to AICoachScreen) ──
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [messages, keyboardHeight]);
+  }, [messages]);
 
   const send = async () => {
     const msg = text.trim();
@@ -109,8 +93,10 @@ export default function ChatScreen() {
   };
 
   return (
-    <View
+    <KeyboardAvoidingView
       style={[s.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.light + '50' }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={0}
     >
       {/* Header */}
       <View style={[s.header, { paddingTop: insets.top + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
@@ -133,7 +119,10 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={(m) => m.id}
         renderItem={renderMsg}
+        style={{ flex: 1 }}
         contentContainerStyle={s.listContent}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
         ListEmptyComponent={
           <View style={s.emptyWrap}>
             <Text style={s.emptyText}>Start of conversation</Text>
@@ -149,11 +138,8 @@ export default function ChatScreen() {
         </View>
       ) : null}
 
-      {/* Input Bar ── paddingBottom uses keyboardHeight exactly like AICoachScreen ── */}
-      <View style={[s.inputBar, {
-        paddingBottom: (keyboardHeight > 0 ? keyboardHeight : insets.bottom) + 8,
-        backgroundColor: isDarkMode ? Colors.darkCard : Colors.white,
-      }]}>
+      {/* Input */}
+      <View style={[s.inputBar, { paddingBottom: insets.bottom + 8, backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
         <TextInput
           value={text}
           onChangeText={setText}
@@ -167,7 +153,7 @@ export default function ChatScreen() {
           <Ionicons name="send" size={20} color={Colors.white} />
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -178,8 +164,8 @@ const s = StyleSheet.create({
   headerAvatar: { width: 40, height: 40, borderRadius: 20 },
   headerName: { fontSize: 16, fontWeight: '700' },
   headerSub: { fontSize: 11, color: Colors.gray500 },
-  listContent: { padding: Spacing.md, paddingBottom: 24 },
-  emptyWrap: { alignItems: 'center', paddingVertical: 80 },
+  listContent: { padding: Spacing.md, paddingBottom: 24, flexGrow: 1 },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 80 },
   emptyText: { fontSize: 11, fontWeight: '700', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 2 },
   msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12 },
   msgRowMine: { justifyContent: 'flex-end' },
