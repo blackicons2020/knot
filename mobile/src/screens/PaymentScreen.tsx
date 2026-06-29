@@ -21,20 +21,7 @@ type PayRoute = RouteProp<RootStackParamList, 'Payment'>;
 const { width } = Dimensions.get('window');
 
 const TIERS = [
-  {
-    id: SubscriptionTier.Essential,
-    title: 'Knot Essential',
-    subtitle: 'New users exploring the platform',
-    features: [
-      '3 AI-Curated Matches / Day',
-      'Basic Matchmaking',
-      'Basic Messaging',
-      'Identity Verification',
-      'Basic Compatibility Score',
-      'Limited AI Insights',
-    ],
-    colors: ['#2A2A2A', '#4A4A4A', '#2A2A2A'] as [string, string, string],
-  },
+
   {
     id: SubscriptionTier.Premium,
     title: 'Knot Premium',

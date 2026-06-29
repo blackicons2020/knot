@@ -314,15 +314,19 @@ export default function ProfileScreen() {
           <GlassCard style={st.gridItemFull}>
             <View style={st.planRow}>
               <Text style={st.planLabel}>Active Plan</Text>
-              <Text style={st.planValue}>{userProfile.isPremium ? 'Premium Member' : 'Base Member'}</Text>
+              <Text style={st.planValue}>
+                {userProfile.isPremium ? (userProfile.subscriptionTier ? `Knot ${userProfile.subscriptionTier}` : 'Premium Member') : 'Base Member'}
+              </Text>
             </View>
-            {!userProfile.isPremium && (
+            {userProfile.subscriptionTier !== 'Elite' && (
               <TouchableOpacity 
                 style={st.upgradeBtn}
                 onPress={() => navigation.navigate('Payment', { user: userProfile })}
               >
                 <Ionicons name="sparkles" size={16} color={Colors.dark} />
-                <Text style={st.upgradeBtnText}>UPGRADE TO PREMIUM</Text>
+                <Text style={st.upgradeBtnText}>
+                  {userProfile.isPremium ? 'UPGRADE TO ELITE' : 'UPGRADE TO PREMIUM'}
+                </Text>
               </TouchableOpacity>
             )}
           </GlassCard>

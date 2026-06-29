@@ -78,6 +78,21 @@ function DropdownModal({
 
 /* ── Main Screen ──────────────────────────────────────────── */
 
+
+function GlassCard({ children, style }: { children: React.ReactNode; style?: any }) {
+  const { isDarkMode } = useTheme();
+  return (
+    <View style={[
+      st.glassCard,
+      { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : Colors.white },
+      !isDarkMode && { borderColor: Colors.gray200, borderWidth: 1 },
+      style
+    ]}>
+      {children}
+    </View>
+  );
+}
+
 export default function EditProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<EditRoute>();
@@ -183,7 +198,7 @@ export default function EditProfileScreen() {
     const forceCityManual = !!stateVal && cities.length === 0;
 
     return (
-      <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+      <GlassCard>
         <Text style={st.cardTitle}>{title}</Text>
 
         {renderSelect('Country', countryVal, COUNTRIES, setCountry)}
@@ -222,7 +237,7 @@ export default function EditProfileScreen() {
             />
           </View>
         )}
-      </View>
+      </GlassCard>
     );
   };
 
@@ -238,7 +253,7 @@ export default function EditProfileScreen() {
 
       <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: 100 }}>
         {/* ── Photos ── */}
-        <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+        <GlassCard>
           <Text style={st.cardTitle}>Registry Photos</Text>
           <Text style={[st.hint, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>Upload up to 6 photos. The first is your primary picture.</Text>
           
@@ -272,7 +287,7 @@ export default function EditProfileScreen() {
         </View>
 
         {/* ── Identity ── */}
-        <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+        <GlassCard>
           <Text style={st.cardTitle}>Identity</Text>
           <View style={{ marginBottom: 12 }}>
             <Text style={labelStyle}>Name</Text>
@@ -287,14 +302,14 @@ export default function EditProfileScreen() {
               {renderSelect('Marriage History', form.maritalStatus, Object.values(MaritalStatus), (v) => set('maritalStatus', v))}
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* ── Locations ── */}
         {renderLocationSection('residence', 'Current Residence')}
         {renderLocationSection('origin', 'Heritage & Roots')}
 
         {/* ── Bio & Lifestyle ── */}
-        <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+        <GlassCard>
           <Text style={st.cardTitle}>Bio & Lifestyle</Text>
           <View style={{ marginBottom: 12 }}>
             <Text style={labelStyle}>Occupation</Text>
@@ -317,10 +332,10 @@ export default function EditProfileScreen() {
               {renderSelect('Drinking', form.drinking, Object.values(DrinkingHabits), (v) => set('drinking', v))}
             </View>
           </View>
-        </View>
+        </GlassCard>
 
         {/* ── Marriage & Partner Preferences ── */}
-        <View style={[st.card, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+        <GlassCard>
           <Text style={st.cardTitle}>Marriage & Partner Preferences</Text>
           <View style={st.row2}>
             <View style={st.col}>
@@ -364,7 +379,7 @@ export default function EditProfileScreen() {
               placeholderTextColor={Colors.gray400}
             />
           </View>
-        </View>
+        </GlassCard>
       </ScrollView>
 
       {/* Save button */}
@@ -389,48 +404,50 @@ export default function EditProfileScreen() {
 
 /* ── Styles ───────────────────────────────────────────────── */
 
+
 const st = StyleSheet.create({
   root: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.gray200 },
-  headerTitle: { fontSize: 18, fontWeight: '900' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  headerTitle: { fontSize: 18, fontWeight: '900', letterSpacing: 1 },
 
-  card: { padding: Spacing.md, borderRadius: BorderRadius.lg, marginBottom: 12, elevation: 1 },
-  cardTitle: { fontSize: 13, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, borderBottomWidth: 2, borderBottomColor: Colors.primary, paddingBottom: 8, marginBottom: 16 },
+  glassCard: { padding: Spacing.md, borderRadius: 20, marginBottom: 16, borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, overflow: 'hidden' },
+  cardTitle: { fontSize: 11, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16 },
 
-  label: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 6 },
-  subLabel: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 },
+  label: { fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8, color: Colors.gray400 },
+  subLabel: { fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 },
 
-  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, marginBottom: 4 },
+  input: { borderWidth: 1, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14, fontSize: 14, marginBottom: 4, backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.1)' },
 
-  selectBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
+  selectBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14, backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.1)' },
   selectText: { fontSize: 14, flex: 1 },
 
   row2: { flexDirection: 'row', gap: 12 },
   col: { flex: 1 },
 
-  footer: { padding: Spacing.md, borderTopWidth: 1, borderTopColor: Colors.gray200 },
-  saveBtn: { backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: 12, alignItems: 'center', elevation: 4 },
-  saveBtnText: { color: Colors.white, fontSize: 16, fontWeight: '900' },
+  footer: { padding: Spacing.md, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
+  saveBtn: { backgroundColor: Colors.primary, paddingVertical: 18, borderRadius: 100, alignItems: 'center', shadowColor: Colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  saveBtnText: { color: Colors.white, fontSize: 14, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
 
   /* Photos */
-  hint: { fontSize: 11, marginBottom: 16 },
+  hint: { fontSize: 11, marginBottom: 16, lineHeight: 16 },
   gridPhotos: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  photoCell: { width: '30%', aspectRatio: 1, borderRadius: BorderRadius.lg, overflow: 'hidden', position: 'relative' },
+  photoCell: { width: '30%', aspectRatio: 1, borderRadius: 16, overflow: 'hidden', position: 'relative' },
   photoImg: { width: '100%', height: '100%' },
-  mainBadge: { position: 'absolute', top: 4, left: 4, backgroundColor: Colors.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
-  mainBadgeText: { fontSize: 8, fontWeight: '900', color: Colors.white, textTransform: 'uppercase' },
-  removeBtn: { position: 'absolute', bottom: 4, right: 4, backgroundColor: Colors.white, borderRadius: 16, padding: 4, elevation: 4 },
-  addCell: { width: '30%', aspectRatio: 1, borderRadius: BorderRadius.lg, borderWidth: 2, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+  mainBadge: { position: 'absolute', top: 6, left: 6, backgroundColor: Colors.primary, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 100 },
+  mainBadgeText: { fontSize: 7, fontWeight: '900', color: Colors.white, textTransform: 'uppercase', letterSpacing: 1 },
+  removeBtn: { position: 'absolute', bottom: 6, right: 6, backgroundColor: Colors.white, borderRadius: 100, padding: 6, elevation: 4 },
+  addCell: { width: '30%', aspectRatio: 1, borderRadius: 16, borderWidth: 1, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.02)' },
   addText: { fontSize: 9, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 },
 
   /* Modal */
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { maxHeight: '70%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 24 },
-  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1, borderBottomColor: Colors.gray100 },
-  modalTitle: { fontSize: 16, fontWeight: '900' },
-  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, margin: 12, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 12 },
-  searchInput: { flex: 1, fontSize: 14, padding: 0 },
-  modalItem: { paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: Colors.gray100 },
-  modalItemText: { fontSize: 14 },
-  modalEmpty: { textAlign: 'center', padding: 24, color: Colors.gray400, fontSize: 13 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalContent: { maxHeight: '70%', borderTopLeftRadius: 32, borderTopRightRadius: 32, paddingBottom: 32, shadowColor: '#000', shadowOffset: {width: 0, height: -4}, shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
+  modalTitle: { fontSize: 16, fontWeight: '900', letterSpacing: 1 },
+  searchWrap: { flexDirection: 'row', alignItems: 'center', gap: 10, margin: 16, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.05)' },
+  searchInput: { flex: 1, fontSize: 15, padding: 0 },
+  modalItem: { paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.02)' },
+  modalItemText: { fontSize: 15 },
+  modalEmpty: { textAlign: 'center', padding: 32, color: Colors.gray400, fontSize: 14 },
 });
+
