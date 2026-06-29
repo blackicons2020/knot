@@ -284,7 +284,7 @@ export default function EditProfileScreen() {
               </View>
             )}
           </View>
-        </View>
+        </GlassCard>
 
         {/* ── Identity ── */}
         <GlassCard>
