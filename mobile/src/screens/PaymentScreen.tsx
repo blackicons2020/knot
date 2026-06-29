@@ -141,12 +141,9 @@ export default function PaymentScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onScroll={(e) => {
-        const x = e.nativeEvent.contentOffset.x;
-        setActiveTierIdx(Math.round(x / width));
-      }} scrollEventThrottle={16}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {TIERS.map((tier, idx) => (
-          <View key={tier.id} style={{ width, padding: Spacing.md }}>
+          <View key={tier.id} style={{ padding: Spacing.md, paddingBottom: 16 }}>
             <LinearGradient
               colors={tier.colors}
               start={{ x: 0, y: 0 }}
@@ -175,36 +172,30 @@ export default function PaymentScreen() {
                 </View>
               ))}
             </View>
+
+            <View style={{ alignItems: 'center', marginTop: 8 }}>
+              <TouchableOpacity style={{ width: '100%' }} onPress={() => { setActiveTierIdx(idx); handleSubscribe(); }} disabled={processing}>
+                <LinearGradient
+                  colors={processing && activeTierIdx === idx ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={s.payBtn}
+                >
+                  {processing && activeTierIdx === idx ? (
+                    <Text style={s.payBtnText}>Processing...</Text>
+                  ) : (
+                    <>
+                      <Ionicons name="logo-apple" size={18} color={Colors.white} />
+                      <Text style={s.payBtnText}>Subscribe to {tier.id}</Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+              <Text style={s.secureNote}>Secure In-App Purchase</Text>
+            </View>
           </View>
         ))}
       </ScrollView>
-
-      <View style={s.indicatorRow}>
-        {TIERS.map((_, i) => (
-          <View key={i} style={[s.indicator, i === activeTierIdx ? s.indicatorActive : { backgroundColor: isDarkMode ? Colors.gray700 : Colors.gray300 }]} />
-        ))}
-      </View>
-
-      <View style={[s.footer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-        <TouchableOpacity style={{ width: '100%' }} onPress={handleSubscribe} disabled={processing}>
-          <LinearGradient
-            colors={processing ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={s.payBtn}
-          >
-            {processing ? (
-              <Text style={s.payBtnText}>Processing...</Text>
-            ) : (
-              <>
-                <Ionicons name="logo-apple" size={18} color={Colors.white} />
-                <Text style={s.payBtnText}>Subscribe to {activeTier.id}</Text>
-              </>
-            )}
-          </LinearGradient>
-        </TouchableOpacity>
-        <Text style={s.secureNote}>Secure In-App Purchase</Text>
-      </View>
     </SafeAreaView>
   );
 }

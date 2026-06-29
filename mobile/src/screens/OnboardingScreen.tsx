@@ -863,6 +863,18 @@ export default function OnboardingScreen() {
                     <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={traitCustom} onChangeText={setTraitCustom} placeholder="Specify other trait" placeholderTextColor={Colors.gray400} />
                   )}
                 </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>REGISTRY EXPECTATIONS</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, minHeight: 80, textAlignVertical: 'top' }]}
+                    value={form.marriageExpectations}
+                    onChangeText={(v) => set('marriageExpectations', v)}
+                    placeholder="What are your expectations for marriage?"
+                    placeholderTextColor={Colors.gray400}
+                    multiline
+                  />
+                </View>
                 <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (form.idealPartnerTraits?.length === 0) ? 0.5 : 1 }]} onPress={() => {
                   if (form.preferredPartnerAgeRange) {
                     const minAge = form.preferredPartnerAgeRange[0] || 0;
@@ -1032,7 +1044,7 @@ export default function OnboardingScreen() {
                 placeholderTextColor={Colors.gray400}
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === '' ? (
-                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(5)}>
+                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(6)}>
                   <Text style={styles.analyzeBtnText}>Generate Registry</Text>
                   <Ionicons name="sparkles" size={14} color={Colors.white} />
                 </TouchableOpacity>
@@ -1201,9 +1213,9 @@ export default function OnboardingScreen() {
             <TouchableOpacity style={{ marginTop: 24 }} onPress={complete}>
               <LinearGradient
                 colors={['#E27D8D', '#2D1B4E']}
+                style={styles.actionButton}
               >
                 <Text style={styles.actionButtonText}>Activate Dashboard</Text>
-                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
