@@ -246,11 +246,18 @@ export default function HomeScreen() {
                   ✔ {metrics?.attachment} Attachment
                 </Text>
               </View>
+              {activeMatch.marriageTimeline && (
+                <View style={[st.tag, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : Colors.gray100 }]}>
+                  <Text style={[st.tagText, { color: isDarkMode ? Colors.gray300 : Colors.gray700 }]}>
+                    ⏱ {activeMatch.marriageTimeline}
+                  </Text>
+                </View>
+              )}
             </View>
 
-            {/* Bio / Registry Expectations */}
-            <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600 }]}>
-              {activeMatch.marriageExpectations || activeMatch.bio}
+            {/* Bio */}
+            <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600 }]} numberOfLines={3}>
+              {activeMatch.bio || "No bio provided."}
             </Text>
           </View>
         </View>

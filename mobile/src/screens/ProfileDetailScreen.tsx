@@ -351,7 +351,7 @@ export default function ProfileDetailScreen() {
             </View>
           </View>
 
-          <DataItem label="Registry Expectations" value={match.marriageExpectations} isDark={isDarkMode} />
+          <DataItem label="Marriage Expectations" value={match.marriageExpectations} isDark={isDarkMode} />
 
         </View>
       </ScrollView>
