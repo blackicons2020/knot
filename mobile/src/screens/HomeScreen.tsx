@@ -102,45 +102,34 @@ export default function HomeScreen() {
     }
   };
 
-  const checkLimitAndProceed = (action: () => void) => {
-    const limit = getDailyLimit();
-    const viewed = userProfile?.matchesViewedToday || 0;
-    
-    if (viewed >= limit) {
-      Alert.alert(
-        'Daily Limit Reached',
-        `You have reached your limit of ${limit} curated matches for today.\n\nUpgrade your subscription to unlock more matches and features!`,
-        [
-          { text: 'Later', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => navigation.navigate('Payment', { user: userProfile! }) }
-        ]
-      );
-      return;
-    }
-    
-    // Increment local state viewed count
-    setUserProfile({ ...userProfile!, matchesViewedToday: viewed + 1 });
-    action();
-  };
-
   const handlePass = () => {
-    checkLimitAndProceed(() => {
-      setPhotoIndex(0);
-      if (currentMatchIndex < matches.length - 1) {
-        setCurrentMatchIndex((prev) => prev + 1);
+    setPhotoIndex(0);
+    const limit = getDailyLimit();
+    const maxIndex = Math.min(matches.length, limit) - 1;
+
+    if (currentMatchIndex >= maxIndex) {
+      if (matches.length > limit) {
+        Alert.alert(
+          'Daily Limit Reached',
+          `You have reached your limit of ${limit} curated matches for today.\n\nUpgrade your subscription to unlock more matches and features!`,
+          [
+            { text: 'Later', onPress: () => setCurrentMatchIndex(0), style: 'cancel' },
+            { text: 'Upgrade', onPress: () => navigation.navigate('Payment', { user: userProfile! }) }
+          ]
+        );
       } else {
         addToast('You have reviewed all curated matches for today.', 'info');
-        setCurrentMatchIndex(0); // Wrap around for testing
+        setCurrentMatchIndex(0);
       }
-    });
+    } else {
+      setCurrentMatchIndex((prev) => prev + 1);
+    }
   };
 
   const handleConnect = () => {
-    checkLimitAndProceed(() => {
-      if (activeMatch) {
-        navigation.navigate('ProfileDetail', { match: activeMatch });
-      }
-    });
+    if (activeMatch) {
+      navigation.navigate('ProfileDetail', { match: activeMatch });
+    }
   };
 
   const startConversation = () => {
