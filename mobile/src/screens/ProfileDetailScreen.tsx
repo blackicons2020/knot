@@ -247,6 +247,16 @@ export default function ProfileDetailScreen() {
                   </View>
                 </View>
               </View>
+              {/* AI Explanation Glow Box */}
+              <View style={[st.glowCard, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.02)', borderColor: 'rgba(212,175,55,0.3)', borderWidth: 1, padding: 16, borderRadius: 16, marginBottom: 24 }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Ionicons name="sparkles" size={16} color={Colors.accent} style={{ marginRight: 6 }} />
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1.5 }}>Why You Matched</Text>
+                </View>
+                <Text style={{ fontSize: 12, lineHeight: 18, color: isDarkMode ? Colors.gray300 : Colors.gray700 }}>
+                  {metrics?.aiExplanation || 'The AI found deep synergy between your values and lifestyle.'}
+                </Text>
+              </View>
             </>
           )}
 
@@ -285,16 +295,7 @@ export default function ProfileDetailScreen() {
             <DataItem label="Cultural Identity" value={match.culturalBackground} isDark={isDarkMode} />
           </View>
 
-          {/* AI Explanation Glow Box Replacing Bio */}
-          <View style={[st.glowCard, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.02)', borderColor: 'rgba(212,175,55,0.3)', borderWidth: 1, padding: 16, borderRadius: 16, marginBottom: 24 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-              <Ionicons name="sparkles" size={16} color={Colors.accent} style={{ marginRight: 6 }} />
-              <Text style={{ fontSize: 12, fontWeight: '900', color: Colors.accent, textTransform: 'uppercase', letterSpacing: 1.5 }}>Why You Matched</Text>
-            </View>
-            <Text style={{ fontSize: 12, lineHeight: 18, color: isDarkMode ? Colors.gray300 : Colors.gray700 }}>
-              {metrics?.aiExplanation || 'The AI found deep synergy between your values and lifestyle.'}
-            </Text>
-          </View>
+          <DataItem label="Registry Bio" value={match.bio} isDark={isDarkMode} />
 
           <View style={st.row2}>
             <View style={st.col}><DataItem label="Nationality" value={match.nationality} isDark={isDarkMode} /></View>
