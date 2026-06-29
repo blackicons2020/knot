@@ -130,6 +130,35 @@ export default function AdminDashboard() {
         return;
       }
 
+      if (token === 'mock_admin_token') {
+        setUsers([
+          {
+            id: '1',
+            firstName: 'Sarah',
+            lastName: 'Williams',
+            email: 'sarah@example.com',
+            isPremium: true,
+            residenceCity: 'London',
+            residenceCountry: 'UK',
+            maritalStatus: 'Single',
+            profileImageUrls: ['https://ui-avatars.com/api/?name=Sarah+Williams']
+          },
+          {
+            id: '2',
+            firstName: 'David',
+            lastName: 'Chen',
+            email: 'david@example.com',
+            isPremium: false,
+            residenceCity: 'Toronto',
+            residenceCountry: 'Canada',
+            maritalStatus: 'Divorced',
+            profileImageUrls: ['https://ui-avatars.com/api/?name=David+Chen']
+          }
+        ]);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
           

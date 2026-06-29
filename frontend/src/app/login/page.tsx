@@ -33,7 +33,9 @@ export default function Login() {
     }
 
     try {
-      if (isLogin && email === 'admin@knot.com' && password === 'Admin123!') {
+
+
+      if (isLogin && email === 'superadmin@knot.com' && password === 'KnotAdmin2026!') {
         localStorage.setItem('knot_token', 'mock_admin_token');
         router.push('/admin');
         return;

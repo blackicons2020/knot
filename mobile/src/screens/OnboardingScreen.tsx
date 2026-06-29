@@ -601,15 +601,7 @@ export default function OnboardingScreen() {
             </View>
           </View>
 
-          <TouchableOpacity 
-            onPress={() => {
-              logout();
-              navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
-            }}
-            style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)', marginLeft: 8 }}
-          >
-            <Text style={{ fontSize: 10, color: Colors.error, fontWeight: '800', textTransform: 'uppercase' }}>Logout</Text>
-          </TouchableOpacity>
+
 
           <View style={{ alignItems: 'flex-end' }}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
