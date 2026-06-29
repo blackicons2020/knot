@@ -58,7 +58,7 @@ export class AuthService {
   }
 
   async login(dto: any) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email }, include: { profileImages: true } });
     if (!user) {
       if (dto.email === 'superadmin@knot.com' && (dto.password === 'KnotAdmin2026!' || dto.password === 'knotAdmin2026!')) {
         const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -87,6 +87,15 @@ export class AuthService {
 
     const token = this.jwtService.sign({ id: user.id, email: user.email, role: user.role });
     return { token, user: this.sanitizeUser(user) };
+  }
+
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { profileImages: true },
+    });
+    if (!user) throw new UnauthorizedException('User not found');
+    return this.sanitizeUser(user);
   }
 
   private sanitizeUser(user: any) {
