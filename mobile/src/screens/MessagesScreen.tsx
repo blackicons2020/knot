@@ -12,6 +12,7 @@ import AppHeader from '../components/AppHeader';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, Match } from '../types';
 import { db } from '../services/apiService';
+import { MATCHES_DATA } from '../constants';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,13 +25,14 @@ export default function MessagesScreen() {
 
   useEffect(() => {
     if (!userProfile) return;
-    db.getDailyMatches(userProfile.id).then((m) => {
-      setMatches(m);
-      setLoading(false);
-    }).catch(() => {
+    try {
+      const filtered = MATCHES_DATA.filter((m) => userProfile.preferredGender ? m.gender === userProfile.preferredGender : true);
+      setMatches(filtered);
+    } catch (err) {
       setMatches([]);
+    } finally {
       setLoading(false);
-    });
+    }
   }, [userProfile]);
 
   if (loading) {
