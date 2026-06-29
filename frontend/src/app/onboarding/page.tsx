@@ -595,9 +595,21 @@ export default function Onboarding() {
         <Link href="/" className="text-xl font-serif font-black tracking-wider flex items-center gap-1">
           KNOT<span className="text-[#D4AF37]">.</span>
         </Link>
-        <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
-          Step {step} of 5
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
+            Step {step} of 5
+          </span>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('knot_token');
+              localStorage.removeItem('knot_userProfile');
+              window.location.href = '/login';
+            }}
+            className="text-[10px] uppercase tracking-widest text-red-400 font-bold bg-red-500/10 hover:bg-red-500/20 px-4 py-1.5 rounded-full border border-red-500/10 transition-colors"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       {/* Main Container */}
