@@ -255,10 +255,16 @@ export default function HomeScreen() {
               )}
             </View>
 
-            {/* Bio */}
-            <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600 }]} numberOfLines={3}>
-              {activeMatch.bio || "No bio provided."}
-            </Text>
+            {/* Why You Matched AI Glow Box (Moved up) */}
+            <View style={[st.glowCard, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.02)', marginTop: 8 }]}>
+              <View style={st.glowHeader}>
+                <Ionicons name="sparkles" size={16} color={Colors.accent} style={{ marginRight: 6 }} />
+                <Text style={st.glowTitle}>Why You Matched</Text>
+              </View>
+              <Text style={[st.glowBody, { color: isDarkMode ? Colors.gray300 : Colors.gray700 }]}>
+                {metrics?.aiExplanation}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -299,14 +305,13 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Why You Matched AI Glow Box */}
-        <View style={[st.glowCard, { backgroundColor: isDarkMode ? 'rgba(212,175,55,0.05)' : 'rgba(212,175,55,0.02)' }]}>
-          <View style={st.glowHeader}>
-            <Ionicons name="sparkles" size={16} color={Colors.accent} style={{ marginRight: 6 }} />
-            <Text style={st.glowTitle}>Why You Matched</Text>
-          </View>
-          <Text style={[st.glowBody, { color: isDarkMode ? Colors.gray300 : Colors.gray700 }]}>
-            {metrics?.aiExplanation}
+        {/* Bio (Moved down) */}
+        <View style={[st.sectionCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, padding: 16 }]}>
+          <Text style={[st.sectionTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>
+            Registry Bio
+          </Text>
+          <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600, marginTop: 8 }]} numberOfLines={6}>
+            {activeMatch.bio || "No bio provided."}
           </Text>
         </View>
 
