@@ -133,7 +133,7 @@ export default function AdminDashboard() {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://knot-backend-core.onrender.com';
           
-        const res = await fetch(`${API_URL}/admin/users`, {
+        const res = await fetch(`${API_URL}/users`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchUsers();
-  }, [router]);
+  }, []);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
