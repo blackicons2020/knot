@@ -24,7 +24,7 @@ export default function MessagesScreen() {
 
   useEffect(() => {
     if (!userProfile) return;
-    db.getLikedMatches(userProfile.id).then((m) => {
+    db.getDailyMatches(userProfile.id).then((m) => {
       setMatches(m);
       setLoading(false);
     }).catch(() => {
