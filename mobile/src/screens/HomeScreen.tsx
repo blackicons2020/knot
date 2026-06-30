@@ -38,9 +38,13 @@ export default function HomeScreen() {
       setLoading(true);
       try {
         // Strictly enforce opposite-sex matchmaking
-        const isFemale = userProfile.gender?.toLowerCase() === 'female';
-        const targetGender = isFemale ? 'male' : 'female';
-        setMatches(MATCHES_DATA.filter((m) => m.gender?.toLowerCase() === targetGender));
+        const userGender = (userProfile.gender || '').toLowerCase().trim();
+        console.log('[HomeScreen] userProfile.gender raw:', JSON.stringify(userProfile.gender), '=> normalized:', userGender);
+        const targetGender = userGender === 'female' ? 'male' : 'female';
+        console.log('[HomeScreen] Filtering matches for targetGender:', targetGender);
+        const filtered = MATCHES_DATA.filter((m) => m.gender?.toLowerCase() === targetGender);
+        console.log('[HomeScreen] Filtered matches count:', filtered.length, filtered.map(m => `${m.name}(${m.gender})`));
+        setMatches(filtered);
       } catch (err) {
         console.error('Failed to load matches:', err);
         addToast('Failed to sync latest curated matches.', 'error');

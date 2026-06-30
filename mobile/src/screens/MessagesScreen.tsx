@@ -27,9 +27,11 @@ export default function MessagesScreen() {
   useEffect(() => {
     if (!userProfile) return;
     try {
-      const isFemale = userProfile.gender?.toLowerCase() === 'female';
-      const targetGender = isFemale ? 'male' : 'female';
+      const userGender = (userProfile.gender || '').toLowerCase().trim();
+      console.log('[MessagesScreen] userProfile.gender raw:', JSON.stringify(userProfile.gender), '=> normalized:', userGender);
+      const targetGender = userGender === 'female' ? 'male' : 'female';
       const filtered = MATCHES_DATA.filter((m) => m.gender?.toLowerCase() === targetGender);
+      console.log('[MessagesScreen] Filtered matches count:', filtered.length);
       setMatches(filtered);
     } catch (err) {
       setMatches([]);
