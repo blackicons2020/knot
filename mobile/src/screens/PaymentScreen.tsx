@@ -13,7 +13,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, SubscriptionTier } from '../types';
-import { formatTierPrice, getTierPriceUSD } from '../services/currencyService';
+import { formatTierPrice, getTierPriceUSD, formatLocalPrice, AFRICAN_COUNTRIES } from '../services/currencyService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type PayRoute = RouteProp<RootStackParamList, 'Payment'>;
@@ -75,11 +75,30 @@ export default function PaymentScreen() {
 
   const [activeTierIdx, setActiveTierIdx] = useState(0);
   const [processing, setProcessing] = useState(false);
+  const [isYearly, setIsYearly] = useState(false);
 
   const country = user.residenceCountry || 'Nigeria';
+  
+  const tierOrder: Record<string, number> = {
+    [SubscriptionTier.Essential]: 0,
+    [SubscriptionTier.Premium]: 1,
+    [SubscriptionTier.Elite]: 2,
+    [SubscriptionTier.Executive]: 3,
+  };
+  const currentUserTierVal = tierOrder[user.subscriptionTier || SubscriptionTier.Essential] || 0;
+
+  const getTierPriceDisplay = (tierId: string) => {
+    const baseUsd = getTierPriceUSD(tierId as any, country);
+    const finalUsd = isYearly ? baseUsd * 10 : baseUsd;
+    const isAfrica = AFRICAN_COUNTRIES.includes(country);
+    if (isAfrica) {
+       return formatLocalPrice(finalUsd, country);
+    }
+    return `$${finalUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   const activeTier = TIERS[activeTierIdx];
-  const monthlyFormatted = formatTierPrice(activeTier.id as any, country);
-  const usdVal = getTierPriceUSD(activeTier.id as any, country);
+  const usdVal = getTierPriceUSD(activeTier.id as any, country) * (isYearly ? 10 : 1);
 
   const handleSubscribe = async () => {
     Alert.alert(
@@ -99,8 +118,9 @@ export default function PaymentScreen() {
               setTimeout(() => {
                 setUserProfile({
                   ...user,
-                  subscriptionTier: activeTier.id,
+                  subscriptionTier: activeTier.id as SubscriptionTier,
                   subscriptionAmount: usdVal,
+                  subscriptionPeriod: isYearly ? 'yearly' : 'monthly',
                   subscriptionDate: new Date().toISOString(),
                   isPremium: true,
                 });
@@ -128,6 +148,21 @@ export default function PaymentScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={[s.billingToggleWrap, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
+        <TouchableOpacity 
+          style={[s.billingToggleBtn, !isYearly && s.billingToggleBtnActive]} 
+          onPress={() => setIsYearly(false)}
+        >
+          <Text style={[s.billingToggleText, !isYearly && s.billingToggleTextActive]}>Monthly</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[s.billingToggleBtn, isYearly && s.billingToggleBtnActive]} 
+          onPress={() => setIsYearly(true)}
+        >
+          <Text style={[s.billingToggleText, isYearly && s.billingToggleTextActive]}>Yearly (Save 17%)</Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {TIERS.map((tier, idx) => (
           <View key={tier.id} style={{ padding: Spacing.md, paddingBottom: 16 }}>
@@ -144,8 +179,8 @@ export default function PaymentScreen() {
               <Text style={s.premiumSub}>{tier.subtitle}</Text>
               
               <View style={s.priceBox}>
-                <Text style={s.priceLabel}>Monthly Investment</Text>
-                <Text style={s.priceAmount}>{formatTierPrice(tier.id as any, country)}</Text>
+                <Text style={s.priceLabel}>{isYearly ? 'Annual Investment' : 'Monthly Investment'}</Text>
+                <Text style={s.priceAmount}>{getTierPriceDisplay(tier.id)}</Text>
                 <Text style={s.priceSub}>Billed securely via Apple/Google</Text>
               </View>
             </LinearGradient>
@@ -161,23 +196,38 @@ export default function PaymentScreen() {
             </View>
 
             <View style={{ alignItems: 'center', marginTop: 8 }}>
-              <TouchableOpacity style={{ width: '100%' }} onPress={() => { setActiveTierIdx(idx); handleSubscribe(); }} disabled={processing}>
-                <LinearGradient
-                  colors={processing && activeTierIdx === idx ? [Colors.gray200, Colors.gray200] : [Colors.primary, '#8C52FF']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.payBtn}
-                >
-                  {processing && activeTierIdx === idx ? (
-                    <Text style={s.payBtnText}>Processing...</Text>
-                  ) : (
-                    <>
-                      <Ionicons name="logo-apple" size={18} color={Colors.white} />
-                      <Text style={s.payBtnText}>Subscribe to {tier.id}</Text>
-                    </>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
+              {(() => {
+                const tierVal = tierOrder[tier.id] || 0;
+                const isCurrent = tierVal === currentUserTierVal;
+                const isLower = tierVal < currentUserTierVal;
+                const isDisabled = isCurrent || isLower;
+
+                return (
+                  <TouchableOpacity 
+                    style={{ width: '100%' }} 
+                    onPress={() => { setActiveTierIdx(idx); handleSubscribe(); }} 
+                    disabled={isDisabled || processing}
+                  >
+                    <LinearGradient
+                      colors={(isDisabled || (processing && activeTierIdx === idx)) ? [Colors.gray400, Colors.gray400] : [Colors.primary, '#8C52FF']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={s.payBtn}
+                    >
+                      {processing && activeTierIdx === idx ? (
+                        <Text style={s.payBtnText}>Processing...</Text>
+                      ) : (
+                        <>
+                          {!isDisabled && <Ionicons name="logo-apple" size={18} color={Colors.white} />}
+                          <Text style={s.payBtnText}>
+                            {isCurrent ? 'Current Plan' : isLower ? 'Included in Current Plan' : `Subscribe to ${tier.id}`}
+                          </Text>
+                        </>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                );
+              })()}
               <Text style={s.secureNote}>Secure In-App Purchase</Text>
             </View>
           </View>
@@ -202,13 +252,16 @@ const s = StyleSheet.create({
   priceSub: { fontSize: 9, fontWeight: '600', color: 'rgba(255,255,255,0.5)', marginTop: 4, textTransform: 'uppercase' },
   benefitsCard: { padding: 20, borderRadius: 24, marginBottom: 16, borderWidth: 1, borderColor: Colors.gray200 },
   benefitsTitle: { fontSize: 11, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, borderBottomWidth: 1, borderBottomColor: Colors.gray50, paddingBottom: 8, marginBottom: 16 },
-  benefitRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  benefitText: { fontSize: 13, fontWeight: '600', flex: 1 },
-  indicatorRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 16 },
-  indicator: { width: 8, height: 8, borderRadius: 4 },
-  indicatorActive: { backgroundColor: Colors.primary, width: 24 },
-  footer: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: Colors.gray100, alignItems: 'center' },
-  payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', paddingVertical: 18, borderRadius: BorderRadius.lg },
-  payBtnText: { color: Colors.white, fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 },
-  secureNote: { fontSize: 8, fontWeight: '900', color: Colors.gray400, textTransform: 'uppercase', letterSpacing: 3, marginTop: 12 },
+  benefitsCard: { padding: 24, borderRadius: 24, marginTop: -20, paddingTop: 32, marginBottom: 8 },
+  benefitsTitle: { fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16 },
+  benefitRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 },
+  benefitText: { fontSize: 13, fontWeight: '500' },
+  payBtn: { paddingVertical: 18, borderRadius: BorderRadius.full, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  payBtnText: { color: Colors.white, fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  secureNote: { fontSize: 10, color: Colors.gray400, marginTop: 12, fontWeight: '600' },
+  billingToggleWrap: { flexDirection: 'row', padding: 4, marginHorizontal: Spacing.md, borderRadius: BorderRadius.full, marginBottom: 16 },
+  billingToggleBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: BorderRadius.full },
+  billingToggleBtnActive: { backgroundColor: Colors.primary },
+  billingToggleText: { fontSize: 13, fontWeight: '700', color: Colors.gray400 },
+  billingToggleTextActive: { color: Colors.white },
 });
