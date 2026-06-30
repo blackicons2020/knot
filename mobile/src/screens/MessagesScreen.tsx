@@ -63,6 +63,7 @@ export default function MessagesScreen() {
                 <Text style={[s.chatName, { color: isDarkMode ? Colors.white : Colors.dark }]}>{item.name}</Text>
                 <Text style={s.chatSub}>Tap to start chatting</Text>
               </View>
+              <Text style={s.chatTime}>Just now</Text>
             </TouchableOpacity>
           );
         }}
@@ -93,4 +94,5 @@ const s = StyleSheet.create({
   emptyWrap: { alignItems: 'center', paddingVertical: 80 },
   emptyTitle: { fontWeight: '700' },
   emptySub: { fontSize: 13, marginTop: 8, textAlign: 'center' },
+  chatTime: { fontSize: 12, color: Colors.gray400, fontWeight: '600' },
 });

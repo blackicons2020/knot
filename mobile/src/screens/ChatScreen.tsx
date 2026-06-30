@@ -96,9 +96,14 @@ export default function ChatScreen() {
     return (
       <View style={[s.msgRow, isMine && s.msgRowMine]}>
         {!isMine && <Image source={{ uri: photo }} style={s.msgAvatar} />}
-        <View style={[s.bubble, isMine ? s.bubbleMine : [s.bubbleTheirs, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]]}>
-          <Text style={[s.bubbleText, isMine ? { color: Colors.white } : { color: isDarkMode ? Colors.white : Colors.gray900 }]}>
-            {item.text}
+        <View style={s.bubbleContainer}>
+          <View style={[s.bubble, isMine ? s.bubbleMine : [s.bubbleTheirs, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]]}>
+            <Text style={[s.bubbleText, isMine ? { color: Colors.white } : { color: isDarkMode ? Colors.white : Colors.gray900 }]}>
+              {item.text}
+            </Text>
+          </View>
+          <Text style={[s.msgTime, isMine ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' }]}>
+            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Text>
         </View>
       </View>
@@ -183,10 +188,12 @@ const s = StyleSheet.create({
   msgRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginBottom: 12 },
   msgRowMine: { justifyContent: 'flex-end' },
   msgAvatar: { width: 24, height: 24, borderRadius: 12 },
-  bubble: { maxWidth: '75%', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 18 },
+  bubbleContainer: { maxWidth: '75%' },
+  bubble: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 18 },
   bubbleMine: { backgroundColor: Colors.primary, borderBottomRightRadius: 4 },
   bubbleTheirs: { backgroundColor: Colors.white, borderBottomLeftRadius: 4, borderWidth: 1, borderColor: Colors.gray200 },
   bubbleText: { fontSize: 14, fontWeight: '500' },
+  msgTime: { fontSize: 10, color: Colors.gray400, marginTop: 4, marginHorizontal: 4 },
   inputBar: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: Colors.gray100 },
   input: { flex: 1, borderRadius: 24, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14 },
   sendBtn: { backgroundColor: Colors.primary, borderRadius: 22, padding: 10 },
