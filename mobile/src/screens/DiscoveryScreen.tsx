@@ -80,7 +80,7 @@ export default function DiscoveryScreen() {
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ gap: COL_GAP }}
-        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 100, gap: COL_GAP }}
+        contentContainerStyle={{ padding: Spacing.md, paddingBottom: 24, gap: COL_GAP }}
         renderItem={renderItem}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>

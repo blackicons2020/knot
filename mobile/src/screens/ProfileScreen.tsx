@@ -109,7 +109,7 @@ export default function ProfileScreen() {
     <View style={st.root}>
       <AppHeader />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 24 }}
       >
         <View style={st.content}>
         

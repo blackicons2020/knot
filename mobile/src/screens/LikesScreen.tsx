@@ -59,7 +59,7 @@ export default function LikesScreen() {
         keyExtractor={(m) => m.id}
         numColumns={2}
         columnWrapperStyle={{ gap: 12 }}
-        contentContainerStyle={{ padding: Spacing.md, gap: 12, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: Spacing.md, gap: 12, paddingBottom: 24 }}
         renderItem={({ item }) => {
           const photo = item.profileImageUrls?.[0] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400';
           return (

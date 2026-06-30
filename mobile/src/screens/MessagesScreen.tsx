@@ -53,7 +53,7 @@ export default function MessagesScreen() {
       <FlatList
         data={matches}
         keyExtractor={(m) => m.id}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 24 }}
         renderItem={({ item }) => {
           const photo = item.profileImageUrls?.[0] || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400';
           return (

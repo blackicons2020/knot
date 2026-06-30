@@ -251,7 +251,7 @@ export default function EditProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: 100 }}>
+      <ScrollView contentContainerStyle={{ padding: Spacing.md, paddingBottom: 24 }}>
         {/* ── Photos ── */}
         <GlassCard>
           <Text style={st.cardTitle}>Registry Photos</Text>
