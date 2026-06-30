@@ -100,10 +100,14 @@ export default function PaymentScreen() {
   const activeTier = TIERS[activeTierIdx];
   const usdVal = getTierPriceUSD(activeTier.id as any, country) * (isYearly ? 10 : 1);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (tierIdx: number) => {
+    setActiveTierIdx(tierIdx);
+    const selectedTier = TIERS[tierIdx];
+    const tierUsdVal = getTierPriceUSD(selectedTier.id as any, country) * (isYearly ? 10 : 1);
+    
     Alert.alert(
       'Confirm Subscription',
-      `Are you sure you want to subscribe to ${activeTier.title} for ${monthlyFormatted}/month?`,
+      `Are you sure you want to subscribe to ${selectedTier.title} for ${getTierPriceDisplay(selectedTier.id as string)}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -118,13 +122,13 @@ export default function PaymentScreen() {
               setTimeout(() => {
                 setUserProfile({
                   ...user,
-                  subscriptionTier: activeTier.id as SubscriptionTier,
-                  subscriptionAmount: usdVal,
+                  subscriptionTier: selectedTier.id as SubscriptionTier,
+                  subscriptionAmount: tierUsdVal,
                   subscriptionPeriod: isYearly ? 'yearly' : 'monthly',
                   subscriptionDate: new Date().toISOString(),
                   isPremium: true,
                 });
-                addToast(`Welcome to ${activeTier.title}!`, 'success');
+                addToast(`Welcome to ${selectedTier.title}!`, 'success');
                 setProcessing(false);
                 navigation.goBack();
               }, 1500);
@@ -205,7 +209,7 @@ export default function PaymentScreen() {
                 return (
                   <TouchableOpacity 
                     style={{ width: '100%' }} 
-                    onPress={() => { setActiveTierIdx(idx); handleSubscribe(); }} 
+                    onPress={() => { handleSubscribe(idx); }} 
                     disabled={isDisabled || processing}
                   >
                     <LinearGradient
