@@ -63,7 +63,6 @@ export default function MessagesScreen() {
                 <Text style={[s.chatName, { color: isDarkMode ? Colors.white : Colors.dark }]}>{item.name}</Text>
                 <Text style={s.chatSub}>Tap to start chatting</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={Colors.gray400} />
             </TouchableOpacity>
           );
         }}
