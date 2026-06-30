@@ -5,7 +5,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { db } from '../services/apiService';
@@ -365,11 +366,23 @@ export default function ProfileDetailScreen() {
           <TouchableOpacity
             style={{ flex: 1 }}
             disabled={bothDisabled}
-            onPress={() => {
-              if (!userProfile?.isPremium) {
-                navigation.navigate('Payment', { user: userProfile! });
-              } else {
+            onPress={async () => {
+              if (userProfile?.isPremium) {
                 navigation.navigate('Chat', { match, user: userProfile! });
+                return;
+              }
+              try {
+                const freeMatchId = await AsyncStorage.getItem('freeMatchId');
+                if (!freeMatchId) {
+                  await AsyncStorage.setItem('freeMatchId', match.id);
+                  navigation.navigate('Chat', { match, user: userProfile! });
+                } else if (freeMatchId === match.id) {
+                  navigation.navigate('Chat', { match, user: userProfile! });
+                } else {
+                  navigation.navigate('Payment', { user: userProfile! });
+                }
+              } catch (e) {
+                navigation.navigate('Payment', { user: userProfile! });
               }
             }}
           >

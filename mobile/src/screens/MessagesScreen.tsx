@@ -13,6 +13,7 @@ import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, Match } from '../types';
 import { db } from '../services/apiService';
 import { MATCHES_DATA } from '../constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -56,7 +57,25 @@ export default function MessagesScreen() {
           return (
             <TouchableOpacity
               style={[s.chatRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}
-              onPress={() => navigation.navigate('Chat', { match: item, user: userProfile! })}
+              onPress={async () => {
+                if (userProfile?.isPremium) {
+                  navigation.navigate('Chat', { match: item, user: userProfile! });
+                  return;
+                }
+                try {
+                  const freeMatchId = await AsyncStorage.getItem('freeMatchId');
+                  if (!freeMatchId) {
+                    await AsyncStorage.setItem('freeMatchId', item.id);
+                    navigation.navigate('Chat', { match: item, user: userProfile! });
+                  } else if (freeMatchId === item.id) {
+                    navigation.navigate('Chat', { match: item, user: userProfile! });
+                  } else {
+                    navigation.navigate('Payment', { user: userProfile! });
+                  }
+                } catch (e) {
+                  navigation.navigate('Payment', { user: userProfile! });
+                }
+              }}
             >
               <Image source={{ uri: photo }} style={s.avatar} />
               <View style={{ flex: 1, marginLeft: 16 }}>
