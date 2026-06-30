@@ -306,24 +306,25 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* Actions */}
-        <View style={st.actionsRow}>
-          <TouchableOpacity style={st.actionBtnPass} onPress={handlePass}>
-            <Text style={st.actionBtnPassText}>Pass</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleConnect} style={{ flex: 1 }}>
-            <LinearGradient
-              colors={[Colors.primary, '#8C52FF']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={st.actionBtnConnect}
-            >
-              <Text style={st.actionBtnConnectText}>Connect</Text>
-              <Ionicons name="heart-outline" size={18} color={Colors.white} />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      {/* Actions Fixed at Bottom */}
+      <View style={[st.actionsRow, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200, borderTopWidth: 1, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 }]}>
+        <TouchableOpacity style={st.actionBtnPass} onPress={handlePass}>
+          <Text style={st.actionBtnPassText}>Pass</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleConnect} style={{ flex: 1 }}>
+          <LinearGradient
+            colors={[Colors.primary, '#8C52FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={st.actionBtnConnect}
+          >
+            <Text style={st.actionBtnConnectText}>Connect</Text>
+            <Ionicons name="heart-outline" size={18} color={Colors.white} />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
       {/* Mutual Match Modal */}
       <Modal visible={showMatchModal} transparent animationType="fade">
@@ -460,7 +461,7 @@ const st = StyleSheet.create({
   glowBody: { fontSize: 12, lineHeight: 18 },
 
   /* Actions */
-  actionsRow: { flexDirection: 'row', gap: 16, marginTop: Spacing.sm, paddingBottom: Spacing.md },
+  actionsRow: { flexDirection: 'row', gap: 16 },
   actionBtnPass: { flex: 1, paddingVertical: 14, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: '#374151', backgroundColor: '#191E2E', alignItems: 'center', justifyContent: 'center' },
   actionBtnPassText: { fontSize: 15, fontWeight: '700', color: Colors.white },
   actionBtnConnect: { paddingVertical: 14, borderRadius: BorderRadius.full, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
