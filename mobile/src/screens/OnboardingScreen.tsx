@@ -633,7 +633,7 @@ export default function OnboardingScreen() {
                 <Ionicons name={acceptedTerms ? "checkbox" : "square-outline"} size={24} color={Colors.primary} />
               </TouchableOpacity>
               <Text style={[styles.welcomeDesc, { fontSize: 12, marginLeft: 10, flex: 1, textAlign: 'left', marginBottom: 0 }]}>
-                I accept the <Text style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Terms of Service</Text> and <Text style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>.
+                I accept the <Text onPress={() => navigation.navigate('Legal', { type: 'tos' })} style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Terms of Service</Text> and <Text onPress={() => navigation.navigate('Legal', { type: 'privacy' })} style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>.
               </Text>
             </View>
 

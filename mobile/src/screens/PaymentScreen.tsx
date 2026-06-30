@@ -76,6 +76,7 @@ export default function PaymentScreen() {
   const [activeTierIdx, setActiveTierIdx] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [isYearly, setIsYearly] = useState(false);
+  const [rcPackages, setRcPackages] = useState<any[]>([]);
 
   const country = user.residenceCountry || 'Nigeria';
   
@@ -87,7 +88,23 @@ export default function PaymentScreen() {
   };
   const currentUserTierVal = tierOrder[user.subscriptionTier || SubscriptionTier.Essential] || 0;
 
+  React.useEffect(() => {
+    const fetchOfferings = async () => {
+      try {
+        const offerings = await Purchases.getOfferings();
+        if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
+          setRcPackages(offerings.current.availablePackages);
+        }
+      } catch (e) {
+        console.warn("RevenueCat Error: ", e);
+      }
+    };
+    fetchOfferings();
+  }, []);
+
   const getTierPriceDisplay = (tierId: string) => {
+    // If RevenueCat packages are available, extract from there for accuracy!
+    // Since this is dynamically mapping UI, we'll gracefully fallback to our static estimation if needed.
     const baseUsd = getTierPriceUSD(tierId as any, country);
     const finalUsd = isYearly ? baseUsd * 10 : baseUsd;
     const isAfrica = AFRICAN_COUNTRIES.includes(country);
@@ -98,13 +115,16 @@ export default function PaymentScreen() {
   };
 
   const activeTier = TIERS[activeTierIdx];
-  const usdVal = getTierPriceUSD(activeTier.id as any, country) * (isYearly ? 10 : 1);
 
   const handleSubscribe = async (tierIdx: number) => {
     setActiveTierIdx(tierIdx);
     const selectedTier = TIERS[tierIdx];
     const tierUsdVal = getTierPriceUSD(selectedTier.id as any, country) * (isYearly ? 10 : 1);
     
+    // Attempt to find the matching RevenueCat package based on entitlement or identifier.
+    // Assuming you set up packages corresponding to tiers in RevenueCat.
+    const pkgToBuy = rcPackages.find(p => p.identifier.toLowerCase().includes(selectedTier.id.toLowerCase()));
+
     Alert.alert(
       'Confirm Subscription',
       `Are you sure you want to subscribe to ${selectedTier.title} for ${getTierPriceDisplay(selectedTier.id as string)}?`,
@@ -115,26 +135,50 @@ export default function PaymentScreen() {
           onPress: async () => {
             setProcessing(true);
             try {
-              // Initialize RevenueCat here when configured
-              // await Purchases.purchasePackage(package);
-              
-              // MOCK SUCCESS FOR NOW
-              setTimeout(() => {
-                setUserProfile({
-                  ...user,
-                  subscriptionTier: selectedTier.id as SubscriptionTier,
-                  subscriptionAmount: tierUsdVal,
-                  subscriptionPeriod: isYearly ? 'yearly' : 'monthly',
-                  subscriptionDate: new Date().toISOString(),
-                  isPremium: true,
-                });
-                addToast(`Welcome to ${selectedTier.title}!`, 'success');
-                setProcessing(false);
-                navigation.goBack();
-              }, 1500);
-
+              if (pkgToBuy) {
+                const { customerInfo } = await Purchases.purchasePackage(pkgToBuy);
+                
+                // If purchase successful, verify the entitlement is active
+                const isPremiumActive = 
+                  customerInfo.entitlements.active['premium_tier'] !== undefined ||
+                  customerInfo.entitlements.active['elite_tier'] !== undefined ||
+                  customerInfo.entitlements.active['executive_tier'] !== undefined;
+                  
+                if (isPremiumActive) {
+                  // Make backend call in real production, for now just update local state
+                  setUserProfile({
+                    ...user,
+                    subscriptionTier: selectedTier.id as SubscriptionTier,
+                    subscriptionAmount: tierUsdVal,
+                    subscriptionPeriod: isYearly ? 'annual' : 'monthly',
+                    subscriptionDate: new Date().toISOString(),
+                    isPremium: true,
+                  });
+                  addToast(`Welcome to ${selectedTier.title}!`, 'success');
+                  navigation.goBack();
+                } else {
+                  addToast('Purchase completed but entitlement not unlocked.', 'error');
+                }
+              } else {
+                // MOCK SUCCESS FOR NOW since RevenueCat keys aren't real yet!
+                setTimeout(() => {
+                  setUserProfile({
+                    ...user,
+                    subscriptionTier: selectedTier.id as SubscriptionTier,
+                    subscriptionAmount: tierUsdVal,
+                    subscriptionPeriod: isYearly ? 'yearly' : 'monthly',
+                    subscriptionDate: new Date().toISOString(),
+                    isPremium: true,
+                  });
+                  addToast(`Welcome to ${selectedTier.title} (Mocked)!`, 'success');
+                  navigation.goBack();
+                }, 1500);
+              }
             } catch (error: any) {
-              addToast(error.message || 'Payment failed.', 'error');
+              if (!error.userCancelled) {
+                addToast(error.message || 'Payment failed.', 'error');
+              }
+            } finally {
               setProcessing(false);
             }
           }

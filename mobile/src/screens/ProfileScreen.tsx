@@ -336,11 +336,11 @@ export default function ProfileScreen() {
         <View style={st.sectionBlock}>
           <SectionHeader title="Legal & Compliance" />
           <GlassCard style={st.gridItemFull}>
-            <TouchableOpacity onPress={() => Alert.alert('Terms of Service', 'Placeholder for Terms of Service...')} style={[st.planRow, { borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', paddingBottom: 12, marginBottom: 12 }]}>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'tos' })} style={[st.planRow, { borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', paddingBottom: 12, marginBottom: 12 }]}>
               <Text style={st.planLabel}>Terms of Service</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => Alert.alert('Privacy Policy', 'Placeholder for Privacy Policy...')} style={st.planRow}>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })} style={st.planRow}>
               <Text style={st.planLabel}>Privacy Policy</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
             </TouchableOpacity>

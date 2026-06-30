@@ -19,6 +19,7 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import ManagePhotosScreen from '../screens/ManagePhotosScreen';
 import PaymentScreen from '../screens/PaymentScreen';
 import AdminScreen from '../screens/AdminScreen';
+import LegalScreen from '../screens/LegalScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -51,7 +52,10 @@ export default function AppNavigator() {
             />
           </>
         ) : needsOnboarding ? (
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Legal" component={LegalScreen} options={{ presentation: 'modal' }} />
+          </>
         ) : (
           <>
             <Stack.Screen name="MainTabs" component={TabNavigator} />
@@ -67,6 +71,7 @@ export default function AppNavigator() {
             <Stack.Screen name="ManagePhotos" component={ManagePhotosScreen} />
             <Stack.Screen name="Payment" component={PaymentScreen} />
             <Stack.Screen name="Admin" component={AdminScreen} />
+            <Stack.Screen name="Legal" component={LegalScreen} options={{ presentation: 'modal' }} />
           </>
         )}
       </Stack.Navigator>

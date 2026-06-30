@@ -31,7 +31,8 @@ export class UsersService {
       'childrenPreference', 'idealPartnerTraits', 'personalValues', 'marriageExpectations', 'careerGoals',
       'residenceCountry', 'residenceState', 'residenceCity', 'originCountry', 'originState', 'originCity',
       'personalityArchetype', 'attachmentStyle', 'readinessScore', 'seriousnessLevel', 'trustScore',
-      'isVerified', 'isPremium', 'idVerified', 'selfieVerified', 'selfieUrl', 'moderationFlags'
+      'isVerified', 'isPremium', 'idVerified', 'selfieVerified', 'selfieUrl', 'moderationFlags',
+      'pushToken', 'subscriptionTier', 'subscriptionAmount', 'subscriptionPeriod', 'subscriptionDate'
     ];
 
     const data: any = {};

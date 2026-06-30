@@ -57,9 +57,18 @@ model User {
   seriousnessLevel     Int       @default(0) // Commitment Intention Index (0-100)
   trustScore           Int       @default(60) // Base trust score starts at 60
 
+  // Subscription Details
+  subscriptionTier    String    @default("Essential")
+  subscriptionAmount  Float?
+  subscriptionPeriod  String?
+  subscriptionDate    DateTime?
+
   // Advanced Trust & Safety Metrics
   isVerified           Boolean   @default(false)
+  pushToken            String?
   isPremium            Boolean   @default(false)
+  isAdmin              Boolean   @default(false)
+  isOnline             Boolean   @default(false)
   idVerified           Boolean   @default(false)
   selfieVerified       Boolean   @default(false)
   selfieUrl            String?
