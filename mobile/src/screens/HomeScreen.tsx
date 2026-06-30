@@ -358,7 +358,7 @@ export default function HomeScreen() {
 const st = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  scrollContent: { padding: Spacing.md, paddingBottom: 100 },
+  scrollContent: { padding: Spacing.md, paddingBottom: 24 },
   emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 100 },
   emptyText: { fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 2, marginTop: 12 },
   

@@ -154,7 +154,7 @@ export default function InsightsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { padding: Spacing.md, paddingBottom: 100 },
+  scrollContent: { padding: Spacing.md, paddingBottom: 24 },
   title: { fontSize: 22, fontWeight: '900', letterSpacing: -0.5, marginBottom: 4 },
   subtitle: { fontSize: 12, lineHeight: 18, marginBottom: Spacing.lg },
   metricsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: Spacing.lg },
