@@ -26,7 +26,7 @@ export class UsersService {
 
   async updateProfile(id: string, dto: any) {
     const allowedKeys = [
-      'firstName', 'lastName', 'dateOfBirth', 'bio', 'occupation', 'education', 'religion', 'culturalBackground',
+      'firstName', 'lastName', 'gender', 'preferredGender', 'dateOfBirth', 'bio', 'occupation', 'education', 'religion', 'culturalBackground', 'languagesSpoken',
       'smoking', 'drinking', 'maritalStatus', 'childrenStatus', 'marriageTimeline', 'willingToRelocate',
       'childrenPreference', 'idealPartnerTraits', 'personalValues', 'marriageExpectations', 'careerGoals',
       'residenceCountry', 'residenceState', 'residenceCity', 'originCountry', 'originState', 'originCity',
