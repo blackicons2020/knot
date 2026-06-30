@@ -1,13 +1,17 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AIService } from '../ai/ai.service';
 import { MatchStatus } from '@prisma/client';
+import { NotificationsService } from '../services/notifications.service';
 
 @Injectable()
 export class MatchesService {
+  private readonly logger = new Logger(MatchesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiService: AIService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getDailyMatches(userId: string) {
@@ -87,10 +91,32 @@ export class MatchesService {
   }
 
   async respondToMatch(matchId: string, status: MatchStatus) {
-    return this.prisma.match.update({
+    const updatedMatch = await this.prisma.match.update({
       where: { id: matchId },
       data: { status },
+      include: { userA: true, userB: true }
     });
+
+    if (status === MatchStatus.CONNECTED) {
+      if (updatedMatch.userA.pushToken) {
+        await this.notificationsService.sendPushNotification(
+          updatedMatch.userA.pushToken,
+          `New Connection!`,
+          `You and ${updatedMatch.userB.firstName} are now connected.`,
+          { url: `knot://chat/${updatedMatch.userB.id}` }
+        );
+      }
+      if (updatedMatch.userB.pushToken) {
+        await this.notificationsService.sendPushNotification(
+          updatedMatch.userB.pushToken,
+          `New Connection!`,
+          `You and ${updatedMatch.userA.firstName} are now connected.`,
+          { url: `knot://chat/${updatedMatch.userA.id}` }
+        );
+      }
+    }
+
+    return updatedMatch;
   }
 
   async getConnectedMatches(userId: string) {

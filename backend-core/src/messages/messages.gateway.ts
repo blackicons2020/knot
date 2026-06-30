@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AIService } from '../ai/ai.service';
+import { NotificationsService } from '../services/notifications.service';
 
 @WebSocketGateway({ cors: true })
 export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -21,6 +22,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiService: AIService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   handleConnection(client: Socket) {
@@ -116,6 +118,26 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         this.server.to(receiverSocketId).emit('aiMessageTip', {
           tip: prompterResponse,
         });
+      }
+    } else {
+      // Receiver is offline, send push notification
+      const receiver = await this.prisma.user.findUnique({
+        where: { id: payload.receiverId },
+        select: { pushToken: true }
+      });
+      const sender = await this.prisma.user.findUnique({
+        where: { id: payload.senderId },
+        select: { firstName: true }
+      });
+
+      if (receiver?.pushToken && sender) {
+        // Send push notification
+        await this.notificationsService.sendPushNotification(
+          receiver.pushToken,
+          `New message from ${sender.firstName}`,
+          payload.content,
+          { url: `knot://chat/${payload.senderId}` }
+        );
       }
     }
   }
