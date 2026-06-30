@@ -10,6 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import {
   RootStackParamList, User, SmokingHabits, DrinkingHabits,
@@ -96,13 +97,38 @@ function GlassCard({ children, style }: { children: React.ReactNode; style?: any
 export default function EditProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { params } = useRoute<EditRoute>();
-  const { setUserProfile } = useAuth();
+  const { userProfile, setUserProfile, logout } = useAuth();
   const { isDarkMode } = useTheme();
+  const { addToast } = useToast();
   const [form, setForm] = useState<User>(params.user);
   
   // Photos state
   const [photos, setPhotos] = useState<string[]>(params.user.profileImageUrls || []);
   const [uploading, setUploading] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to permanently delete your account? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              if (userProfile?.id) {
+                await db.deleteUser(userProfile.id);
+              }
+              logout();
+            } catch (err: any) {
+              addToast(err.message || 'Failed to delete account', 'error');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   // Dropdown modal state
   const [ddVisible, setDdVisible] = useState(false);
@@ -387,6 +413,9 @@ export default function EditProfileScreen() {
         <TouchableOpacity style={st.saveBtn} onPress={save}>
           <Text style={st.saveBtnText}>Save Registry Updates</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={st.deleteBtn} onPress={handleDeleteAccount}>
+          <Text style={st.deleteBtnText}>Delete Account</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Searchable dropdown modal */}
@@ -425,8 +454,10 @@ const st = StyleSheet.create({
   col: { flex: 1 },
 
   footer: { padding: Spacing.md, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
-  saveBtn: { backgroundColor: Colors.primary, paddingVertical: 18, borderRadius: 100, alignItems: 'center', shadowColor: Colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  saveBtn: { backgroundColor: Colors.primary, paddingVertical: 18, borderRadius: 100, alignItems: 'center', shadowColor: Colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6, marginBottom: 12 },
   saveBtnText: { color: Colors.white, fontSize: 14, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
+  deleteBtn: { paddingVertical: 18, borderRadius: 100, alignItems: 'center', borderWidth: 1, borderColor: '#ff4444' },
+  deleteBtnText: { color: '#ff4444', fontSize: 14, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
 
   /* Photos */
   hint: { fontSize: 11, marginBottom: 16, lineHeight: 16 },

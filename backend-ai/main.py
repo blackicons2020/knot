@@ -68,9 +68,9 @@ app.add_middleware(
 
 # Models
 class ProfileData(BaseModel):
-    firstName: str
-    lastName: str
-    dateOfBirth: str
+    firstName: str = ""
+    lastName: str = ""
+    dateOfBirth: str = ""
     bio: str = ""
     occupation: str = ""
     religion: str = ""

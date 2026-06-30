@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator
+  Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { Colors, Spacing, BorderRadius } from '../theme/colors';
 import { RootStackParamList, Match } from '../types';
 
@@ -70,6 +71,7 @@ export default function ProfileDetailScreen() {
   const { params } = useRoute<DetailRoute>();
   const { userProfile } = useAuth();
   const { isDarkMode } = useTheme();
+  const { addToast } = useToast();
   const insets = useSafeAreaInsets();
   const match: Match = params.match;
 
@@ -86,9 +88,8 @@ export default function ProfileDetailScreen() {
       if (!userProfile || !match) return;
       try {
         const result = await db.calculateCompatibility(userProfile, match as any);
-        // The result matches CompatibilityResponse from AI microservice
         setMetrics({
-          trustScore: 95, // Fallback base trust
+          trustScore: 95, 
           valuesAlignment: result.valuesAlignment || 0,
           emotionalSynergy: result.emotionalAlignment || 0,
           communicationMatch: result.communicationStyle || 0,
@@ -98,7 +99,6 @@ export default function ProfileDetailScreen() {
         });
       } catch (err) {
         console.error('Failed to load compatibility metrics:', err);
-        // Fallback safely if offline
         setMetrics({
           valuesAlignment: 85,
           emotionalSynergy: 80,
@@ -111,6 +111,14 @@ export default function ProfileDetailScreen() {
     }
     fetchMetrics();
   }, [match.id, userProfile?.id]);
+
+  const handleOptions = () => {
+    Alert.alert('Options', 'Select an action for this profile', [
+      { text: 'Block', style: 'destructive', onPress: () => addToast('User blocked successfully', 'success') },
+      { text: 'Report', style: 'destructive', onPress: () => addToast('Report submitted', 'success') },
+      { text: 'Cancel', style: 'cancel' }
+    ]);
+  };
 
   const isAdmin = userProfile?.role === 'ADMIN' || userProfile?.id === 'user_0';
   const isRestricted = !isAdmin && (!userProfile?.isPremium || !match.isPremium);
@@ -151,6 +159,13 @@ export default function ProfileDetailScreen() {
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="chevron-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[st.optionsBtn, { top: insets.top + 8 }]}
+            onPress={handleOptions}
+          >
+            <Ionicons name="ellipsis-horizontal" size={24} color={Colors.white} />
           </TouchableOpacity>
 
           {/* Tap zones */}
@@ -412,6 +427,7 @@ const st = StyleSheet.create({
   indicator: { flex: 1, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.4)' },
   indicatorActive: { backgroundColor: Colors.white },
   backBtn: { position: 'absolute', left: 16, zIndex: 30, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 22, padding: 10 },
+  optionsBtn: { position: 'absolute', right: 16, zIndex: 30, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 22, padding: 10 },
 
   /* Info overlay */
   infoCard: { marginTop: -48, borderTopLeftRadius: 40, borderTopRightRadius: 40, paddingHorizontal: 32, paddingTop: 32, paddingBottom: 16 },

@@ -119,6 +119,7 @@ export default function OnboardingScreen() {
   const [govIdUri, setGovIdUri] = useState<string | null>(null);
   const [livenessUri, setLivenessUri] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Form State
   const [form, setForm] = useState<User>({
@@ -196,6 +197,7 @@ export default function OnboardingScreen() {
   };
 
   const startIdScanner = async () => {
+    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission needed', 'Please grant camera access to scan your Government ID.');
@@ -625,7 +627,23 @@ export default function OnboardingScreen() {
             <Text style={styles.welcomeDesc}>
               Before entering KNOT, all members complete our AI Guided interview to establish personality vectors, attachment archetypes, and commitment integrity.
             </Text>
-            <TouchableOpacity onPress={() => setStep(2)}>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 20 }}>
+              <TouchableOpacity onPress={() => setAcceptedTerms(!acceptedTerms)}>
+                <Ionicons name={acceptedTerms ? "checkbox" : "square-outline"} size={24} color={Colors.primary} />
+              </TouchableOpacity>
+              <Text style={[styles.welcomeDesc, { fontSize: 12, marginLeft: 10, flex: 1, textAlign: 'left', marginBottom: 0 }]}>
+                I accept the <Text style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Terms of Service</Text> and <Text style={{ color: Colors.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>.
+              </Text>
+            </View>
+
+            <TouchableOpacity onPress={() => {
+              if (acceptedTerms) {
+                setStep(2);
+              } else {
+                Alert.alert('Required', 'You must accept the Terms of Service and Privacy Policy to continue.');
+              }
+            }}>
               <LinearGradient
                 colors={['#E27D8D', '#2D1B4E']}
                 start={{ x: 0, y: 0 }}

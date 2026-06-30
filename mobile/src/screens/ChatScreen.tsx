@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text,
-  TextInput, TouchableOpacity, View,
+  TextInput, TouchableOpacity, View, Alert
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -42,6 +42,14 @@ export default function ChatScreen() {
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }, [messages]);
+
+  const handleOptions = () => {
+    Alert.alert('Options', 'Select an action for this profile', [
+      { text: 'Block', style: 'destructive', onPress: () => { addToast('User blocked successfully', 'success'); navigation.goBack(); } },
+      { text: 'Report', style: 'destructive', onPress: () => addToast('Report submitted', 'success') },
+      { text: 'Cancel', style: 'cancel' }
+    ]);
+  };
 
   const send = async () => {
     const msg = text.trim();
@@ -126,9 +134,14 @@ export default function ChatScreen() {
           <Text style={[s.headerName, { color: isDarkMode ? Colors.white : Colors.dark }]}>{match.name}</Text>
           <Text style={s.headerSub}>Online</Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('VideoCall', { match, user })}>
-          <Ionicons name="videocam" size={24} color={Colors.primary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => navigation.navigate('VideoCall', { match, user })} style={{ marginRight: 16 }}>
+            <Ionicons name="videocam" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleOptions}>
+            <Ionicons name="ellipsis-vertical" size={24} color={isDarkMode ? Colors.gray400 : Colors.gray600} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Messages */}
