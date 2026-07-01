@@ -241,13 +241,6 @@ export default function HomeScreen() {
                   ✔ {metrics?.attachment} Attachment
                 </Text>
               </View>
-              {activeMatch.marriageTimeline && (
-                <View style={[st.tag, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.05)' : Colors.gray100 }]}>
-                  <Text style={[st.tagText, { color: isDarkMode ? Colors.gray300 : Colors.gray700 }]}>
-                    ⏱ {activeMatch.marriageTimeline}
-                  </Text>
-                </View>
-              )}
             </View>
 
             {/* Why You Matched AI Glow Box (Moved up) */}
@@ -302,8 +295,8 @@ export default function HomeScreen() {
 
         {/* Bio (Moved down) */}
         <View style={[st.sectionCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, padding: 16 }]}>
-          <Text style={[st.sectionTitle, { color: isDarkMode ? Colors.white : Colors.dark }]}>
-            Registry Bio
+          <Text style={[st.barLabel, { marginBottom: 8 }]}>
+            REGISTRY BIO
           </Text>
           <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600, marginTop: 8 }]} numberOfLines={6}>
             {activeMatch.bio || "No bio provided."}

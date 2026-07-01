@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/apiService';
 import { User } from '../types';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -27,6 +28,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { expoPushToken } = usePushNotifications();
+
+  useEffect(() => {
+    if (userProfile && expoPushToken?.data) {
+      // Background sync token to backend
+      api.updateProfile(userProfile.id, { pushToken: expoPushToken.data }).catch(console.warn);
+    }
+  }, [userProfile, expoPushToken]);
 
   useEffect(() => {
     const restore = async () => {

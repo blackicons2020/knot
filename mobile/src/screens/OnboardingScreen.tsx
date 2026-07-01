@@ -160,7 +160,7 @@ export default function OnboardingScreen() {
   const [messages, setMessages] = useState<Array<{ role: 'ai' | 'user'; text: string }>>([
     {
       role: 'ai',
-      text: 'Welcome to KNOT. I am your AI Matchmaking Guide. I will explore your psychological profiles, attachment dynamics, and commitment objectives. Shall we begin?',
+      text: 'Welcome to KNOT. I am your AI-Matching Guide. I will explore your psychological profiles, attachment dynamics, and commitment objectives. Shall we begin?',
     },
   ]);
   const [currentInput, setCurrentInput] = useState('');
@@ -661,7 +661,7 @@ export default function OnboardingScreen() {
                 adjustsFontSizeToFit 
                 style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: Colors.gray500, fontWeight: 'bold', width: '100%', textAlign: 'center' }}
               >
-                FRAUD-PROOF | AI MATCHMAKING | HIGH-TRUST
+                FRAUD-PROOF | AI-MATCHING | HIGH-TRUST
               </Text>
             </View>
           </View>
@@ -1024,7 +1024,7 @@ export default function OnboardingScreen() {
                 <Ionicons name="logo-android" size={20} color={Colors.accent} />
               </View>
               <View>
-                <Text style={[styles.chatHeaderTitle, textStyle]}>KNOT AI Matchmaking Guide</Text>
+                <Text style={[styles.chatHeaderTitle, textStyle]}>KNOT AI-Matching Guide</Text>
                 <Text style={styles.chatHeaderSubtitle}>Interview Session Active</Text>
               </View>
             </View>
