@@ -74,7 +74,7 @@ export default function DiscoveryScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
-      <AppHeader />
+      <AppHeader onFilter={() => navigation.navigate('EditProfile', { user: userProfile! })} />
       <FlatList
         data={processed}
         keyExtractor={(item) => item.id}
@@ -87,6 +87,7 @@ export default function DiscoveryScreen() {
             <Text style={[styles.emptyText, { color: isDarkMode ? Colors.gray500 : Colors.gray400 }]}>No users found in the registry.</Text>
           </View>
         }
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

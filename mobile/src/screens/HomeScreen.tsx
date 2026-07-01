@@ -41,9 +41,8 @@ export default function HomeScreen() {
         const userGender = (userProfile.gender || '').toLowerCase().trim();
         console.log('[HomeScreen] userProfile.gender raw:', JSON.stringify(userProfile.gender), '=> normalized:', userGender);
         const targetGender = userGender === 'female' ? 'male' : 'female';
-        console.log('[HomeScreen] Filtering matches for targetGender:', targetGender);
+        
         const filtered = MATCHES_DATA.filter((m) => m.gender?.toLowerCase() === targetGender);
-        console.log('[HomeScreen] Filtered matches count:', filtered.length, filtered.map(m => `${m.name}(${m.gender})`));
         setMatches(filtered);
       } catch (err) {
         console.error('Failed to load matches:', err);
@@ -159,8 +158,8 @@ export default function HomeScreen() {
   if (!activeMatch) {
     return (
       <View style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
-        <AppHeader />
-        <View style={st.emptyWrap}>
+        <AppHeader onFilter={() => navigation.navigate('EditProfile', { user: userProfile! })} />
+        <View style={st.cardWrapper}>
           <Ionicons name="compass-outline" size={64} color={Colors.gray400} />
           <Text style={[st.emptyText, { color: isDarkMode ? Colors.gray400 : Colors.gray600 }]}>
             No curated matches available.
@@ -172,7 +171,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
-      <AppHeader />
+      <AppHeader onFilter={() => navigation.navigate('EditProfile', { user: userProfile! })} />
       <ScrollView contentContainerStyle={st.scrollContent}>
         {/* Curated Match Hero Card */}
         <View style={[st.heroCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
@@ -295,7 +294,7 @@ export default function HomeScreen() {
 
         {/* Bio (Moved down) */}
         <View style={[st.sectionCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200, padding: 16 }]}>
-          <Text style={[st.barLabel, { marginBottom: 8 }]}>
+          <Text style={[st.sectionTitle, { color: Colors.accent, textTransform: 'uppercase', marginBottom: 8 }]}>
             REGISTRY BIO
           </Text>
           <Text style={[st.bioText, { color: isDarkMode ? Colors.gray300 : Colors.gray600, marginTop: 8 }]} numberOfLines={6}>

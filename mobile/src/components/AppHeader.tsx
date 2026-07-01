@@ -13,7 +13,7 @@ const AVATARS = [
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128',
 ];
 
-export default function AppHeader() {
+export default function AppHeader({ onFilter }: { onFilter?: () => void }) {
   const insets = useSafeAreaInsets();
   const { isDarkMode, toggleTheme } = useTheme();
 
@@ -32,7 +32,7 @@ export default function AppHeader() {
         <View style={st.headerLeft}>
           <KnotLogo size="md" />
           <View style={st.headerActions}>
-            <TouchableOpacity style={st.headerBtn}>
+            <TouchableOpacity onPress={onFilter} style={st.headerBtn}>
               <Ionicons name="options" size={18} color={Colors.gray400} />
             </TouchableOpacity>
             <TouchableOpacity onPress={toggleTheme} style={st.headerBtn}>
