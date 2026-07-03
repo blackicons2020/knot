@@ -44,7 +44,7 @@ export class NotificationsService {
     });
 
     const chunks = this.expo.chunkPushNotifications(validMessages);
-    const tickets = [];
+    const tickets: any[] = [];
 
     for (const chunk of chunks) {
       try {
