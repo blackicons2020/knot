@@ -81,7 +81,7 @@ You have the right to access, update, or delete your personal information. You c
 Additionally, you may request complete account and data deletion externally without logging in by visiting our portal at: http://16.192.76.171/data-deletion
 
 6. Contact Us
-If you have questions about this Privacy Policy, please contact our support team at privacy@knotapp.com.
+If you have questions about this Privacy Policy, please contact our support team at cleanconnectng@gmail.com.
   `;
 
   return (
