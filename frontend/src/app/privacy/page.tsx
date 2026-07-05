@@ -56,6 +56,17 @@ export default function PrivacyPolicyPage() {
               If you have any questions about this Privacy Policy, please contact our support team at <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a>.
             </p>
           </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">7. Child Safety Standards</h2>
+            <p className="mb-2">
+              Knot is strictly for adults aged 18 and over. We maintain a zero-tolerance policy against any form of Child Sexual Abuse Material (CSAM) and Child Sexual Abuse and Exploitation (CSAE).
+            </p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Zero Tolerance:</strong> Any user found distributing, promoting, or possessing CSAM/CSAE will be permanently banned and immediately reported to the relevant national authorities and law enforcement.</li>
+              <li><strong>Reporting:</strong> Users can instantly report any child safety concerns directly within the app using the "Report User" feature, or by immediately emailing <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a>.</li>
+            </ul>
+          </section>
         </div>
       </div>
     </div>
