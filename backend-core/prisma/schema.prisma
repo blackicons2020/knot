@@ -49,6 +49,14 @@ model User {
   originCountry        String    @default("")
   originState          String    @default("")
   originCity           String    @default("")
+  
+  // Preferred Partner Location Details
+  preferredResidenceCountry String @default("")
+  preferredResidenceState   String @default("")
+  preferredResidenceCity    String @default("")
+  preferredOriginCountry    String @default("")
+  preferredOriginState      String @default("")
+  preferredOriginCity       String @default("")
 
   // AI Relationship Intelligence Profiles
   personalityArchetype String?

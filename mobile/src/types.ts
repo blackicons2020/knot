@@ -95,6 +95,15 @@ export interface User {
   isPremium: boolean;
   occupation: string;
   city: string;
+
+  
+  // Preferred Partner Location Details
+  preferredResidenceCountry?: string;
+  preferredResidenceState?: string;
+  preferredResidenceCity?: string;
+  preferredOriginCountry?: string;
+  preferredOriginState?: string;
+  preferredOriginCity?: string;
   country: string;
   residenceCountry: string;
   residenceState: string;

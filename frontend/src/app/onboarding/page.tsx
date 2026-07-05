@@ -135,6 +135,16 @@ export default function Onboarding() {
   const [originState, setOriginState] = useState("");
   const [originCity, setOriginCity] = useState("");
 
+  const [preferredResidenceCountry, setPreferredResidenceCountry] = useState("");
+  const [preferredResidenceState, setPreferredResidenceState] = useState("");
+  const [prefResCountryCustom, setPrefResCountryCustom] = useState("");
+  const [prefResStateCustom, setPrefResStateCustom] = useState("");
+  const [preferredOriginCountry, setPreferredOriginCountry] = useState("");
+  const [preferredOriginState, setPreferredOriginState] = useState("");
+  const [prefOriCountryCustom, setPrefOriCountryCustom] = useState("");
+  const [prefOriCustom, setPrefOriCustom] = useState("");
+  const [preferredPartnerAgeRange, setPreferredPartnerAgeRange] = useState<[number, number]>([18, 60]);
+
   // Selfie Liveness Interactive Modal States
   const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
   const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "up" | "down" | "complete">("idle");
@@ -429,9 +439,14 @@ export default function Onboarding() {
           bio: "", occupation, religion: religionSelect === "Other" ? religionCustom : religionSelect,
           education: "", culturalBackground: "", smoking, drinking, maritalStatus, childrenStatus,
           marriageTimeline, willingToRelocate, childrenPreference, idealPartnerTraits: [],
-          marriageExpectations: "", careerGoals: "",
+          marriageExpectations, careerGoals: "",
           residenceCountry, residenceState, residenceCity,
-          originCountry, originState, originCity
+          originCountry, originState, originCity,
+          preferredResidenceCountry: preferredResidenceCountry === 'Enter Choice Country' ? prefResCountryCustom : preferredResidenceCountry,
+          preferredResidenceState: preferredResidenceState === 'Enter State/Province/Region' ? prefResStateCustom : preferredResidenceState,
+          preferredOriginCountry: preferredOriginCountry === 'Enter Choice Country' ? prefOriCountryCustom : preferredOriginCountry,
+          preferredOriginState: preferredOriginState === 'Enter Native Heritage' ? prefOriCustom : preferredOriginState,
+          preferredPartnerAgeRange
         })
       });
 
@@ -534,7 +549,13 @@ export default function Onboarding() {
           lastName: lastName,
           dateOfBirth: dateOfBirth,
           languagesSpoken: finalLanguages,
-          idealPartnerTraits: finalTraits
+          idealPartnerTraits: finalTraits,
+          marriageExpectations,
+          preferredResidenceCountry: preferredResidenceCountry === 'Enter Choice Country' ? prefResCountryCustom : preferredResidenceCountry,
+          preferredResidenceState: preferredResidenceState === 'Enter State/Province/Region' ? prefResStateCustom : preferredResidenceState,
+          preferredOriginCountry: preferredOriginCountry === 'Enter Choice Country' ? prefOriCountryCustom : preferredOriginCountry,
+          preferredOriginState: preferredOriginState === 'Enter Native Heritage' ? prefOriCustom : preferredOriginState,
+          preferredPartnerAgeRange
         })
       });
 
@@ -735,17 +756,94 @@ export default function Onboarding() {
             {subStep === 6 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
                 <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Intended Partners Residence</h2>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">Where do you ideally want your partner to be living?</p>
+                <div className="space-y-4">
+                  <select value={preferredResidenceCountry} onChange={e => { setPreferredResidenceCountry(e.target.value); setPreferredResidenceState(""); }} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Country</option>
+                    <option value="Any Country">Any Country</option>
+                    <option value="Enter Choice Country">Enter Choice Country</option>
+                    {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  {preferredResidenceCountry === 'Enter Choice Country' && (
+                    <input type="text" value={prefResCountryCustom} onChange={e => setPrefResCountryCustom(e.target.value)} placeholder="Type your choice country" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
+                  
+                  <select value={preferredResidenceState} onChange={e => setPreferredResidenceState(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select State / Province</option>
+                    <option value="Any State/Province/Region">Any State/Province/Region</option>
+                    <option value="Enter State/Province/Region">Enter State/Province/Region</option>
+                    {(STATES_BY_COUNTRY[preferredResidenceCountry] || []).map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                  {preferredResidenceState === 'Enter State/Province/Region' && (
+                    <input type="text" value={prefResStateCustom} onChange={e => setPrefResStateCustom(e.target.value)} placeholder="Type your choice state/province/region" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
+                </div>
+                <button onClick={() => {
+                  if (preferredResidenceCountry === 'Enter Choice Country' && !prefResCountryCustom.trim()) {
+                    alert('Please type your choice country.'); return;
+                  }
+                  if (preferredResidenceState === 'Enter State/Province/Region' && !prefResStateCustom.trim()) {
+                    alert('Please type your choice state/province/region.'); return;
+                  }
+                  setSubStep(7);
+                }} disabled={!preferredResidenceCountry} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
+
+            {subStep === 7 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-serif font-black">Native Heritage</h2>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">What is your preferred cultural background or origin for a partner?</p>
+                <div className="space-y-4">
+                  <select value={preferredOriginCountry} onChange={e => { setPreferredOriginCountry(e.target.value); setPreferredOriginState(""); }} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Country</option>
+                    <option value="Any Country">Any Country</option>
+                    <option value="Enter Choice Country">Enter Choice Country</option>
+                    {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  {preferredOriginCountry === 'Enter Choice Country' && (
+                    <input type="text" value={prefOriCountryCustom} onChange={e => setPrefOriCountryCustom(e.target.value)} placeholder="Type your choice country" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
+                  
+                  <select value={preferredOriginState} onChange={e => setPreferredOriginState(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                    <option value="">Select Native Heritage</option>
+                    <option value="Any Heritage">Any Heritage</option>
+                    <option value="Enter Native Heritage">Enter Native Heritage</option>
+                  </select>
+                  {preferredOriginState === 'Enter Native Heritage' && (
+                    <input type="text" value={prefOriCustom} onChange={e => setPrefOriCustom(e.target.value)} placeholder="e.g. Yoruba, Scottish, English, Catalan" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
+                </div>
+                <button onClick={() => {
+                  if (preferredOriginCountry === 'Enter Choice Country' && !prefOriCountryCustom.trim()) {
+                    alert('Please type your choice country.'); return;
+                  }
+                  if (preferredOriginState === 'Enter Native Heritage' && !prefOriCustom.trim()) {
+                    alert('Please type your choice native heritage.'); return;
+                  }
+                  setSubStep(8);
+                }} disabled={!preferredOriginCountry} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+              </div>
+            )}
+
+            {subStep === 8 && (
+              <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
+                <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-serif font-black">Languages</h2>
                 </div>
                 <MultiSelectDropdown label="Languages Spoken" options={[...MAJOR_LANGUAGES]} values={languagesSpoken} onChange={setLanguagesSpoken} placeholder="Select languages" />
                 {languagesSpoken.includes("Other") && (
                   <input type="text" value={languageCustom} onChange={e => setLanguageCustom(e.target.value)} placeholder="Specify other language" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 )}
-                <button onClick={() => setSubStep(7)} disabled={languagesSpoken.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+                <button onClick={() => setSubStep(9)} disabled={languagesSpoken.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
             )}
 
-            {subStep === 7 && (
+            {subStep === 9 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
                 <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-serif font-black">Lifestyle Habits</h2>
@@ -781,11 +879,11 @@ export default function Onboarding() {
                     </select>
                   </div>
                 </div>
-                <button onClick={() => setSubStep(8)} disabled={!maritalStatus || !smoking || !drinking} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+                <button onClick={() => setSubStep(10)} disabled={!maritalStatus || !smoking || !drinking} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
             )}
 
-            {subStep === 8 && (
+            {subStep === 10 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
                 <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-serif font-black">Future Plans</h2>
@@ -819,11 +917,11 @@ export default function Onboarding() {
                     </select>
                   </div>
                 </div>
-                <button onClick={() => setSubStep(9)} disabled={!childrenStatus || !marriageTimeline || !willingToRelocate} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+                <button onClick={() => setSubStep(11)} disabled={!childrenStatus || !marriageTimeline || !willingToRelocate} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
             )}
 
-            {subStep === 9 && (
+            {subStep === 11 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
                 <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-serif font-black">Family Goals</h2>
@@ -837,24 +935,50 @@ export default function Onboarding() {
                     <option value="Open to children">Open to children</option>
                   </select>
                 </div>
-                <button onClick={() => setSubStep(10)} disabled={!childrenPreference} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
+                <button onClick={() => setSubStep(12)} disabled={!childrenPreference} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
             )}
 
-            {subStep === 10 && (
+            {subStep === 12 && (
               <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out space-y-6">
                 <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-serif font-black">Ideal Partner Traits</h2>
                 </div>
                 <MultiSelectDropdown label="Traits" options={[...MAJOR_TRAITS]} values={idealPartnerTraits} onChange={setIdealPartnerTraits} placeholder="Select traits" />
                 {idealPartnerTraits.includes("Other") && (
-                  <input type="text" value={traitCustom} onChange={e => setTraitCustom(e.target.value)} placeholder="Specify other trait" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  <input type="text" value={traitCustom} onChange={e => setTraitCustom(e.target.value)} placeholder="Specify other trait" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white mb-4 focus:outline-none focus:border-[#D4AF37]/50" />
                 )}
-                <button onClick={() => setStep(3)} disabled={idealPartnerTraits.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Proceed to Verification</button>
+                
+                <div className="mt-4">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Ideal Partner Age Range</label>
+                  <div className="flex gap-4">
+                    <input type="number" placeholder="Min Age" value={preferredPartnerAgeRange[0]} onChange={(e) => setPreferredPartnerAgeRange([parseInt(e.target.value) || 0, preferredPartnerAgeRange[1]])} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                    <input type="number" placeholder="Max Age" value={preferredPartnerAgeRange[1]} onChange={(e) => setPreferredPartnerAgeRange([preferredPartnerAgeRange[0], parseInt(e.target.value) || 0])} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Marriage Expectations</label>
+                  <textarea 
+                    value={marriageExpectations} 
+                    onChange={e => setMarriageExpectations(e.target.value)} 
+                    placeholder="What are your expectations for marriage?" 
+                    className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white min-h-[80px] focus:outline-none focus:border-[#D4AF37]/50" 
+                  />
+                </div>
+                
+                <button onClick={() => {
+                  if (preferredPartnerAgeRange[0] < 18) {
+                    alert("The minimum age for a partner must be 18 or older."); return;
+                  }
+                  if (preferredPartnerAgeRange[1] < preferredPartnerAgeRange[0]) {
+                    alert("The maximum age cannot be less than the minimum age."); return;
+                  }
+                  setStep(3);
+                }} disabled={idealPartnerTraits.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Proceed to Verification</button>
               </div>
             )}
 
-            {/* Back Button if subStep > 0 */}
             {subStep > 0 && (
               <button onClick={() => setSubStep(subStep - 1)} className="absolute top-6 left-6 text-gray-500 hover:text-white flex items-center gap-1 text-xs">
                 &larr; Back

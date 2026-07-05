@@ -1,4 +1,4 @@
-package com.knot.app
+package com.cleanconnect.knot
 
 import android.os.Build
 import android.os.Bundle

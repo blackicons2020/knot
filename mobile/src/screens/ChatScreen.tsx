@@ -135,9 +135,6 @@ export default function ChatScreen() {
           <Text style={s.headerSub}>Online</Text>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => navigation.navigate('VideoCall', { match, user })} style={{ marginRight: 16 }}>
-            <Ionicons name="videocam" size={24} color={Colors.primary} />
-          </TouchableOpacity>
           <TouchableOpacity onPress={handleOptions}>
             <Ionicons name="ellipsis-vertical" size={24} color={isDarkMode ? Colors.gray400 : Colors.gray600} />
           </TouchableOpacity>

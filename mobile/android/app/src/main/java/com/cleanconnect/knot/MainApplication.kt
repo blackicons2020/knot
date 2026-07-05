@@ -1,4 +1,4 @@
-package com.knot.app
+package com.cleanconnect.knot
 
 import android.app.Application
 import android.content.res.Configuration

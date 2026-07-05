@@ -140,9 +140,10 @@ export default function PaymentScreen() {
                 
                 // If purchase successful, verify the entitlement is active
                 const isPremiumActive = 
-                  customerInfo.entitlements.active['premium_tier'] !== undefined ||
-                  customerInfo.entitlements.active['elite_tier'] !== undefined ||
-                  customerInfo.entitlements.active['executive_tier'] !== undefined;
+                  customerInfo.entitlements.active['Premium'] !== undefined ||
+                  customerInfo.entitlements.active['Elite'] !== undefined ||
+                  customerInfo.entitlements.active['Executive'] !== undefined ||
+                  customerInfo.entitlements.active['premium_tier'] !== undefined;
                   
                 if (isPremiumActive) {
                   // Make backend call in real production, for now just update local state

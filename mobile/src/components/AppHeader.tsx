@@ -7,6 +7,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Colors, Spacing } from '../theme/colors';
 import KnotLogo from './KnotLogo';
 
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../contexts/AuthContext';
+
 const AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=128',
   'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=128',
@@ -16,6 +19,16 @@ const AVATARS = [
 export default function AppHeader({ onFilter }: { onFilter?: () => void }) {
   const insets = useSafeAreaInsets();
   const { isDarkMode, toggleTheme } = useTheme();
+  const navigation = useNavigation<any>();
+  const { userProfile } = useAuth();
+
+  const handleFilterPress = () => {
+    if (onFilter) {
+      onFilter();
+    } else if (userProfile) {
+      navigation.navigate('EditProfile', { user: userProfile });
+    }
+  };
 
   return (
     <View>
@@ -32,7 +45,7 @@ export default function AppHeader({ onFilter }: { onFilter?: () => void }) {
         <View style={st.headerLeft}>
           <KnotLogo size="md" />
           <View style={st.headerActions}>
-            <TouchableOpacity onPress={onFilter} style={st.headerBtn}>
+            <TouchableOpacity onPress={handleFilterPress} style={st.headerBtn}>
               <Ionicons name="options" size={18} color={Colors.gray400} />
             </TouchableOpacity>
             <TouchableOpacity onPress={toggleTheme} style={st.headerBtn}>

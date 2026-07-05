@@ -7,6 +7,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -100,6 +102,7 @@ export default function EditProfileScreen() {
   const { userProfile, setUserProfile, logout } = useAuth();
   const { isDarkMode } = useTheme();
   const { addToast } = useToast();
+  const insets = useSafeAreaInsets();
   const [form, setForm] = useState<User>(params.user);
   
   // Photos state
@@ -109,7 +112,7 @@ export default function EditProfileScreen() {
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
-      'Are you sure you want to permanently delete your account? This action cannot be undone.',
+      'Are you sure you want to permanently delete this account? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -117,10 +120,13 @@ export default function EditProfileScreen() {
           style: 'destructive', 
           onPress: async () => {
             try {
-              if (userProfile?.id) {
+              if (userProfile?.id === form.id) {
                 await db.deleteUser(userProfile.id);
+                logout();
+              } else {
+                await db.deleteUser(form.id);
+                navigation.goBack();
               }
-              logout();
             } catch (err: any) {
               addToast(err.message || 'Failed to delete account', 'error');
             }
@@ -143,6 +149,11 @@ export default function EditProfileScreen() {
     setDdVisible(true);
   }, []);
 
+  const [prefResCountryCustom, setPrefResCountryCustom] = useState('');
+  const [prefResStateCustom, setPrefResStateCustom] = useState('');
+  const [prefOriCountryCustom, setPrefOriCountryCustom] = useState('');
+  const [prefOriCustom, setPrefOriCustom] = useState('');
+
   const set = (key: keyof User, val: any) => {
     if (key === 'residenceCountry') setForm((p) => ({ ...p, residenceCountry: val, residenceState: '', residenceCity: '', country: val }));
     else if (key === 'residenceState') setForm((p) => ({ ...p, residenceState: val, residenceCity: '' }));
@@ -154,8 +165,25 @@ export default function EditProfileScreen() {
 
   const save = async () => {
     const updatedUser = { ...form, profileImageUrls: photos };
+    
+    if (updatedUser.preferredResidenceCountry === 'Enter Choice Country' && prefResCountryCustom) {
+      updatedUser.preferredResidenceCountry = prefResCountryCustom;
+    }
+    if (updatedUser.preferredResidenceState === 'Enter State/Province/Region' && prefResStateCustom) {
+      updatedUser.preferredResidenceState = prefResStateCustom;
+    }
+    if (updatedUser.preferredOriginCountry === 'Enter Choice Country' && prefOriCountryCustom) {
+      updatedUser.preferredOriginCountry = prefOriCountryCustom;
+    }
+    if (updatedUser.preferredOriginState === 'Enter Native Heritage' && prefOriCustom) {
+      updatedUser.preferredOriginState = prefOriCustom;
+    }
+
     await db.saveUser(updatedUser);
-    setUserProfile(updatedUser);
+    if (userProfile?.id === updatedUser.id) {
+      setUserProfile(updatedUser);
+    }
+    addToast('Profile updated.', 'success');
     navigation.goBack();
   };
 
@@ -304,11 +332,27 @@ export default function EditProfileScreen() {
               </TouchableOpacity>
             )}
             {uploading && (
-              <View style={[st.addCell, { borderColor: Colors.primary }]}>
-                <ActivityIndicator size="small" color={Colors.primary} />
-                <Text style={st.addText}>Uploading...</Text>
+              <View style={[st.addCell, { borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
+                <ActivityIndicator color={Colors.primary} />
               </View>
             )}
+          </View>
+        </GlassCard>
+
+        {/* ── Basic Info ── */}
+        <GlassCard>
+          <Text style={st.cardTitle}>Basic Info</Text>
+          <View style={{ marginBottom: 12 }}>
+            <Text style={labelStyle}>First Name</Text>
+            <TextInput style={inputStyle} value={form.firstName} onChangeText={(v) => set('firstName', v)} />
+          </View>
+          <View style={{ marginBottom: 12 }}>
+            <Text style={labelStyle}>Last Name</Text>
+            <TextInput style={inputStyle} value={form.lastName} onChangeText={(v) => set('lastName', v)} />
+          </View>
+          <View style={{ marginBottom: 12 }}>
+            <Text style={labelStyle}>Occupation</Text>
+            <TextInput style={inputStyle} value={form.occupation} onChangeText={(v) => set('occupation', v)} />
           </View>
         </GlassCard>
 
@@ -395,6 +439,36 @@ export default function EditProfileScreen() {
             </View>
           </View>
           <View style={{ marginBottom: 12 }}>
+            <Text style={[labelStyle, { marginBottom: 8, marginTop: 12 }]}>Intended Partners Residence</Text>
+            {renderSelect('Country', form.preferredResidenceCountry || '', ['Any Country', 'Enter Choice Country', ...COUNTRIES], (v) => set('preferredResidenceCountry', v))}
+            {form.preferredResidenceCountry === 'Enter Choice Country' && (
+              <TextInput style={[inputStyle, { marginTop: 8 }]} value={prefResCountryCustom} onChangeText={setPrefResCountryCustom} placeholder="Type choice country" placeholderTextColor={Colors.gray400} />
+            )}
+            
+            <View style={{ marginTop: 8 }}>
+              {renderSelect('State/Province/Region', form.preferredResidenceState || '', ['Any State/Province/Region', 'Enter State/Province/Region', ...(STATES_BY_COUNTRY[form.preferredResidenceCountry || ''] || [])], (v) => set('preferredResidenceState', v))}
+            </View>
+            {form.preferredResidenceState === 'Enter State/Province/Region' && (
+              <TextInput style={[inputStyle, { marginTop: 8 }]} value={prefResStateCustom} onChangeText={setPrefResStateCustom} placeholder="Type choice state/province/region" placeholderTextColor={Colors.gray400} />
+            )}
+          </View>
+
+          <View style={{ marginBottom: 12 }}>
+            <Text style={[labelStyle, { marginBottom: 8, marginTop: 12 }]}>Intended Native Heritage</Text>
+            {renderSelect('Country', form.preferredOriginCountry || '', ['Any Country', 'Enter Choice Country', ...COUNTRIES], (v) => set('preferredOriginCountry', v))}
+            {form.preferredOriginCountry === 'Enter Choice Country' && (
+              <TextInput style={[inputStyle, { marginTop: 8 }]} value={prefOriCountryCustom} onChangeText={setPrefOriCountryCustom} placeholder="Type choice country" placeholderTextColor={Colors.gray400} />
+            )}
+            
+            <View style={{ marginTop: 8 }}>
+              {renderSelect('Native Heritage', form.preferredOriginState || '', ['Any Heritage', 'Enter Native Heritage'], (v) => set('preferredOriginState', v))}
+            </View>
+            {form.preferredOriginState === 'Enter Native Heritage' && (
+              <TextInput style={[inputStyle, { marginTop: 8 }]} value={prefOriCustom} onChangeText={setPrefOriCustom} placeholder="e.g. Yoruba, Scottish, English, Catalan" placeholderTextColor={Colors.gray400} />
+            )}
+          </View>
+
+          <View style={{ marginBottom: 12 }}>
             <Text style={labelStyle}>Marriage Expectations</Text>
             <TextInput
               style={[inputStyle, { height: 100, textAlignVertical: 'top' }]}
@@ -406,17 +480,19 @@ export default function EditProfileScreen() {
             />
           </View>
         </GlassCard>
-      </ScrollView>
 
-      {/* Save button */}
-      <View style={[st.footer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white }]}>
-        <TouchableOpacity style={st.saveBtn} onPress={save}>
-          <Text style={st.saveBtnText}>Save Registry Updates</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={st.deleteBtn} onPress={handleDeleteAccount}>
-          <Text style={st.deleteBtnText}>Delete Account</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Save button moved inside ScrollView */}
+        <View style={[st.footer, { backgroundColor: 'transparent', paddingBottom: Math.max(insets.bottom, 24), paddingTop: 24, borderTopWidth: 0 }]}>
+          <TouchableOpacity style={st.gradientBtn} onPress={save}>
+            <LinearGradient colors={[Colors.primary, '#8C52FF']} start={{x:0, y:0}} end={{x:1, y:0}} style={st.gradientBtnContent}>
+              <Text style={st.gradientBtnText}>Save Registry Updates</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity style={st.deleteBtn} onPress={handleDeleteAccount}>
+            <Text style={st.deleteBtnText}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/* Searchable dropdown modal */}
       <DropdownModal
@@ -454,8 +530,9 @@ const st = StyleSheet.create({
   col: { flex: 1 },
 
   footer: { padding: Spacing.md, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
-  saveBtn: { backgroundColor: Colors.primary, paddingVertical: 18, borderRadius: 100, alignItems: 'center', shadowColor: Colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6, marginBottom: 12 },
-  saveBtnText: { color: Colors.white, fontSize: 14, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
+  gradientBtn: { borderRadius: 100, overflow: 'hidden', marginBottom: 12, shadowColor: Colors.primary, shadowOffset: {width:0, height:6}, shadowOpacity: 0.4, shadowRadius: 12, elevation: 8 },
+  gradientBtnContent: { paddingVertical: 18, alignItems: 'center', justifyContent: 'center' },
+  gradientBtnText: { color: Colors.white, fontSize: 15, fontWeight: '900', letterSpacing: 2, textTransform: 'uppercase' },
   deleteBtn: { paddingVertical: 18, borderRadius: 100, alignItems: 'center', borderWidth: 1, borderColor: '#ff4444' },
   deleteBtnText: { color: '#ff4444', fontSize: 14, fontWeight: '900', letterSpacing: 1, textTransform: 'uppercase' },
 

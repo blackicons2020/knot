@@ -45,6 +45,7 @@ export default function AppNavigator() {
         ) : userProfile?.role === 'ADMIN' ? (
           <>
             <Stack.Screen name="Admin" component={AdminScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen
               name="ProfileDetail"
               component={ProfileDetailScreen}

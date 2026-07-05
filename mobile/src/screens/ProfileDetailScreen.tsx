@@ -121,17 +121,14 @@ export default function ProfileDetailScreen() {
   };
 
   const isAdmin = userProfile?.role === 'ADMIN' || userProfile?.id === 'user_0';
-  const isRestricted = !isAdmin && (!userProfile?.isPremium || !match.isPremium);
   const bothDisabled = userProfile?.isPremium === true && !match.isPremium;
+
+  const locationDisplay = match.residenceCity && match.residenceState
+    ? `${match.residenceCity}, ${match.residenceState}, ${match.residenceCountry}`
+    : match.residenceCountry || '';
 
   const nextPhoto = () => setPhotoIdx((i) => Math.min(i + 1, photos.length - 1));
   const prevPhoto = () => setPhotoIdx((i) => Math.max(i - 1, 0));
-
-  const locationDisplay = isRestricted
-    ? (match.residenceCountry || match.country || 'Hidden Location')
-    : (match.residenceCity && match.residenceCountry
-        ? `${match.residenceCity}, ${match.residenceCountry}`
-        : `${match.city || ''}, ${match.country || ''}`.replace(/^, |, $/g, ''));
 
   return (
     <View style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.white }]}>
@@ -190,34 +187,7 @@ export default function ProfileDetailScreen() {
           <Text style={st.location}>{locationDisplay.toUpperCase()}</Text>
         </View>
 
-        {/* ─── Restricted banner ─── */}
-        {isRestricted && (
-          <View style={[st.restrictedBox, {
-            backgroundColor: isDarkMode ? Colors.darkSurface : Colors.light + '80',
-            borderColor: isDarkMode ? Colors.darkBorder : 'rgba(74,13,103,0.1)',
-          }]}>
-            <Text style={st.restrictedTitle}>Subscription Required</Text>
-            <Text style={[st.restrictedBody, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-              {!userProfile?.isPremium
-                ? 'Subscribe to view full contact details and interact with this user.'
-                : 'This user is not a subscriber. Contact details are restricted.'}
-            </Text>
-            {!userProfile?.isPremium && (
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Payment', { user: userProfile! })}
-              >
-                <LinearGradient
-                  colors={[Colors.primary, '#8C52FF']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={st.upgradeBtn}
-                >
-                  <Text style={st.upgradeBtnText}>Upgrade Now</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
+
 
         {/* ─── Profile content sections ─── */}
         <View style={st.content}>
@@ -296,8 +266,8 @@ export default function ProfileDetailScreen() {
             <Text style={[st.locationLabel, { color: isDarkMode ? Colors.accent : Colors.primary }]}>Current Residence</Text>
             <View style={st.row3}>
               <View style={st.col3}><DataItem label="Country" value={match.residenceCountry} isDark={isDarkMode} /></View>
-              <View style={st.col3}><DataItem label="State" value={isRestricted ? '••••••' : match.residenceState} isDark={isDarkMode} /></View>
-              <View style={st.col3}><DataItem label="City" value={isRestricted ? '••••••' : match.residenceCity} isDark={isDarkMode} /></View>
+              <View style={st.col3}><DataItem label="State" value={match.residenceState} isDark={isDarkMode} /></View>
+              <View style={st.col3}><DataItem label="City" value={match.residenceCity} isDark={isDarkMode} /></View>
             </View>
 
             <Divider isDark={isDarkMode} />
@@ -305,8 +275,8 @@ export default function ProfileDetailScreen() {
             <Text style={[st.locationLabel, { color: isDarkMode ? Colors.accent : Colors.primary }]}>Heritage & Origin</Text>
             <View style={st.row3}>
               <View style={st.col3}><DataItem label="Country" value={match.originCountry} isDark={isDarkMode} /></View>
-              <View style={st.col3}><DataItem label="State" value={isRestricted ? '••••••' : match.originState} isDark={isDarkMode} /></View>
-              <View style={st.col3}><DataItem label="City" value={isRestricted ? '••••••' : match.originCity} isDark={isDarkMode} /></View>
+              <View style={st.col3}><DataItem label="State" value={match.originState} isDark={isDarkMode} /></View>
+              <View style={st.col3}><DataItem label="City" value={match.originCity} isDark={isDarkMode} /></View>
             </View>
             <DataItem label="Cultural Identity" value={match.culturalBackground} isDark={isDarkMode} />
           </View>
@@ -334,7 +304,6 @@ export default function ProfileDetailScreen() {
 
 
           <Divider isDark={isDarkMode} />
-
           {/* ══ MARRIAGE EXPECTATIONS ══ */}
           <SectionHeader title="Marriage Expectations" isDark={isDarkMode} />
 
@@ -352,6 +321,14 @@ export default function ProfileDetailScreen() {
                   : undefined}
                 isDark={isDarkMode}
               />
+            </View>
+          </View>
+          
+          <View style={[st.dataItem, { marginTop: 8, marginBottom: 16, backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : Colors.gray50, padding: 12, borderRadius: 12 }]}>
+            <Text style={[st.locationLabel, { color: isDarkMode ? Colors.accent : Colors.primary, marginBottom: 8 }]}>Preferred Partner Origin & Residence</Text>
+            <DataItem label="Target Residence" value={[match.preferredResidenceCity, match.preferredResidenceState, match.preferredResidenceCountry].filter(Boolean).join(', ') || 'Anywhere'} isDark={isDarkMode} />
+            <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: isDarkMode ? Colors.darkBorder : Colors.gray200, paddingTop: 8 }}>
+              <DataItem label="Target Heritage / Origin" value={[match.preferredOriginCity, match.preferredOriginState, match.preferredOriginCountry].filter(Boolean).join(', ') || 'Any Background'} isDark={isDarkMode} />
             </View>
           </View>
 

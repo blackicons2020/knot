@@ -221,6 +221,10 @@ export default function OnboardingScreen() {
   const [religionCustom, setReligionCustom] = useState('');
   const [languageCustom, setLanguageCustom] = useState('');
   const [traitCustom, setTraitCustom] = useState('');
+  const [prefResCountryCustom, setPrefResCountryCustom] = useState('');
+  const [prefResStateCustom, setPrefResStateCustom] = useState('');
+  const [prefOriCountryCustom, setPrefOriCountryCustom] = useState('');
+  const [prefOriCustom, setPrefOriCustom] = useState('');
 
   // Gold Archetype Results
   const archetype = {
@@ -267,12 +271,18 @@ export default function OnboardingScreen() {
     outputRange: ['5%', '95%'],
   });
 
+
+
   const set = (key: keyof User, val: any) => setForm((p) => ({ ...p, [key]: val }));
   const setResCountry = (v: string) => setForm((p) => ({ ...p, residenceCountry: v, residenceState: '', residenceCity: '', country: v }));
   const setResState = (v: string) => setForm((p) => ({ ...p, residenceState: v, residenceCity: '' }));
   const setResCity = (v: string) => setForm((p) => ({ ...p, residenceCity: v, city: v }));
   const setOriCountry = (v: string) => setForm((p) => ({ ...p, originCountry: v, originState: '', originCity: '' }));
   const setOriState = (v: string) => setForm((p) => ({ ...p, originState: v, originCity: '' }));
+  const setPrefResCountry = (v: string) => setForm((p) => ({ ...p, preferredResidenceCountry: v, preferredResidenceState: '', preferredResidenceCity: '' }));
+  const setPrefResState = (v: string) => setForm((p) => ({ ...p, preferredResidenceState: v, preferredResidenceCity: '' }));
+  const setPrefOriCountry = (v: string) => setForm((p) => ({ ...p, preferredOriginCountry: v, preferredOriginState: '', preferredOriginCity: '' }));
+  const setPrefOriState = (v: string) => setForm((p) => ({ ...p, preferredOriginState: v, preferredOriginCity: '' }));
 
   const pickImage = async (type: 'selfie' | 'id') => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -522,14 +532,14 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderLocationGroup = (prefix: 'residence' | 'origin', title: string) => {
-    const countryVal = prefix === 'residence' ? form.residenceCountry : form.originCountry;
-    const stateVal = prefix === 'residence' ? form.residenceState : form.originState;
-    const cityVal = prefix === 'residence' ? form.residenceCity : form.originCity;
-    const states = STATES_BY_COUNTRY[countryVal] || [];
-    const setCountry = prefix === 'residence' ? setResCountry : setOriCountry;
-    const setState = prefix === 'residence' ? setResState : setOriState;
-    const setCity = prefix === 'residence' ? setResCity : (v: string) => set('originCity', v);
+  const renderLocationGroup = (prefix: 'residence' | 'origin' | 'preferredResidence' | 'preferredOrigin', title: string) => {
+    const countryVal = prefix === 'residence' ? form.residenceCountry : prefix === 'origin' ? form.originCountry : prefix === 'preferredResidence' ? form.preferredResidenceCountry : form.preferredOriginCountry;
+    const stateVal = prefix === 'residence' ? form.residenceState : prefix === 'origin' ? form.originState : prefix === 'preferredResidence' ? form.preferredResidenceState : form.preferredOriginState;
+    const cityVal = prefix === 'residence' ? form.residenceCity : prefix === 'origin' ? form.originCity : prefix === 'preferredResidence' ? form.preferredResidenceCity : form.preferredOriginCity;
+    const states = STATES_BY_COUNTRY[countryVal || ''] || [];
+    const setCountry = prefix === 'residence' ? setResCountry : prefix === 'origin' ? setOriCountry : prefix === 'preferredResidence' ? setPrefResCountry : setPrefOriCountry;
+    const setState = prefix === 'residence' ? setResState : prefix === 'origin' ? setOriState : prefix === 'preferredResidence' ? setPrefResState : setPrefOriState;
+    const setCity = prefix === 'residence' ? setResCity : prefix === 'origin' ? (v: string) => set('originCity', v) : prefix === 'preferredResidence' ? (v: string) => set('preferredResidenceCity', v) : (v: string) => set('preferredOriginCity', v);
 
     return (
       <View style={{ marginTop: 16 }}>
@@ -565,6 +575,77 @@ export default function OnboardingScreen() {
     );
   };
 
+  const renderPartnerResidenceGroup = () => {
+    const countryOptions = ['Any Country', 'Enter Choice Country', ...COUNTRIES];
+    const states = STATES_BY_COUNTRY[form.preferredResidenceCountry || ''] || [];
+    const stateOptions = ['Any State/Province/Region', 'Enter State/Province/Region', ...states];
+
+    return (
+      <View style={{ marginTop: 16 }}>
+        {renderDropdownField('Country', form.preferredResidenceCountry, 'Select country', countryOptions, setPrefResCountry)}
+        {form.preferredResidenceCountry === 'Enter Choice Country' && (
+          <View style={{ marginBottom: 12 }}>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+              value={prefResCountryCustom}
+              onChangeText={setPrefResCountryCustom}
+              placeholder="Type your choice country"
+              placeholderTextColor={Colors.gray400}
+            />
+          </View>
+        )}
+        
+        {renderDropdownField('State / Province / Region', form.preferredResidenceState, 'Select state / province', stateOptions, setPrefResState)}
+        {form.preferredResidenceState === 'Enter State/Province/Region' && (
+          <View style={{ marginBottom: 12 }}>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+              value={prefResStateCustom}
+              onChangeText={setPrefResStateCustom}
+              placeholder="Type your choice state/province/region"
+              placeholderTextColor={Colors.gray400}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderPartnerHeritageGroup = () => {
+    const countryOptions = ['Any Country', 'Enter Choice Country', ...COUNTRIES];
+    const heritageOptions = ['Any Heritage', 'Enter Native Heritage'];
+
+    return (
+      <View style={{ marginTop: 16 }}>
+        {renderDropdownField('Country', form.preferredOriginCountry, 'Select Country', countryOptions, setPrefOriCountry)}
+        {form.preferredOriginCountry === 'Enter Choice Country' && (
+          <View style={{ marginBottom: 12 }}>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+              value={prefOriCountryCustom}
+              onChangeText={setPrefOriCountryCustom}
+              placeholder="Type your choice country"
+              placeholderTextColor={Colors.gray400}
+            />
+          </View>
+        )}
+
+        {renderDropdownField('Native Heritage', form.preferredOriginState, 'Select Native Heritage', heritageOptions, setPrefOriState)}
+        {form.preferredOriginState === 'Enter Native Heritage' && (
+          <View style={{ marginBottom: 12 }}>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}
+              value={prefOriCustom}
+              onChangeText={setPrefOriCustom}
+              placeholder="e.g. Yoruba, Scottish, English, Catalan"
+              placeholderTextColor={Colors.gray400}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
+
   const bgStyle = { backgroundColor: isDarkMode ? Colors.dark : Colors.white };
   const textStyle = { color: isDarkMode ? Colors.white : Colors.dark };
 
@@ -574,18 +655,25 @@ export default function OnboardingScreen() {
       {step <= 3 && (
         <View style={[styles.headerRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {((step === 2 && subStep > 0) || step === 3) && (
+            {((step === 1) || (step === 2) || (step === 3)) && (
               <TouchableOpacity 
                 onPress={() => {
                   if (step === 3) {
                     setStep(2);
-                    setSubStep(10); // Return to Ideal Partner Traits
-                  } else {
-                    setSubStep(s => {
-                      let prev = s - 1;
-                      if (prev === 3 && form.email) prev = 2;
-                      return prev;
-                    });
+                    setSubStep(13); // Return to Ideal Partner Traits
+                  } else if (step === 2) {
+                    if (subStep === 0) {
+                      setStep(1); // Go back to Cinematic Setup
+                    } else {
+                      setSubStep(s => {
+                        let prev = s - 1;
+                        if (prev === 3 && form.email) prev = 2;
+                        return prev;
+                      });
+                    }
+                  } else if (step === 1) {
+                    // Back arrow on first screen logs user out to Auth screen
+                    logout();
                   }
                 }} 
                 style={{ marginRight: 16 }}
@@ -606,7 +694,16 @@ export default function OnboardingScreen() {
 
 
           <View style={{ alignItems: 'flex-end' }}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+            <TouchableOpacity onPress={() => {
+              Alert.alert(
+                "Exit Setup",
+                "Are you sure you want to stop the onboarding process? You will need to log in again.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Exit", style: "destructive", onPress: logout }
+                ]
+              );
+            }} style={styles.closeBtn}>
               <Ionicons name="close" size={24} color={Colors.gray400} />
             </TouchableOpacity>
             <Text style={styles.stepCounter}>Step {step} of 6</Text>
@@ -683,7 +780,13 @@ export default function OnboardingScreen() {
                     <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.lastName} onChangeText={(v) => set('lastName', v)} placeholder="Last Name" placeholderTextColor={Colors.gray400} />
                   </View>
                 </View>
-                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.firstName || !form.lastName) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.firstName || !form.lastName}>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.firstName || !form.lastName) ? 0.5 : 1 }]} onPress={() => {
+                  if (!form.firstName?.trim() || !form.lastName?.trim()) {
+                    Alert.alert('Validation Error', 'Please enter your real first and last name.');
+                    return;
+                  }
+                  nextSubStep();
+                }} disabled={!form.firstName || !form.lastName}>
                   <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
                   <Text style={styles.actionButtonText}>Next</Text>
                   <Ionicons name="arrow-forward" size={18} color={Colors.white} />
@@ -723,7 +826,22 @@ export default function OnboardingScreen() {
                     <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.occupation} onChangeText={(v) => set('occupation', v)} placeholder="e.g. Software Engineer" placeholderTextColor={Colors.gray400} />
                   </View>
                 </View>
-                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.dateOfBirth || !form.occupation) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.dateOfBirth || !form.occupation}>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.dateOfBirth || !form.occupation) ? 0.5 : 1 }]} onPress={() => {
+                  if (!form.occupation?.trim()) {
+                    Alert.alert('Validation Error', 'Please enter a valid occupation.');
+                    return;
+                  }
+                  if (form.dateOfBirth) {
+                    const dobDate = new Date(form.dateOfBirth);
+                    const diff = Date.now() - dobDate.getTime();
+                    const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+                    if (age < 18) {
+                      Alert.alert('Invalid Age', 'You must be at least 18 years old.');
+                      return;
+                    }
+                  }
+                  nextSubStep();
+                }} disabled={!form.dateOfBirth || !form.occupation}>
                   <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
                   <Text style={styles.actionButtonText}>Next</Text>
                   <Ionicons name="arrow-forward" size={18} color={Colors.white} />
@@ -738,7 +856,13 @@ export default function OnboardingScreen() {
                   <Text style={styles.label}>Email Address</Text>
                   <TextInput style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900 }]} value={form.email} onChangeText={(v) => set('email', v)} placeholder="name@email.com" placeholderTextColor={Colors.gray400} autoCapitalize="none" />
                 </View>
-                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.email) ? 0.5 : 1 }]} onPress={nextSubStep} disabled={!form.email}>
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.email) ? 0.5 : 1 }]} onPress={() => {
+                  if (!form.email?.includes('@') || !form.email?.includes('.')) {
+                    Alert.alert('Validation Error', 'Please enter a valid email address.');
+                    return;
+                  }
+                  nextSubStep();
+                }} disabled={!form.email}>
                   <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
                   <Text style={styles.actionButtonText}>Next</Text>
                   <Ionicons name="arrow-forward" size={18} color={Colors.white} />
@@ -793,6 +917,64 @@ export default function OnboardingScreen() {
 
             {subStep === 7 && (
               <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Intended Partners Residence</Text>
+                <Text style={{ color: Colors.gray400, marginBottom: 16 }}>Where do you ideally want your partner to be living?</Text>
+                {renderPartnerResidenceGroup()}
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.preferredResidenceCountry) ? 0.5 : 1 }]} onPress={() => {
+                  if (form.preferredResidenceCountry === 'Enter Choice Country' && !prefResCountryCustom.trim()) {
+                    Alert.alert('Missing Information', 'Please type your choice country.');
+                    return;
+                  }
+                  if (form.preferredResidenceState === 'Enter State/Province/Region' && !prefResStateCustom.trim()) {
+                    Alert.alert('Missing Information', 'Please type your choice state/province/region.');
+                    return;
+                  }
+                  if (form.preferredResidenceCountry === 'Enter Choice Country' && prefResCountryCustom) {
+                    setForm(p => ({ ...p, preferredResidenceCountry: prefResCountryCustom }));
+                  }
+                  if (form.preferredResidenceState === 'Enter State/Province/Region' && prefResStateCustom) {
+                    setForm(p => ({ ...p, preferredResidenceState: prefResStateCustom }));
+                  }
+                  nextSubStep();
+                }} disabled={!form.preferredResidenceCountry}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 8 && (
+              <View>
+                <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Native Heritage</Text>
+                <Text style={{ color: Colors.gray400, marginBottom: 16 }}>What is your preferred cultural background or origin for a partner?</Text>
+                {renderPartnerHeritageGroup()}
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (!form.preferredOriginCountry) ? 0.5 : 1 }]} onPress={() => {
+                  if (form.preferredOriginCountry === 'Enter Choice Country' && !prefOriCountryCustom.trim()) {
+                    Alert.alert('Missing Information', 'Please type your choice country.');
+                    return;
+                  }
+                  if (form.preferredOriginState === 'Enter Native Heritage' && !prefOriCustom.trim()) {
+                    Alert.alert('Missing Information', 'Please type your choice native heritage.');
+                    return;
+                  }
+                  if (form.preferredOriginCountry === 'Enter Choice Country' && prefOriCountryCustom) {
+                    setForm(p => ({ ...p, preferredOriginCountry: prefOriCountryCustom }));
+                  }
+                  if (form.preferredOriginState === 'Enter Native Heritage' && prefOriCustom) {
+                    setForm(p => ({ ...p, preferredOriginState: prefOriCustom }));
+                  }
+                  nextSubStep();
+                }} disabled={!form.preferredOriginCountry}>
+                  <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
+                  <Text style={styles.actionButtonText}>Next</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {subStep === 9 && (
+              <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Languages</Text>
                 <View style={{ gap: 16 }}>
                   {renderMultiDropdownField('Languages Spoken', form.languagesSpoken || [], 'Select languages', ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic', 'Portuguese', 'Yoruba', 'Igbo', 'Hausa', 'Swahili', 'Chinese', 'Other'], (v) => set('languagesSpoken', v))}
@@ -808,7 +990,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {subStep === 8 && (
+            {subStep === 10 && (
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Lifestyle Habits</Text>
                 <View style={{ gap: 16 }}>
@@ -824,7 +1006,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {subStep === 9 && (
+            {subStep === 11 && (
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Future Plans</Text>
                 <View style={{ gap: 16 }}>
@@ -840,7 +1022,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {subStep === 10 && (
+            {subStep === 12 && (
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Family Goals</Text>
                 <View style={{ gap: 16 }}>
@@ -854,7 +1036,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {subStep === 11 && (
+            {subStep === 13 && (
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Ideal Partner Traits</Text>
                 <View style={{ gap: 16 }}>

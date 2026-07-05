@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert,
+  Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -126,8 +126,11 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
               <View style={st.userInfoText}>
-                <Text style={st.userName}>{userProfile.name}, {userProfile.age}</Text>
-                <Text style={st.userLocation}>{userProfile.occupation} • {locationText}</Text>
+                <Text style={st.userName}>
+                  {userProfile.name || [userProfile.firstName, userProfile.lastName].filter(Boolean).join(' ') || 'User'}
+                  {userProfile.age || userProfile.dateOfBirth ? `, ${userProfile.age || (new Date().getFullYear() - new Date(userProfile.dateOfBirth!).getFullYear())}` : ''}
+                </Text>
+                <Text style={st.userLocation}>{userProfile.occupation || 'Member'} • {locationText}</Text>
                 {userProfile.isVerified && (
                   <View style={st.verifiedBadge}>
                     <Text style={st.verifiedBadgeText}>Verified Registry Member</Text>
@@ -293,6 +296,18 @@ export default function ProfileScreen() {
           </GlassCard>
 
           <GlassCard style={[st.gridItemFull, { marginBottom: 16 }]}>
+            <Text style={st.cardSectionTitle}>Preferred Partner Origin & Residence</Text>
+            
+            <View style={{ marginBottom: 12 }}>
+              <DataItem label="Target Residence" value={[userProfile.preferredResidenceCity, userProfile.preferredResidenceState, userProfile.preferredResidenceCountry].filter(Boolean).join(', ') || 'Anywhere'} />
+            </View>
+            <View style={st.divider} />
+            <View style={{ marginTop: 12 }}>
+              <DataItem label="Target Heritage / Origin" value={[userProfile.preferredOriginCity, userProfile.preferredOriginState, userProfile.preferredOriginCountry].filter(Boolean).join(', ') || 'Any Background'} />
+            </View>
+          </GlassCard>
+
+          <GlassCard style={[st.gridItemFull, { marginBottom: 16 }]}>
             <DataItem label="Registry Expectations" value={userProfile.marriageExpectations} />
           </GlassCard>
 
@@ -343,6 +358,10 @@ export default function ProfileScreen() {
             <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })} style={st.planRow}>
               <Text style={st.planLabel}>Privacy Policy</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Linking.openURL('mailto:cleanconnectng@gmail.com')} style={[st.planRow, { borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', paddingTop: 12, marginTop: 12 }]}>
+              <Text style={st.planLabel}>Contact Support</Text>
+              <Ionicons name="mail-outline" size={16} color={Colors.gray400} />
             </TouchableOpacity>
           </GlassCard>
         </View>

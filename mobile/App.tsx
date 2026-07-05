@@ -8,7 +8,9 @@ import { ToastProvider } from './src/contexts/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 import Purchases from 'react-native-purchases';
-import { Platform } from 'react-native';
+import { Platform, LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['[RevenueCat]']);
 
 function AppContent() {
   const { isDarkMode } = useTheme();

@@ -178,9 +178,14 @@ export default function AdminScreen() {
                     </View>
                     <Text style={s.memberOcc}>{item.occupation}</Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ padding: 8, backgroundColor: '#EF44442A', borderRadius: 12 }}>
-                    <Ionicons name="trash" size={18} color="#ef4444" />
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('EditProfile', { user: item })} style={{ padding: 8, backgroundColor: '#3B82F62A', borderRadius: 12 }}>
+                      <Ionicons name="pencil" size={18} color="#3b82f6" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ padding: 8, backgroundColor: '#EF44442A', borderRadius: 12 }}>
+                      <Ionicons name="trash" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </TouchableOpacity>
             );
