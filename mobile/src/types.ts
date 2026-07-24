@@ -11,7 +11,7 @@ export type RootStackParamList = {
   ManagePhotos: { user: User };
   Payment: { user: User };
   Admin: undefined;
-  Legal: { type: 'tos' | 'privacy' };
+  Legal: { type: 'tos' | 'privacy' | 'community' };
 };
 
 export type TabParamList = {

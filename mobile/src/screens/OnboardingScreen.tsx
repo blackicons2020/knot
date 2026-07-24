@@ -44,6 +44,8 @@ export default function OnboardingScreen() {
   // 4: AI Liveness & Biometric Verification Scan
   // 5: Relationship Certificate Reveal
   const [step, setStep] = useState(1);
+  const [profilePictureSkipped, setProfilePictureSkipped] = useState(false);
+  const [verificationSkipped, setVerificationSkipped] = useState(false);
   const totalSteps = 6;
   const [subStep, setSubStep] = useState(0);
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -366,7 +368,7 @@ export default function OnboardingScreen() {
   };
 
   const handleProcessAIVerification = async () => {
-    setStep(4);
+    setStep(7);
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
@@ -430,7 +432,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4); // Approval
             setTimeout(() => {
-              setStep(5); // Go to Interview next!
+              setStep(7); // Go to Interview next!
             }, 1200);
           }, 1500);
         }, 1500);
@@ -447,7 +449,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4);
             setTimeout(() => {
-              setStep(5);
+              setStep(7);
             }, 1200);
           }, 1500);
         }, 1500);
@@ -1010,7 +1012,7 @@ export default function OnboardingScreen() {
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Future Plans</Text>
                 <View style={{ gap: 16 }}>
-                  {renderDropdownField('Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
+                  {renderDropdownField('Future Partners Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
                   {renderDropdownField('Vow Timeline', form.marriageTimeline, 'Timeline', ['ASAP', '1-2 years', '3+ years', 'Not sure'], (v) => set('marriageTimeline', v))}
                   {renderDropdownField('Relocation', form.willingToRelocate, 'Relocate', Object.values(WillingToRelocate), (v) => set('willingToRelocate', v))}
                 </View>
@@ -1118,13 +1120,14 @@ export default function OnboardingScreen() {
           </Animated.View>
         )}
 
-        {/* Step 3: Identity Verification Uploads */}
+        
+        {/* Step 3: Profile Picture Upload */}
         {step === 3 && (
           <View style={styles.formContainer}>
-            <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24, textAlign: 'center' }]}>Identity & Trust Verification</Text>
+            <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24, textAlign: 'center' }]}>Profile Picture</Text>
+            <Text style={{ color: Colors.gray400, textAlign: 'center', marginBottom: 24 }}>Upload a clear, recent photo of yourself</Text>
             
             <View style={styles.uploadSection}>
-              <Text style={styles.label}>PROFILE PICTURE</Text>
               <View style={[styles.uploadBox, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.gray50, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>
                 <View style={styles.uploadAvatar}>
                   {form.profileImageUrls?.length > 0 ? (
@@ -1142,6 +1145,28 @@ export default function OnboardingScreen() {
                 </View>
               </View>
             </View>
+
+            <TouchableOpacity style={{ marginTop: 24, opacity: (!form.profileImageUrls?.length) ? 0.4 : 1 }} onPress={() => setStep(4)} disabled={!form.profileImageUrls?.length}>
+              <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionButton}>
+                <Text style={styles.actionButtonText}>Upload & Continue</Text>
+                <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+              </LinearGradient>
+            </TouchableOpacity>
+            
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <TouchableOpacity onPress={() => { setProfilePictureSkipped(true); setStep(4); }}>
+                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
+              </TouchableOpacity>
+              <Text style={{ color: '#ef4444', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until a picture is uploaded.</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Step 4: Identity & Trust Verification */}
+        {step === 4 && (
+          <View style={styles.formContainer}>
+            <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24, textAlign: 'center' }]}>Identity & Trust Verification</Text>
+            <Text style={{ color: Colors.gray400, textAlign: 'center', marginBottom: 24 }}>Help us keep the community safe</Text>
 
             <View style={styles.uploadSection}>
               <Text style={styles.label}>SELFIE SCAN FOR VERIFICATION</Text>
@@ -1190,16 +1215,24 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            <TouchableOpacity style={{ marginTop: 24, opacity: (!form.profileImageUrls?.length || !livenessUri || !govIdUri) ? 0.4 : 1 }} onPress={handleProcessAIVerification} disabled={!form.profileImageUrls?.length || !livenessUri || !govIdUri}>
+            <TouchableOpacity style={{ marginTop: 24, opacity: (!livenessUri || !govIdUri) ? 0.4 : 1 }} onPress={handleProcessAIVerification} disabled={!livenessUri || !govIdUri}>
               <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionButton}>
                 <Text style={styles.actionButtonText}>Verify Identity & Documents</Text>
                 <Ionicons name="arrow-forward" size={18} color={Colors.white} />
               </LinearGradient>
             </TouchableOpacity>
+            
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <TouchableOpacity onPress={() => { setVerificationSkipped(true); setStep(6); }}>
+                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
+              </TouchableOpacity>
+              <Text style={{ color: '#ef4444', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until verification is done.</Text>
+            </View>
           </View>
         )}
+
 {/* Step 4: Conversational AI Interview */}
-        {step === 5 && (
+        {step === 6 && (
           <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
             <View style={[styles.chatHeader, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
               <View style={[styles.botAvatar, { backgroundColor: Colors.accent + '1A', borderColor: Colors.accent + '2B' }]}>
@@ -1247,7 +1280,7 @@ export default function OnboardingScreen() {
                 placeholderTextColor={Colors.gray400}
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === '' ? (
-                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(6)}>
+                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(7)}>
                   <Text style={styles.analyzeBtnText}>Generate Registry</Text>
                   <Ionicons name="sparkles" size={14} color={Colors.white} />
                 </TouchableOpacity>
@@ -1261,7 +1294,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 4: Futuristic AI Identity & Biometric Match Scanner */}
-        {step === 4 && (
+        {step === 5 && !verificationSkipped && (
           <View style={[styles.scannerContainer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent + '33' }]}>
             <Text style={[styles.scannerTitle, textStyle]}>AI Biometric Liveness & ID Match</Text>
             <Text style={styles.scannerSubtitle}>Secure Verification Session In Progress</Text>
@@ -1356,7 +1389,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 5: Digital Relationship Certificate Reveal */}
-        {step === 6 && (
+        {step === 7 && (
           <View style={styles.certificateContainer}>
             <View style={[styles.certCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent }]}>
               

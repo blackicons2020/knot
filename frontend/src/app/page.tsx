@@ -387,9 +387,9 @@ export default function Home() {
             <span className="text-xs">© 2026 KNOT AI Relationship Systems.</span>
           </div>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-400">
-            <Link href="#" className="hover:text-[#D4AF37] transition-colors">Privacy Charter</Link>
-            <Link href="#" className="hover:text-[#D4AF37] transition-colors">Commitment Pledge</Link>
-            <Link href="#" className="hover:text-[#D4AF37] transition-colors">Trust & Safety Guidelines</Link>
+            <Link href="/terms" className="hover:text-[#D4AF37] transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-[#D4AF37] transition-colors">Privacy Policy</Link>
+            <Link href="/community-guidelines" className="hover:text-[#D4AF37] transition-colors">Community Guidelines & Safety Standards</Link>
           </div>
         </div>
       </footer>

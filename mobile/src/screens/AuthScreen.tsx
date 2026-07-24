@@ -77,7 +77,7 @@ export default function AuthScreen() {
           {isLogin ? 'Welcome Back' : 'Join the Registry'}
         </Text>
         <Text style={[styles.subheadline, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-          Fraud-Proof AI Matching High-Trust
+          Relationships that lead to vows
         </Text>
 
         {/* Google Sign-in temporarily disabled

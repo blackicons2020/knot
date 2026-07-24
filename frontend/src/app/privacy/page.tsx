@@ -1,237 +1,178 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-[#0A0D14] text-white p-8 md:p-16 font-sans">
       <div className="max-w-4xl mx-auto bg-[#121721] p-8 md:p-12 rounded-2xl shadow-xl border border-[#2A3143]">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#D4AF37] transition-colors mb-8">
+          <span>←</span> Back to Home
+        </Link>
         <h1 className="text-3xl md:text-5xl font-bold text-[#D4AF37] mb-4 text-center">
-          Privacy Policy & Community Guidelines
+          Privacy Policy
         </h1>
-        <p className="text-center text-gray-500 mb-12">Last Updated: July 3, 2026</p>
+        <p className="text-center text-gray-500 mb-12">Last Updated: July 17, 2026</p>
 
         <div className="space-y-10 text-gray-300 leading-relaxed">
-          
-          {/* SECTION 1: PRIVACY POLICY */}
-          <div>
-            <h2 className="text-2xl font-bold text-white border-b border-[#2A3143] pb-2 mb-4">Part 1: Privacy Policy</h2>
-            
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">1. Introduction</h3>
-              <p className="mb-2">Welcome to Knot, operated by Clean Connect ("we," "our," or "us"). We are committed to protecting your privacy and handling your personal information responsibly.</p>
-              <p className="mb-2">This Privacy Policy explains how we collect, use, store, disclose, and protect your information when you use the Knot mobile application, website, and related services.</p>
-              <p>By using Knot, you agree to the practices described in this Privacy Policy.</p>
-            </section>
+          <p>Knot (&quot;Knot,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is a matchmaking and relationship platform operated by Clean Connect (&quot;Company&quot;).</p>
+          <p>This Privacy Policy explains how we collect, use, disclose, store, protect, and otherwise process personal information when you use the Knot mobile application, website, and related services (collectively, the &quot;Services&quot;).</p>
+          <p>By using Knot, you acknowledge that you have read and understood this Privacy Policy.</p>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">2. Information We Collect</h3>
-              <h4 className="font-semibold text-white mt-4 mb-2">Personal Information</h4>
-              <p className="mb-2">We may collect:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Full name</li><li>Email address</li><li>Phone number</li><li>Date of birth</li><li>Gender</li><li>Profile information</li><li>Interests and preferences</li>
-              </ul>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">1. Information We Collect</h3>
+            <p className="mb-2">The information we collect depends on how you use the Services.</p>
 
-              <h4 className="font-semibold text-white mt-4 mb-2">Identity Verification</h4>
-              <p className="mb-2">To maintain a trusted community, we may collect:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Government-issued identification</li><li>Selfie verification</li><li>Profile photographs</li>
-              </ul>
-              <p className="text-sm italic mb-4">Identity verification information is used solely for safety, fraud prevention, and account verification.</p>
+            <h4 className="font-semibold text-white mt-4 mb-2">1.1 Account and Registration Information</h4>
+            <p className="mb-2">When you create an account, we may collect:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Name or display name</li><li>Email address</li><li>Telephone number</li><li>Password or authentication credentials</li><li>Date of birth or age information</li><li>Gender and relationship preferences</li><li>Account identifiers</li><li>Login and authentication information</li>
+            </ul>
+            <p className="mb-4">You are responsible for ensuring that the information you provide is accurate and truthful.</p>
 
-              <h4 className="font-semibold text-white mt-4 mb-2">Usage Information</h4>
-              <p className="mb-2">We automatically collect:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Device information</li><li>IP address</li><li>Operating system</li><li>App activity</li><li>Log files</li><li>Crash reports</li><li>Chat moderation data used for safety purposes</li>
-              </ul>
+            <h4 className="font-semibold text-white mt-4 mb-2">1.2 Profile Information</h4>
+            <p className="mb-2">You may voluntarily provide information for your Knot profile, including:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Profile photographs</li><li>Biography and personal description</li><li>Location or general area</li><li>Education</li><li>Profession or occupation</li><li>Interests and hobbies</li><li>Relationship preferences</li><li>Lifestyle preferences</li><li>Religious or cultural information, where voluntarily provided</li><li>Other information you choose to include in your profile</li>
+            </ul>
+            <p className="mb-4">Some information may be visible to other users depending on your privacy settings and the functionality of the Services.</p>
 
-              <h4 className="font-semibold text-white mt-4 mb-2">Location Information</h4>
-              <p>If you grant permission, we may collect approximate or precise location information to improve matchmaking and location-based features.</p>
-            </section>
+            <h4 className="font-semibold text-white mt-4 mb-2">1.3 Identity Verification Information</h4>
+            <p className="mb-2">Knot may provide identity verification features designed to improve trust, authenticity, fraud prevention, and platform safety. Where you choose or are required to complete verification, we may collect:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>A selfie or verification photograph</li><li>Images of identity documents</li><li>Information extracted from identity documents</li><li>Verification results</li><li>Information used to compare a selfie with an identity document photograph</li><li>Fraud-prevention and authenticity signals</li>
+            </ul>
+            <p className="mb-2">Depending on the technology used, identity verification may involve automated systems, artificial intelligence, facial comparison, document analysis, or third-party verification service providers.</p>
+            <p className="mb-2">We process verification information for purposes including: confirming that an account is associated with a real person, detecting fraudulent or manipulated identity documents, preventing impersonation, preventing duplicate or fraudulent accounts, protecting users and platform integrity, and determining whether a profile may become publicly visible or receive a verification status.</p>
+            <p className="mb-2">Verification does not guarantee that a user is completely safe, truthful, trustworthy, or suitable for a relationship.</p>
+            <p className="text-sm italic mb-4">We retain verification information only for as long as reasonably necessary for the purposes described in this Privacy Policy, applicable legal requirements, fraud prevention, dispute resolution, and legitimate platform-safety purposes.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">3. How We Use Your Information</h3>
-              <p className="mb-2">We use your information to:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Create and manage your account</li><li>Verify identity</li><li>Provide AI-powered matchmaking</li><li>Improve compatibility recommendations</li><li>Prevent fraud and abuse</li><li>Maintain platform security</li><li>Respond to customer support requests</li><li>Improve our products and services</li><li>Comply with legal obligations</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">2. Artificial Intelligence Features</h3>
+            <p className="mb-2">Knot may use artificial intelligence and automated technologies to provide certain features.</p>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">4. Data Sharing</h3>
-              <p className="mb-2">We do not sell your personal information.</p>
-              <p className="mb-2">We may share information with:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Identity verification providers</li><li>Cloud hosting providers</li><li>Analytics providers</li><li>Fraud prevention partners</li><li>Law enforcement when legally required</li>
-              </ul>
-            </section>
+            <h4 className="font-semibold text-white mt-4 mb-2">2.1 AI Matching and Recommendations</h4>
+            <p className="mb-2">Knot may process information such as profile information, preferences, interests, interaction information, compatibility information, and user-provided preferences to generate recommendations, compatibility suggestions, and potential matches.</p>
+            <p className="mb-4">AI-generated recommendations are suggestions only. Knot does not guarantee that a recommended person is compatible, trustworthy, safe, truthful, or suitable for a relationship.</p>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">5. Data Security</h3>
-              <p>We use reasonable administrative, technical, and physical safeguards to protect your information. While we strive to protect your data, no method of electronic transmission or storage is completely secure.</p>
-            </section>
+            <h4 className="font-semibold text-white mt-4 mb-2">2.2 AI Coach</h4>
+            <p className="mb-2">Knot may provide an AI Coach to assist with matters such as profile improvement, communication suggestions, conversation guidance, relationship-related general guidance, dating suggestions, questions about using Knot, and general interpersonal advice.</p>
+            <p className="mb-4">The AI Coach is an automated software system. It is not a human being and does not provide professional medical, psychological, legal, financial, or other regulated professional advice. AI responses may be incomplete, inaccurate, outdated, or unsuitable for your particular circumstances. You remain responsible for your own decisions.</p>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">6. Data Retention</h3>
-              <p className="mb-2">We retain information only as long as necessary to:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Provide our services</li><li>Meet legal obligations</li><li>Resolve disputes</li><li>Enforce our agreements</li>
-              </ul>
-              <p>When an account is permanently deleted, personal information is deleted or anonymized unless retention is required by law.</p>
-            </section>
+            <h4 className="font-semibold text-white mt-4 mb-2">2.3 AI Chat Assistant</h4>
+            <p className="mb-2">Knot may provide an AI Chat Assistant that allows users to interact with an artificial intelligence system. The AI Chat Assistant:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Is not a human user</li><li>Is not a romantic partner</li><li>Is not a real member of the Knot community</li><li>Does not represent an actual person</li><li>May generate inaccurate or inappropriate responses</li>
+            </ul>
+            <p>Information submitted to AI features may be processed by Knot and, where applicable, authorized third-party AI technology providers to generate responses, recommendations, moderation results, or other requested functionality.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">7. Your Rights</h3>
-              <p className="mb-2">Depending on applicable laws, you may have the right to:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Access your information</li><li>Correct inaccurate information</li><li>Delete your account</li><li>Withdraw consent where applicable</li><li>Request a copy of your personal information</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">3. Third-Party AI and Technology Providers</h3>
+            <p className="mb-2">Knot may use third-party service providers to provide certain technologies, including:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Artificial intelligence services</li><li>Identity verification</li><li>Cloud hosting</li><li>Database infrastructure</li><li>Security services</li><li>Analytics</li><li>Communication services</li><li>Email and SMS services</li><li>Customer support tools</li>
+            </ul>
+            <p>Where information is sent to a third-party provider, it is processed for the relevant service or business purpose, subject to applicable contractual, technical, and legal safeguards.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">8. Children's Privacy</h3>
-              <p className="mb-2">Knot is intended only for users aged 18 years or older.</p>
-              <p>We do not knowingly collect information from anyone under 18. If we discover an account belonging to a minor, we will remove it promptly.</p>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">4. Information from Communications and Interactions</h3>
+            <p className="mb-2">If you communicate with other users through Knot, we may process information associated with those interactions, including messages, reports, block information, content submitted for moderation, safety complaints, and metadata associated with interactions.</p>
+            <p className="mb-2">We may process communications and related information to provide the messaging service, detect fraud and scams, investigate reports, enforce Community Guidelines, prevent harassment/abuse/exploitation/illegal activity, protect users and the platform, and comply with legal obligations.</p>
+            <p>We do not guarantee that every harmful, fraudulent, or illegal activity will be detected.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">9. Changes to this Policy</h3>
-              <p>We may update this Privacy Policy periodically. Changes become effective when published on this page.</p>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">5. Device and Technical Information</h3>
+            <p className="mb-2">When you use Knot, we may automatically collect information such as device type, operating system, app version, IP address, device identifiers, crash information, log information, network information, general location information, usage information, and security and fraud-prevention signals.</p>
+            <p>We use this information to operate, secure, improve, and troubleshoot the Services.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">10. Contact</h3>
-              <p>Clean Connect</p>
-              <p>Email: <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a></p>
-            </section>
-          </div>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">6. Location Information</h3>
+            <p className="mb-2">Knot may process location information where you provide it or where it is technically collected with appropriate permission.</p>
+            <p className="mb-2">Location information may be used for showing approximate location or distance, improving match recommendations, providing location-related features, security and fraud prevention, and improving the Services.</p>
+            <p>We do not publicly display your exact residential address unless you voluntarily provide such information in a manner that makes it visible.</p>
+          </section>
 
-          {/* SECTION 2: CHILD SAFETY STANDARDS */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-white border-b border-[#2A3143] pb-2 mb-4">Part 2: Child Safety Standards</h2>
-            
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Our Commitment</h3>
-              <p className="mb-2">Clean Connect is committed to protecting children from exploitation and abuse.</p>
-              <p className="mb-2">Knot is designed exclusively for adults aged 18 years and older.</p>
-              <p className="font-bold text-white bg-red-900/20 border border-red-500/30 p-4 rounded-lg">We maintain a zero-tolerance policy toward Child Sexual Abuse Material (CSAM), Child Sexual Abuse and Exploitation (CSAE), grooming, trafficking, or any activity that endangers minors.</p>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">7. How We Use Information</h3>
+            <p className="mb-2">We may use information to:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Create and manage accounts</li><li>Provide matchmaking services</li><li>Generate recommendations</li><li>Provide AI features</li><li>Conduct identity verification</li><li>Prevent fraud and impersonation</li><li>Protect users</li><li>Moderate content and activity</li><li>Process reports and complaints</li><li>Provide customer support</li><li>Improve and develop the Services</li><li>Communicate with users</li><li>Detect security incidents</li><li>Comply with applicable laws</li><li>Enforce our Terms of Service and Community Guidelines</li>
+            </ul>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Age Requirement</h3>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Only users 18 years or older may create accounts.</li>
-                <li>Users who falsely claim to be adults will have their accounts permanently removed.</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">8. How We Share Information</h3>
+            <h4 className="font-semibold text-white mt-4 mb-2">Service Providers</h4>
+            <p className="mb-4">Companies that help us operate the Services, including providers of hosting, databases, AI technology, identity verification, security, analytics, communications, and customer support.</p>
+            <h4 className="font-semibold text-white mt-4 mb-2">Other Users</h4>
+            <p className="mb-4">Information that you choose to place on your public or discoverable profile may be visible to other users.</p>
+            <h4 className="font-semibold text-white mt-4 mb-2">Legal and Safety Authorities</h4>
+            <p className="mb-4">We may disclose information where we reasonably believe disclosure is necessary to comply with law, respond to valid legal processes, protect users, prevent fraud, investigate suspected criminal conduct, address threats to safety, or protect our rights or property.</p>
+            <h4 className="font-semibold text-white mt-4 mb-2">Business Transfers</h4>
+            <p className="mb-2">Information may be transferred in connection with a merger, acquisition, restructuring, financing, sale of assets, or similar transaction.</p>
+            <p>We do not sell personal information in the ordinary sense of selling user databases to third parties for their independent marketing purposes.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Prohibited Conduct</h3>
-              <p className="mb-2">The following is strictly prohibited:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Uploading CSAM</li><li>Requesting CSAM</li><li>Sharing CSAM</li><li>Promoting CSAM</li><li>Grooming minors</li><li>Sexual exploitation of children</li><li>Human trafficking involving minors</li><li>Soliciting minors</li><li>Impersonating minors</li><li>Any illegal activity involving children</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">9. Data Retention</h3>
+            <p className="mb-2">We retain information for as long as reasonably necessary for providing the Services, maintaining accounts, safety and fraud prevention, legal compliance, dispute resolution, enforcing agreements, and legitimate business purposes.</p>
+            <p>When information is no longer reasonably necessary, we may delete, anonymize, or securely dispose of it, subject to legal, security, and fraud-prevention requirements.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Reporting</h3>
-              <p className="mb-2">Users can report:</p>
-              <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Suspicious profiles</li><li>Child exploitation</li><li>Illegal activity</li><li>Abuse</li><li>Harassment</li>
-              </ul>
-              <p className="mb-2">Reports can be submitted:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Through the in-app Report User feature</li>
-                <li>By emailing <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a></li>
-              </ul>
-              <p className="mt-4 italic">Reports are reviewed as quickly as possible.</p>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">10. Data Security</h3>
+            <p className="mb-2">We use reasonable technical and organizational safeguards designed to protect information from unauthorized access, alteration, disclosure, or destruction.</p>
+            <p className="mb-2">However, no internet transmission or storage system can be guaranteed to be completely secure.</p>
+            <p>You are responsible for protecting your account credentials and should immediately report suspected unauthorized access.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Enforcement</h3>
-              <p className="mb-2">Violations may result in:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Immediate account suspension</li><li>Permanent account termination</li><li>Removal of offending content</li><li>Reporting to law enforcement where legally required</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">11. Your Rights and Choices</h3>
+            <p className="mb-2">Depending on applicable law, you may have rights to:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Access personal information</li><li>Request correction of inaccurate information</li><li>Request deletion</li><li>Request restriction of processing</li><li>Object to certain processing</li><li>Request data portability</li><li>Withdraw consent where processing is based on consent</li>
+            </ul>
+            <p>Some requests may be subject to legal limitations or verification requirements. To exercise applicable rights, contact: <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a></p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Identity Verification</h3>
-              <p>To promote user safety, Knot may require identity verification using government-issued identification or other verification methods.</p>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">12. Children and Minors</h3>
+            <p className="mb-2">Knot is not intended for children or users who are below the minimum age permitted under applicable law.</p>
+            <p className="mb-2">We do not knowingly permit children to create accounts or use adult matchmaking services.</p>
+            <p className="mb-2">Users must not use Knot to groom minors, exploit minors, facilitate sexual exploitation of minors, contact minors for illegal or abusive purposes, or upload or distribute child sexual abuse material.</p>
+            <p>Any suspected child exploitation or abuse may be reported to appropriate authorities where required or permitted by law.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Cooperation with Authorities</h3>
-              <p>Where legally required, we cooperate with law enforcement agencies and child protection organizations investigating child exploitation or abuse.</p>
-            </section>
-          </div>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">13. International Data Processing</h3>
+            <p className="mb-2">Depending on where our service providers are located, information may be processed in countries other than the country in which you live.</p>
+            <p>Where required by applicable law, we will use appropriate safeguards for international transfers.</p>
+          </section>
 
-          {/* SECTION 3: COMMUNITY GUIDELINES */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-white border-b border-[#2A3143] pb-2 mb-4">Part 3: Community Guidelines</h2>
-            <p className="mb-6 text-lg">Our goal is to create a respectful, authentic, and safe matchmaking community.</p>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">14. Third-Party Links and Services</h3>
+            <p className="mb-2">Knot may contain links to third-party services.</p>
+            <p className="mb-2">We are not responsible for the privacy practices of third-party websites or services that we do not control.</p>
+            <p>You should review the privacy policies of third-party services before providing information to them.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Be Respectful</h3>
-              <p className="mb-2">Treat everyone with kindness. Do not:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Harass</li><li>Threaten</li><li>Bully</li><li>Intimidate</li><li>Stalk</li><li>Hate speech</li>
-              </ul>
-            </section>
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">15. Changes to This Privacy Policy</h3>
+            <p className="mb-2">We may update this Privacy Policy from time to time.</p>
+            <p className="mb-2">When we make material changes, we may provide notice through the Services or other appropriate means.</p>
+            <p>The &quot;Last Updated&quot; date indicates when this Privacy Policy was most recently revised.</p>
+          </section>
 
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Be Honest</h3>
-              <p className="mb-2">Users must:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Use real photographs</li><li>Provide truthful information</li><li>Avoid impersonation</li><li>Avoid fake accounts</li>
-              </ul>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">No Illegal Activities</h3>
-              <p className="mb-2">Users may not:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Buy or sell illegal goods</li><li>Promote criminal activities</li><li>Share illegal content</li><li>Commit fraud</li><li>Solicit prostitution</li><li>Promote trafficking</li>
-              </ul>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">No Sexual Exploitation</h3>
-              <p className="mb-2">We strictly prohibit:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Child exploitation</li><li>Non-consensual sexual content</li><li>Revenge pornography</li><li>Sexual coercion</li><li>Blackmail</li>
-              </ul>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Privacy</h3>
-              <p className="mb-2">Respect other users' privacy. Do not:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Share personal information without permission</li><li>Publish private conversations</li><li>Dox other users</li>
-              </ul>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Fraud Prevention</h3>
-              <p className="mb-2">Do not:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Scam users</li><li>Request money deceptively</li><li>Operate fake investment schemes</li><li>Catfish</li>
-              </ul>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Reporting & Blocking</h3>
-              <p className="mb-2">If you experience harassment, abuse, scams, fake profiles, or child safety concerns, use the in-app <strong>Report User</strong> feature immediately.</p>
-              <p>Users may also block anyone they no longer wish to communicate with.</p>
-            </section>
-
-            <section className="mb-6">
-              <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">Enforcement</h3>
-              <p className="mb-2">Violations may result in:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Warning</li><li>Temporary suspension</li><li>Permanent account removal</li><li>Reporting to law enforcement where appropriate</li>
-              </ul>
-            </section>
-          </div>
-
+          <section className="mb-6">
+            <h3 className="text-xl font-semibold text-[#D4AF37] mb-2">16. Contact Us</h3>
+            <p className="mb-2">For privacy questions or requests:</p>
+            <p className="mb-2">Company: Clean Connect</p>
+            <p>Email: <a href="mailto:cleanconnectng@gmail.com" className="text-[#D4AF37] hover:underline">cleanconnectng@gmail.com</a></p>
+          </section>
         </div>
       </div>
     </div>

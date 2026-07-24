@@ -96,7 +96,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
         }
       } else if (step.value === 3) {
         // Down (Pitch negative)
-        if (face.pitchAngle && face.pitchAngle < -15) {
+        if (face.pitchAngle && face.Math.abs(pitchAngle) < 5) {
           step.value = 4;
           handleStepChangeJS(4);
         }
@@ -139,6 +139,29 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
             <View style={[styles.dot, (livenessState === 'down' || livenessState === 'complete') ? styles.dotActive : null]} />
             <View style={[styles.dot, livenessState === 'complete' ? styles.dotActive : null]} />
           </View>
+          {livenessState === 'complete' && (
+            <View style={{ flexDirection: 'row', gap: 16, width: '100%', marginTop: 24, paddingHorizontal: 32 }}>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 24, borderWidth: 1, borderColor: '#D4AF37', alignItems: 'center' }}
+                onPress={() => {
+                  setLivenessState('ready');
+                  setPrompt('Center your face in the circular aperture');
+                  step.value = 0;
+                }}
+              >
+                <Text style={{ color: '#D4AF37', fontWeight: 'bold' }}>Retake</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 24, backgroundColor: '#10b981', alignItems: 'center' }}
+                onPress={() => {
+                  onClose();
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Ok</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
         </View>
       </View>
     </Modal>

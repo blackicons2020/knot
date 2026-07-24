@@ -153,17 +153,39 @@ export default function ProfileScreen() {
           {/* Identity Verification Card */}
           <GlassCard style={st.verificationCard}>
             <Text style={st.verifTitle}>Identity Verification</Text>
-            <View style={st.verifRow}>
-              <Text style={st.verifLabel}>Government ID Scan</Text>
-              <Text style={st.verifStatus}>Approved</Text>
-            </View>
-            <View style={st.verifRow}>
-              <Text style={st.verifLabel}>Liveness Selfie Match</Text>
-              <Text style={st.verifStatus}>Approved</Text>
-            </View>
-            <View style={st.verifCompleteBadge}>
-              <Text style={st.verifCompleteText}>Identity Verified</Text>
-            </View>
+            {userProfile?.isVerified ? (
+              <>
+                <View style={st.verifRow}>
+                  <Text style={st.verifLabel}>Government ID Scan</Text>
+                  <Text style={st.verifStatus}>Approved</Text>
+                </View>
+                <View style={st.verifRow}>
+                  <Text style={st.verifLabel}>Liveness Selfie Match</Text>
+                  <Text style={st.verifStatus}>Approved</Text>
+                </View>
+                <View style={st.verifCompleteBadge}>
+                  <Text style={st.verifCompleteText}>Identity Verified</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={st.verifRow}>
+                  <Text style={st.verifLabel}>Government ID Scan</Text>
+                  <Text style={[st.verifStatus, { color: '#f59e0b' }]}>Pending</Text>
+                </View>
+                <View style={st.verifRow}>
+                  <Text style={st.verifLabel}>Liveness Selfie Match</Text>
+                  <Text style={[st.verifStatus, { color: '#f59e0b' }]}>Pending</Text>
+                </View>
+                <Text style={{color: '#9ca3af', fontSize: 12, marginTop: 8, marginBottom: 12}}>Your profile remains private until identity verification is completed.</Text>
+                <TouchableOpacity 
+                  style={[st.editBtn, { backgroundColor: '#10B981', borderTopWidth: 0 }]}
+                  onPress={() => navigation.navigate('Onboarding' as never)}
+                >
+                  <Text style={[st.editBtnText, { color: '#fff' }]}>Complete Verification</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </GlassCard>
         </View>
 
@@ -355,8 +377,12 @@ export default function ProfileScreen() {
               <Text style={st.planLabel}>Terms of Service</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })} style={st.planRow}>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })} style={[st.planRow, { borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', paddingBottom: 12, marginBottom: 12 }]}>
               <Text style={st.planLabel}>Privacy Policy</Text>
+              <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'community' })} style={st.planRow}>
+              <Text style={st.planLabel}>Community Guidelines & Safety Standards</Text>
               <Ionicons name="chevron-forward" size={16} color={Colors.gray400} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => Linking.openURL('mailto:cleanconnectng@gmail.com')} style={[st.planRow, { borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', paddingTop: 12, marginTop: 12 }]}>

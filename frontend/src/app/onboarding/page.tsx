@@ -69,7 +69,12 @@ const BIOMETRIC_SELFIE_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.
 const BIOMETRIC_ID_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60"><rect width="100" height="60" rx="6" fill="%23121721" stroke="%23D4AF37" stroke-width="2"/><circle cx="20" cy="30" r="10" fill="%23E27D8D"/><rect x="40" y="18" width="45" height="4" rx="2" fill="%23E27D8D"/><rect x="40" y="28" width="45" height="4" rx="2" fill="%23E27D8D"/><rect x="40" y="38" width="30" height="4" rx="2" fill="%23E27D8D"/><circle cx="20" cy="30" r="13" fill="none" stroke="%23ffffff" stroke-width="1" stroke-dasharray="2,2"/></svg>`;
 
 export default function Onboarding() {
-  const [step, setStep] = useState(1); // 1: Welcome, 2: Essentials Form, 3: AI Interview, 4: Processing, 5: Results Card
+  const [step, setStep] = useState(1);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [profilePictureSkipped, setProfilePictureSkipped] = useState(false);
+  const [verificationSkipped, setVerificationSkipped] = useState(false);
+  const [uploadedProfilePic, setUploadedProfilePic] = useState<File | null>(null);
+  const [uploadedGovId, setUploadedGovId] = useState<File | null>(null); // 1: Welcome, 2: Essentials Form, 3: AI Interview, 4: Processing, 5: Results Card
   const [subStep, setSubStep] = useState(0);
   const [gender, setGender] = useState("");
   const [preferredGender, setPreferredGender] = useState("");
@@ -147,7 +152,8 @@ export default function Onboarding() {
 
   // Selfie Liveness Interactive Modal States
   const [isLivenessModalOpen, setIsLivenessModalOpen] = useState(false);
-  const [livenessState, setLivenessState] = useState<"idle" | "align" | "smile" | "up" | "down" | "complete">("idle");
+  const [livenessState, setLivenessState] = useState<"idle" | "ready" | "smile" | "up" | "straight" | "complete">("idle");
+  // defined in the previous patch block so this old definition might still exist
   const [livenessPrompt, setLivenessPrompt] = useState("Center your face in the circle");
   const [isCameraActive, setIsCameraActive] = useState(true);
 
@@ -296,7 +302,7 @@ export default function Onboarding() {
           const { expressions, landmarks, detection: box } = detection;
           const currentState = livenessStateRef.current;
           
-          if (currentState === "align") {
+          if (currentState === "ready") {
             // Check if face is centered and large enough
             const faceWidth = box.box.width;
             if (faceWidth > 50) { // Relaxed size constraint for different webcams
@@ -322,10 +328,10 @@ export default function Onboarding() {
             
             // Looking up means nose gets closer to eyes
             if (distEyeNose < distNoseChin * 0.5) {
-              setLivenessState("down");
+              setLivenessState("straight");
               setLivenessPrompt("Great! Now lower your head down");
             }
-          } else if (currentState === "down") {
+          } else if (currentState === "straight") {
             const nose = landmarks.getNose()[0];
             const leftEye = landmarks.getLeftEye()[0];
             const rightEye = landmarks.getRightEye()[0];
@@ -383,7 +389,7 @@ export default function Onboarding() {
   const startLivenessScanner = () => {
     setIsLivenessModalOpen(true);
     setIsCameraActive(true);
-    setLivenessState("align");
+    setLivenessState("ready");
     setLivenessPrompt("Center your face in the circular aperture");
   };
 
@@ -454,11 +460,11 @@ export default function Onboarding() {
       if (data.token) {
         localStorage.setItem('knot_token', data.token);
       }
-      setStep(5);
+      setStep(7);
     } catch (err) {
       console.error("Registration failed:", err);
       // Even if it fails, go to step 5 for prototype continuity
-      setStep(5);
+      setStep(7);
     }
   };
 
@@ -581,7 +587,7 @@ export default function Onboarding() {
           setVerificationStep(3); // Verifying age alignment
           setTimeout(() => {
             setVerificationStep(4); // Completed
-            setStep(4); // Proceed to AI Interview
+            setStep(6); // Proceed to AI Interview
           }, 1800);
         }, 1800);
       }, 1800);
@@ -596,7 +602,7 @@ export default function Onboarding() {
           setVerificationStep(3);
           setTimeout(() => {
             setVerificationStep(4);
-            setStep(4);
+            setStep(6);
           }, 1800);
         }, 1800);
       }, 1800);
@@ -890,7 +896,7 @@ export default function Onboarding() {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Children Status</label>
+                    <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Future Partners Children Status</label>
                     <select value={childrenStatus} onChange={e => setChildrenStatus(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select status</option>
                       <option value="No kids">No kids</option>
@@ -987,8 +993,155 @@ export default function Onboarding() {
           </div>
         )}
         
-        {/* Step 3: Futuristic AI Identity & Document Verification Scan */}
+        
+        {/* Step 3: Profile Picture Upload */}
+        {step === 3 && (
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-8 max-w-md mx-auto">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-serif font-black text-white">Profile Picture</h2>
+              <p className="text-sm text-gray-400">Upload a clear, recent photo of yourself</p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-6">
+              <div className="w-32 h-32 rounded-full bg-[#121721] border border-white/10 overflow-hidden flex items-center justify-center relative">
+                {profilePicture ? (
+                  <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-12 h-12 text-gray-500" />
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setUploadedProfilePic(file);
+                      setProfilePicture(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </div>
+              <button 
+                className="px-6 py-3 rounded-full text-sm font-bold bg-white/5 border border-white/10 text-white relative pointer-events-none"
+              >
+                Choose Photo
+              </button>
+            </div>
+
+            <div className="pt-4 space-y-4">
+              <button 
+                onClick={() => setStep(6)} 
+                disabled={!profilePicture}
+                className="w-full py-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50"
+              >
+                Upload & Continue
+              </button>
+              
+              <div className="text-center">
+                <button 
+                  onClick={() => {
+                    setProfilePictureSkipped(true);
+                    setStep(6);
+                  }}
+                  className="text-xs text-gray-500 hover:text-white transition-colors underline"
+                >
+                  Skip for now
+                </button>
+                <p className="text-[10px] text-red-400/80 mt-2">
+                  Warning: Your profile remains private until a picture is uploaded.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Identity & Trust Verification */}
         {step === 4 && (
+          <div className="glass-card rounded-[32px] p-6 sm:p-8 border border-white/10 space-y-6 max-w-md mx-auto">
+            <div className="text-center space-y-2 mb-8">
+              <h2 className="text-2xl font-serif font-black text-white">Identity & Trust Verification</h2>
+              <p className="text-sm text-gray-400">Help us keep the community safe</p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Selfie Scan for Verification</label>
+                <div className="p-4 bg-[#121721] border border-white/10 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                      {verificationSelfie ? <img src={verificationSelfie} className="w-full h-full rounded-full object-cover" /> : <Camera className="w-5 h-5 text-[#D4AF37]" />}
+                    </div>
+                    <div>
+                      <button onClick={startLivenessScanner} className="text-sm font-bold text-[#D4AF37] hover:underline">Start Live Face Scan</button>
+                      <p className="text-[10px] text-gray-500">Strictly for verification</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Government ID Scan</label>
+                <p className="text-[10px] text-gray-500 mb-2">Int'l Passport, Driver's License, voters card or National ID</p>
+                <div className="p-4 bg-[#121721] border border-white/10 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                      {governmentId ? <img src={governmentId} className="w-full h-full rounded-xl object-cover" /> : <ShieldCheck className="w-5 h-5 text-gray-400" />}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button onClick={startIdScanner} className="text-sm font-bold text-white hover:underline text-left">Scan ID Document</button>
+                      <div className="relative">
+                        <button className="text-xs font-bold text-gray-400 hover:text-white text-left pointer-events-none">Upload ID</button>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setUploadedGovId(file);
+                              setGovernmentId(URL.createObjectURL(file));
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 space-y-4">
+              <button 
+                onClick={() => {
+                  handleProcessAIVerification();
+                }} 
+                disabled={!verificationSelfie || !governmentId}
+                className="w-full py-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50"
+              >
+                Verify Identity & Documents
+              </button>
+              
+              <div className="text-center">
+                <button 
+                  onClick={() => {
+                    setVerificationSkipped(true);
+                    setStep(6);
+                  }}
+                  className="text-xs text-gray-500 hover:text-white transition-colors underline"
+                >
+                  Skip for now
+                </button>
+                <p className="text-[10px] text-red-400/80 mt-2">
+                  Warning: Your profile remains private until verification is done.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Futuristic AI Identity & Document Verification Scan */}
+        {step === 6 && (
           <div className="glass-card rounded-[32px] border border-white/10 flex flex-col h-[500px] overflow-hidden">
             {/* Header */}
             <div className="p-4 bg-[#121721]/90 border-b border-white/5 flex items-center gap-3">
@@ -1050,7 +1203,7 @@ export default function Onboarding() {
         )}
 
         {/* Step 4: Conversational AI Onboarding Interview */}
-        {step === 3 && (
+        {step === 5 && !verificationSkipped && (
           <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/20 space-y-8 max-w-xl mx-auto overflow-hidden relative">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-serif font-black text-white">AI Biometric Liveness & ID Match</h2>
@@ -1154,7 +1307,7 @@ export default function Onboarding() {
         )}
 
         {/* Step 5: Cinematic AI Relationship Certificate Reveal */}
-        {step === 5 && (
+        {step === 7 && (
           <div className="space-y-8 animate-fade-in">
             <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/30 shadow-2xl shadow-[#D4AF37]/5 relative overflow-hidden max-w-md mx-auto">
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
@@ -1259,16 +1412,18 @@ export default function Onboarding() {
               )}
 
               {/* Calibration Face Outline overlay */}
-              {livenessState === "align" && (
+              {livenessState === "ready" && (
                 <div className="absolute inset-4 rounded-full border border-dashed border-white/20 pointer-events-none flex items-center justify-center">
                   <div className="w-16 h-20 rounded-full border-2 border-white/30" />
                 </div>
               )}
 
+              
               {/* Complete Overlay Flash */}
               {livenessState === "complete" && (
-                <div className="absolute inset-0 bg-white/90 flex items-center justify-center animate-pulse">
+                <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center animate-pulse gap-2">
                   <ShieldCheck className="w-12 h-12 text-[#10B981]" />
+                  <img src={verificationSelfie || ""} className="w-24 h-24 rounded-full object-cover border-4 border-[#10B981]" />
                 </div>
               )}
             </div>
@@ -1277,12 +1432,22 @@ export default function Onboarding() {
             <div className="p-3 bg-white/5 border border-white/5 rounded-2xl min-h-[64px] flex flex-col items-center justify-center">
               <span className="text-xs font-bold text-gray-200">{livenessPrompt}</span>
               <div className="flex gap-1.5 mt-2">
-                <span className={`w-2 h-2 rounded-full ${livenessState === "align" ? "bg-[#D4AF37] animate-pulse" : "bg-[#10B981]"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "up" || livenessState === "down" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "up" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "down" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
-                <span className={`w-2 h-2 rounded-full ${livenessState === "down" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "ready" ? "bg-[#D4AF37] animate-pulse" : "bg-[#10B981]"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "smile" ? "bg-[#D4AF37] animate-pulse" : (livenessState === "straight" || livenessState === "complete") ? "bg-[#10B981]" : "bg-white/15"}`} />
+                <span className={`w-2 h-2 rounded-full ${livenessState === "straight" ? "bg-[#D4AF37] animate-pulse" : livenessState === "complete" ? "bg-[#10B981]" : "bg-white/15"}`} />
               </div>
             </div>
+            
+            {livenessState === "complete" && (
+              <div className="flex gap-4 w-full">
+                <button onClick={startLivenessScanner} className="flex-1 py-3 rounded-full border border-white/20 text-white text-sm font-bold hover:bg-white/5 transition">
+                  Retake
+                </button>
+                <button onClick={() => { setIsLivenessModalOpen(false); setIsCameraActive(false); }} className="flex-1 py-3 rounded-full bg-[#10B981] text-white text-sm font-bold hover:bg-[#0ea5e9] transition">
+                  Ok
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
