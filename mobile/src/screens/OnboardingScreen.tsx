@@ -199,7 +199,6 @@ export default function OnboardingScreen() {
   };
 
   const startIdScanner = async () => {
-    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission needed', 'Please grant camera access to scan your Government ID.');
@@ -654,13 +653,15 @@ export default function OnboardingScreen() {
   return (
     <KeyboardAvoidingView style={[styles.root, bgStyle, { flex: 1 }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
       {/* Header bar (only show in early steps) */}
-      {step <= 3 && (
+      {step <= 4 && (
         <View style={[styles.headerRow, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {((step === 1) || (step === 2) || (step === 3)) && (
+            {((step === 1) || (step === 2) || (step === 3) || (step === 4)) && (
               <TouchableOpacity 
                 onPress={() => {
-                  if (step === 3) {
+                  if (step === 4) {
+                    setStep(3); // Return to Profile Picture
+                  } else if (step === 3) {
                     setStep(2);
                     setSubStep(13); // Return to Ideal Partner Traits
                   } else if (step === 2) {
@@ -689,6 +690,7 @@ export default function OnboardingScreen() {
                 {step === 1 && 'Cinematic Setup'}
                 {step === 2 && 'Personal Essentials'}
                 {step === 3 && 'Identity & Trust'}
+                {step === 4 && 'Identity Verification'}
               </Text>
             </View>
           </View>
@@ -1012,7 +1014,7 @@ export default function OnboardingScreen() {
               <View>
                 <Text style={[styles.welcomeTitle, textStyle, { fontSize: 24, marginBottom: 24 }]}>Future Plans</Text>
                 <View style={{ gap: 16 }}>
-                  {renderDropdownField('Future Partners Children Status', form.childrenStatus, 'Select status', ['No kids', 'Has children'], (v) => set('childrenStatus', v))}
+                  {renderDropdownField('Future Partners Children Status', form.childrenStatus, 'Select status', ['without kids', 'With Children', 'with or without kids'], (v) => set('childrenStatus', v))}
                   {renderDropdownField('Vow Timeline', form.marriageTimeline, 'Timeline', ['ASAP', '1-2 years', '3+ years', 'Not sure'], (v) => set('marriageTimeline', v))}
                   {renderDropdownField('Relocation', form.willingToRelocate, 'Relocate', Object.values(WillingToRelocate), (v) => set('willingToRelocate', v))}
                 </View>
@@ -1100,7 +1102,7 @@ export default function OnboardingScreen() {
                   setStep(3);
                 }} disabled={form.idealPartnerTraits?.length === 0}>
                   <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
-                  <Text style={styles.actionButtonText}>Proceed to Identity Verification</Text>
+                  <Text style={styles.actionButtonText}>Next</Text>
                   <Ionicons name="checkmark-circle" size={18} color={Colors.white} />
                 </TouchableOpacity>
               </View>
@@ -1157,7 +1159,7 @@ export default function OnboardingScreen() {
               <TouchableOpacity onPress={() => { setProfilePictureSkipped(true); setStep(4); }}>
                 <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
               </TouchableOpacity>
-              <Text style={{ color: '#ef4444', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until a picture is uploaded.</Text>
+              <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until a picture is uploaded.</Text>
             </View>
           </View>
         )}
@@ -1226,7 +1228,7 @@ export default function OnboardingScreen() {
               <TouchableOpacity onPress={() => { setVerificationSkipped(true); setStep(6); }}>
                 <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
               </TouchableOpacity>
-              <Text style={{ color: '#ef4444', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until verification is done.</Text>
+              <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until verification is done.</Text>
             </View>
           </View>
         )}

@@ -5,6 +5,7 @@ ios/
 .expo/
 dist/
 build/
+web-build/
 .git/
 *.tgz
 *.log

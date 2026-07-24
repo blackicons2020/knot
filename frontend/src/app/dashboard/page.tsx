@@ -1146,7 +1146,14 @@ export default function Dashboard() {
                     <div>
                       <h3 className="text-xl font-bold">{userProfile ? `${userProfile.firstName}, 29` : "Gabriel, 29"}</h3>
                       <p className="text-xs text-gray-400">{userProfile?.occupation || "Software Engineer"} • {userProfile?.residenceCity || "Boston"}, {userProfile?.residenceCountry || "MA"}</p>
-                      <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
+                      {userProfile?.isVerified === false ? (
+                        <div className="mt-2">
+                          <span className="inline-block px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-[9px] font-black text-red-400 uppercase tracking-wider">Unverified Profile</span>
+                          <p className="text-[10px] text-gray-400 mt-1">Please verify your ID and Selfie to become visible to the public.</p>
+                        </div>
+                      ) : (
+                        <span className="inline-block mt-2 px-3 py-1 rounded-full bg-[#10B981]/25 border border-[#10B981]/30 text-[9px] font-black text-[#10B981] uppercase tracking-wider">Verified Registry Member</span>
+                      )}
                     </div>
                   </div>
                   <button 
@@ -1162,14 +1169,14 @@ export default function Dashboard() {
                   <h4 className="text-xs text-gray-400 uppercase tracking-widest font-black mb-1">Identity Verification</h4>
                   <div className="flex items-center justify-between text-xs">
                     <span>Government ID Scan</span>
-                    <span className="text-[#10B981] font-bold">Approved</span>
+                    <span className={userProfile?.isVerified === false ? "text-red-400 font-bold" : "text-[#10B981] font-bold"}>{userProfile?.isVerified === false ? "Pending" : "Approved"}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span>Liveness Selfie Match</span>
-                    <span className="text-[#10B981] font-bold">Approved</span>
+                    <span className={userProfile?.isVerified === false ? "text-red-400 font-bold" : "text-[#10B981] font-bold"}>{userProfile?.isVerified === false ? "Pending" : "Approved"}</span>
                   </div>
-                  <div className="mt-3 p-2.5 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20 text-[10px] text-[#10B981] font-black text-center uppercase tracking-wide">
-                    Identity Verified
+                  <div className={`mt-3 p-2.5 rounded-xl text-[10px] font-black text-center uppercase tracking-wide ${userProfile?.isVerified === false ? "bg-red-500/10 border border-red-500/20 text-red-400" : "bg-[#10B981]/10 border border-[#10B981]/20 text-[#10B981]"}`}>
+                    {userProfile?.isVerified === false ? "Verification Required" : "Identity Verified"}
                   </div>
                 </div>
               </div>

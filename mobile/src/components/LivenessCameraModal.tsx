@@ -34,13 +34,13 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   const handleStepChangeJS = Worklets.createRunOnJS((newStep: number) => {
     if (newStep === 1) {
       setLivenessState('smile');
-      setPrompt('Good! Now smile big to verify aliveness');
+      setPrompt('1. Smile');
     } else if (newStep === 2) {
       setLivenessState('up');
-      setPrompt('Perfect! Raise your head up');
+      setPrompt('2. Raise your head up');
     } else if (newStep === 3) {
       setLivenessState('down');
-      setPrompt('Great! Now lower your head down');
+      setPrompt('3. Bring your head down and look straight into the centre of the camera');
     } else if (newStep === 4) {
       setLivenessState('complete');
       setPrompt('Liveness Confirmed! Biometric face scan complete.');
@@ -52,10 +52,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePhoto({});
-        setTimeout(() => {
-          onCapture(`file://${photo.path}`);
-          onClose();
-        }, 1500);
+        onCapture(`file://${photo.path}`);
       } catch (e) {
         console.error(e);
       }

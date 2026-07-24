@@ -570,7 +570,8 @@ export default function Onboarding() {
       // Save user profile locally for dashboard prototype
       localStorage.setItem('knot_userProfile', JSON.stringify({
         firstName, lastName, dateOfBirth, email, 
-        residenceCity, residenceCountry, occupation
+        residenceCity, residenceCountry, occupation,
+        isVerified: !verificationSkipped && !profilePictureSkipped
       }));
 
       if (!res.success) {
@@ -580,6 +581,7 @@ export default function Onboarding() {
       }
 
       // If successful, show the beautiful animated flow
+      setStep(5);
       setVerificationStep(1); // Extracting ID details
       setTimeout(() => {
         setVerificationStep(2); // Matching face biometric vectors
@@ -595,6 +597,7 @@ export default function Onboarding() {
     } catch (error) {
       console.error("AI verification failed:", error);
       // Fallback
+      setStep(5);
       setVerificationStep(1);
       setTimeout(() => {
         setVerificationStep(2);
@@ -619,9 +622,22 @@ export default function Onboarding() {
     <div className="min-h-screen bg-[#0A0E14] text-white flex flex-col justify-between py-6 px-4 sm:py-12 sm:px-6">
       {/* Header */}
       <header className="max-w-4xl mx-auto w-full flex items-center justify-between">
-        <Link href="/" className="text-xl font-serif font-black tracking-wider flex items-center gap-1">
-          KNOT<span className="text-[#D4AF37]">.</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          {((step === 2 && subStep > 0) || (step > 2 && step < 6)) && (
+            <button 
+              onClick={() => {
+                if (step === 2 && subStep > 0) setSubStep(subStep - 1);
+                else if (step > 2) setStep(step - 1);
+              }}
+              className="text-white hover:text-[#D4AF37] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+          )}
+          <Link href="/" className="text-xl font-serif font-black tracking-wider flex items-center gap-1">
+            KNOT<span className="text-[#D4AF37]">.</span>
+          </Link>
+        </div>
         <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
           Step {step} of 5
         </span>
@@ -735,7 +751,14 @@ export default function Onboarding() {
                     <option value="">Select Country</option>
                     {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <input type="text" value={residenceState} onChange={e => setResidenceState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  {STATES_BY_COUNTRY[residenceCountry] && STATES_BY_COUNTRY[residenceCountry].length > 0 ? (
+                    <select value={residenceState} onChange={e => setResidenceState(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select State / Province</option>
+                      {STATES_BY_COUNTRY[residenceCountry].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" value={residenceState} onChange={e => setResidenceState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
                   <input type="text" value={residenceCity} onChange={e => setResidenceCity(e.target.value)} placeholder="City / Town" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
                 <button onClick={() => setSubStep(5)} disabled={!residenceCountry || !residenceCity} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
@@ -752,7 +775,14 @@ export default function Onboarding() {
                     <option value="">Select Country</option>
                     {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <input type="text" value={originState} onChange={e => setOriginState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  {STATES_BY_COUNTRY[originCountry] && STATES_BY_COUNTRY[originCountry].length > 0 ? (
+                    <select value={originState} onChange={e => setOriginState(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
+                      <option value="">Select State / Province</option>
+                      {STATES_BY_COUNTRY[originCountry].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" value={originState} onChange={e => setOriginState(e.target.value)} placeholder="State / Province" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
+                  )}
                   <input type="text" value={originCity} onChange={e => setOriginCity(e.target.value)} placeholder="City / Town" className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50" />
                 </div>
                 <button onClick={() => setSubStep(6)} disabled={!originCountry || !originCity} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
@@ -899,8 +929,9 @@ export default function Onboarding() {
                     <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Future Partners Children Status</label>
                     <select value={childrenStatus} onChange={e => setChildrenStatus(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select status</option>
-                      <option value="No kids">No kids</option>
-                      <option value="Has children">Has children</option>
+                      <option value="without kids">without kids</option>
+                      <option value="With Children">With Children</option>
+                      <option value="with or without kids">with or without kids</option>
                     </select>
                   </div>
                   <div>
@@ -980,8 +1011,8 @@ export default function Onboarding() {
                   if (preferredPartnerAgeRange[1] < preferredPartnerAgeRange[0]) {
                     alert("The maximum age cannot be less than the minimum age."); return;
                   }
-                  setStep(3);
-                }} disabled={idealPartnerTraits.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Proceed to Verification</button>
+                  setStep(3); // Go to Profile Picture Upload next
+                }} disabled={idealPartnerTraits.length === 0} className="w-full py-4 mt-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50 transition-opacity">Next</button>
               </div>
             )}
 
@@ -1002,17 +1033,18 @@ export default function Onboarding() {
               <p className="text-sm text-gray-400">Upload a clear, recent photo of yourself</p>
             </div>
             
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-32 h-32 rounded-full bg-[#121721] border border-white/10 overflow-hidden flex items-center justify-center relative">
+            <div className="flex flex-col items-center">
+              <label htmlFor="profile-upload" className="w-32 h-32 rounded-full bg-[#121721] border border-white/10 overflow-hidden flex items-center justify-center relative cursor-pointer group">
                 {profilePicture ? (
                   <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  <User className="w-12 h-12 text-gray-500" />
+                  <User className="w-12 h-12 text-gray-500 group-hover:text-white transition-colors" />
                 )}
                 <input 
+                  id="profile-upload"
                   type="file" 
                   accept="image/*" 
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -1021,17 +1053,18 @@ export default function Onboarding() {
                     }
                   }}
                 />
-              </div>
-              <button 
-                className="px-6 py-3 rounded-full text-sm font-bold bg-white/5 border border-white/10 text-white relative pointer-events-none"
+              </label>
+              <label 
+                htmlFor="profile-upload"
+                className="mt-4 px-6 py-3 rounded-full text-sm font-bold bg-white/5 border border-white/10 text-white cursor-pointer hover:bg-white/10 transition-colors"
               >
                 Choose Photo
-              </button>
+              </label>
             </div>
 
             <div className="pt-4 space-y-4">
               <button 
-                onClick={() => setStep(6)} 
+                onClick={() => setStep(4)} 
                 disabled={!profilePicture}
                 className="w-full py-4 rounded-xl text-sm font-black rose-glow-btn text-white disabled:opacity-50"
               >
@@ -1042,13 +1075,13 @@ export default function Onboarding() {
                 <button 
                   onClick={() => {
                     setProfilePictureSkipped(true);
-                    setStep(6);
+                    setStep(4);
                   }}
                   className="text-xs text-gray-500 hover:text-white transition-colors underline"
                 >
                   Skip for now
                 </button>
-                <p className="text-[10px] text-red-400/80 mt-2">
+                <p className="text-white text-xs mt-3">
                   Warning: Your profile remains private until a picture is uploaded.
                 </p>
               </div>
@@ -1132,7 +1165,7 @@ export default function Onboarding() {
                 >
                   Skip for now
                 </button>
-                <p className="text-[10px] text-red-400/80 mt-2">
+                <p className="text-white text-xs mt-3">
                   Warning: Your profile remains private until verification is done.
                 </p>
               </div>
