@@ -96,7 +96,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
         }
       } else if (step.value === 3) {
         // Down (Pitch negative)
-        if (face.pitchAngle && face.Math.abs(pitchAngle) < 5) {
+        if (face.pitchAngle && Math.abs(face.pitchAngle) < 5) {
           step.value = 4;
           handleStepChangeJS(4);
         }
