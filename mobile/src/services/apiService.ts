@@ -110,6 +110,13 @@ class ApiService {
     }
   }
 
+  async updateProfile(id: string, updates: Partial<User>): Promise<User> {
+    return this.request<User>(`/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+  }
+
   logout() {
     this.setToken(null);
   }

@@ -159,7 +159,7 @@ export default function HomeScreen() {
     return (
       <View style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
         <AppHeader onFilter={() => navigation.navigate('EditProfile', { user: userProfile! })} />
-        <View style={st.cardWrapper}>
+        <View style={st.emptyWrap}>
           <Ionicons name="compass-outline" size={64} color={Colors.gray400} />
           <Text style={[st.emptyText, { color: isDarkMode ? Colors.gray400 : Colors.gray600 }]}>
             No curated matches available.

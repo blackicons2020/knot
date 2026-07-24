@@ -141,6 +141,7 @@ export interface User {
   personalityArchetype?: string;
   attachmentStyle?: string;
   selfieUrl?: string;
+  pushToken?: string;
 }
 
 export interface Match extends User {

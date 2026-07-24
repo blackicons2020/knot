@@ -501,7 +501,7 @@ export default function OnboardingScreen() {
     return dropdownOptions.filter((o) => o.toLowerCase().includes(q));
   }, [dropdownOptions, dropdownSearch]);
 
-  const renderDropdownField = (label: string, value: string, placeholder: string, options: string[], onSelect: (v: string) => void) => (
+  const renderDropdownField = (label: string, value: string | undefined, placeholder: string, options: string[], onSelect: (v: string) => void) => (
     <View style={{ marginBottom: 12 }}>
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
@@ -1071,7 +1071,7 @@ export default function OnboardingScreen() {
                   )}
                 </View>
 
-                <View style={styles.formGroup}>
+                <View style={{ marginBottom: 24 }}>
                   <Text style={styles.label}>MARRIAGE EXPECTATIONS</Text>
                   <TextInput
                     style={[styles.input, { backgroundColor: isDarkMode ? Colors.darkSurface : Colors.white, color: isDarkMode ? Colors.white : Colors.gray900, minHeight: 80, textAlignVertical: 'top' }]}

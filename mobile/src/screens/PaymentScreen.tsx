@@ -301,8 +301,7 @@ const s = StyleSheet.create({
   priceSub: { fontSize: 9, fontWeight: '600', color: 'rgba(255,255,255,0.5)', marginTop: 4, textTransform: 'uppercase' },
   benefitsCard: { padding: 20, borderRadius: 24, marginBottom: 16, borderWidth: 1, borderColor: Colors.gray200 },
   benefitsTitle: { fontSize: 11, fontWeight: '900', color: Colors.primary, textTransform: 'uppercase', letterSpacing: 2, borderBottomWidth: 1, borderBottomColor: Colors.gray50, paddingBottom: 8, marginBottom: 16 },
-  benefitsCard: { padding: 24, borderRadius: 24, marginTop: -20, paddingTop: 32, marginBottom: 8 },
-  benefitsTitle: { fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16 },
+
   benefitRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 },
   benefitText: { fontSize: 13, fontWeight: '500' },
   payBtn: { paddingVertical: 18, borderRadius: BorderRadius.full, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },

@@ -85,7 +85,7 @@ export const MATCHES_DATA: Match[] = [
     preferredPartnerAgeRange: [25, 35],
     nationality: 'American',
     careerGoals: 'Principal',
-    matchScore: 95
+    compatibilityScore: 95
   },
   {
     id: 'mock-f2',
@@ -121,13 +121,13 @@ export const MATCHES_DATA: Match[] = [
     marriageTimeline: 'Not sure',
     willingToRelocate: WillingToRelocate.Yes,
     preferredMarryFrom: 'Anywhere',
-    childrenPreference: ChildrenPreference.NotSure,
+    childrenPreference: ChildrenPreference.OpenToChildren,
     idealPartnerTraits: ['Funny'],
     marriageExpectations: 'Fun',
     preferredPartnerAgeRange: [25, 35],
     nationality: 'American',
     careerGoals: 'Art Director',
-    matchScore: 82
+    compatibilityScore: 82
   },
   {
     id: 'mock-m1',
@@ -169,7 +169,7 @@ export const MATCHES_DATA: Match[] = [
     preferredPartnerAgeRange: [22, 32],
     nationality: 'American',
     careerGoals: 'CTO',
-    matchScore: 88
+    compatibilityScore: 88
   },
   {
     id: 'mock-m2',
@@ -211,7 +211,7 @@ export const MATCHES_DATA: Match[] = [
     preferredPartnerAgeRange: [25, 30],
     nationality: 'American',
     careerGoals: 'CEO',
-    matchScore: 75
+    compatibilityScore: 75
   },
 ];
 

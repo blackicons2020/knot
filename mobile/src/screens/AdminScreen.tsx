@@ -17,7 +17,7 @@ import { MATCHES_DATA } from '../constants';
 import { AdminAddUserModal } from '../components/AdminAddUserModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type AdminTab = 'all' | 'subscribers';
+type AdminTab = 'all' | 'pending' | 'verified' | 'subscribers';
 
 export default function AdminScreen() {
   const navigation = useNavigation<Nav>();

@@ -141,7 +141,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
               <TouchableOpacity 
                 style={{ flex: 1, paddingVertical: 12, borderRadius: 24, borderWidth: 1, borderColor: '#D4AF37', alignItems: 'center' }}
                 onPress={() => {
-                  setLivenessState('ready');
+                  setLivenessState('align');
                   setPrompt('Center your face in the circular aperture');
                   step.value = 0;
                 }}
