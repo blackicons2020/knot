@@ -429,10 +429,7 @@ export default function OnboardingScreen() {
         setTimeout(() => {
           setVerificationStep(3); // Biometric match
           setTimeout(() => {
-            setVerificationStep(4); // Approval
-            setTimeout(() => {
-              setStep(6); // Go to Interview next!
-            }, 1200);
+            setVerificationStep(4); // Approval - user clicks proceed button to continue
           }, 1500);
         }, 1500);
       }, 1500);
@@ -459,7 +456,7 @@ export default function OnboardingScreen() {
       const finalForm = {
         ...form,
         name: `${form.firstName} ${form.lastName}`,
-        isVerified: true,
+        isVerified: !verificationSkipped,
         personalValues: archetype.personalValues,
         bio: 'Intentional Builder focused on traditional family values and mutual growth.',
       };
@@ -1155,7 +1152,7 @@ export default function OnboardingScreen() {
             
             <View style={{ alignItems: 'center', marginTop: 16 }}>
               <TouchableOpacity onPress={() => { setProfilePictureSkipped(true); setStep(4); }}>
-                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
+                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for Now & Do This Later</Text>
               </TouchableOpacity>
               <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until a picture is uploaded.</Text>
             </View>
@@ -1224,7 +1221,7 @@ export default function OnboardingScreen() {
             
             <View style={{ alignItems: 'center', marginTop: 16 }}>
               <TouchableOpacity onPress={() => { setVerificationSkipped(true); setStep(6); }}>
-                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for now</Text>
+                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for Now & Do This Later</Text>
               </TouchableOpacity>
               <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until verification is done.</Text>
             </View>
@@ -1294,7 +1291,7 @@ export default function OnboardingScreen() {
         )}
 
         {/* Step 4: Futuristic AI Identity & Biometric Match Scanner */}
-        {step === 5 && !verificationSkipped && (
+        {step === 5 && (
           <View style={[styles.scannerContainer, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent + '33' }]}>
             <Text style={[styles.scannerTitle, textStyle]}>AI Biometric Liveness & ID Match</Text>
             <Text style={styles.scannerSubtitle}>Secure Verification Session In Progress</Text>
@@ -1385,25 +1382,52 @@ export default function OnboardingScreen() {
                 )}
               </View>
             </View>
+
+            {/* Manual Proceed Button when Verification is Complete */}
+            {verificationStep >= 4 && (
+              <TouchableOpacity
+                style={{ marginTop: 20 }}
+                onPress={() => setStep(6)}
+              >
+                <LinearGradient colors={['#10B981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionButton}>
+                  <Ionicons name="checkmark-circle-outline" size={20} color={Colors.white} />
+                  <Text style={styles.actionButtonText}>Identity Verified — Proceed to AI Interview</Text>
+                  <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
         {/* Step 5: Digital Relationship Certificate Reveal */}
         {step === 7 && (
           <View style={styles.certificateContainer}>
-            <View style={[styles.certCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: Colors.accent }]}>
+            <View style={[styles.certCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: verificationSkipped ? '#E27D8D' : Colors.accent }]}>
               
               <View style={styles.certBadgeWrapper}>
-                <View style={styles.certBadge}>
-                  <Ionicons name="shield-checkmark" size={14} color={Colors.dark} />
-                  <Text style={styles.certBadgeText}>VERIFIED REGISTRY CERTIFICATE</Text>
+                <View style={[styles.certBadge, verificationSkipped && { backgroundColor: '#E27D8D20', borderColor: '#E27D8D' }]}>
+                  <Ionicons name={verificationSkipped ? "alert-circle" : "shield-checkmark"} size={14} color={verificationSkipped ? "#E27D8D" : Colors.dark} />
+                  <Text style={[styles.certBadgeText, verificationSkipped && { color: "#E27D8D" }]}>
+                    {verificationSkipped ? "UNVERIFIED REGISTRY PROFILE" : "VERIFIED REGISTRY CERTIFICATE"}
+                  </Text>
                 </View>
               </View>
 
               <Text style={[styles.certName, textStyle]}>{form.firstName} {form.lastName}</Text>
               <Text style={styles.certLocation}>
-                {form.residenceCity || 'Lagos'}, {form.residenceCountry || 'Nigeria'} • Active Member
+                {form.residenceCity || 'Lagos'}, {form.residenceCountry || 'Nigeria'} • {verificationSkipped ? "Unverified (Private Profile)" : "Active Verified Member"}
               </Text>
+
+              {verificationSkipped && (
+                <View style={{ backgroundColor: '#E27D8D15', borderColor: '#E27D8D40', borderWidth: 1, borderRadius: 12, padding: 12, marginVertical: 12 }}>
+                  <Text style={{ color: '#E27D8D', fontSize: 12, fontWeight: '700', textAlign: 'center' }}>
+                    ⚠️ Profile Unverified & Hidden
+                  </Text>
+                  <Text style={{ color: Colors.gray400, fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+                    Your profile will remain hidden from potential matches until identity verification is completed.
+                  </Text>
+                </View>
+              )}
 
               <View style={styles.certDivider} />
 

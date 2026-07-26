@@ -131,13 +131,53 @@ export default function ProfileScreen() {
                   {userProfile.age || userProfile.dateOfBirth ? `, ${userProfile.age || (new Date().getFullYear() - new Date(userProfile.dateOfBirth!).getFullYear())}` : ''}
                 </Text>
                 <Text style={st.userLocation}>{userProfile.occupation || 'Member'} • {locationText}</Text>
-                {userProfile.isVerified && (
+                {userProfile.isVerified ? (
                   <View style={st.verifiedBadge}>
                     <Text style={st.verifiedBadgeText}>Verified Registry Member</Text>
                   </View>
+                ) : (
+                  <TouchableOpacity 
+                    style={[st.verifiedBadge, { backgroundColor: '#E27D8D20', borderColor: '#E27D8D', borderWidth: 1 }]}
+                    onPress={() => navigation.navigate('Verification', { user: userProfile })}
+                  >
+                    <Ionicons name="alert-circle" size={12} color="#E27D8D" style={{ marginRight: 4 }} />
+                    <Text style={[st.verifiedBadgeText, { color: '#E27D8D' }]}>Not Verified (Profile Private)</Text>
+                  </TouchableOpacity>
                 )}
               </View>
             </View>
+
+            {!userProfile.isVerified && (
+              <TouchableOpacity 
+                style={{
+                  backgroundColor: 'rgba(226, 125, 141, 0.15)',
+                  borderColor: 'rgba(226, 125, 141, 0.4)',
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  padding: 12,
+                  marginTop: 12,
+                  marginBottom: 4,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+                onPress={() => navigation.navigate('Verification', { user: userProfile })}
+              >
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                    <Ionicons name="shield-outline" size={14} color="#E27D8D" />
+                    <Text style={{ color: '#E27D8D', fontWeight: 'bold', fontSize: 12 }}>Profile Not Verified</Text>
+                  </View>
+                  <Text style={{ color: Colors.gray300, fontSize: 10, lineHeight: 14 }}>
+                    Your profile is hidden from matches. Verify now to become visible to the community.
+                  </Text>
+                </View>
+                <View style={{ backgroundColor: '#E27D8D', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}>
+                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 10 }}>Verify Now</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity style={st.editBtn} onPress={() => navigation.navigate('EditProfile', { user: userProfile })}>
               <Ionicons name="settings-outline" size={14} color={Colors.gray300} />
               <Text style={st.editBtnText}>Edit Profile Data</Text>

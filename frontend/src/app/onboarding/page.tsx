@@ -575,7 +575,7 @@ export default function Onboarding() {
 
       if (!res.success) {
         alert(res.details || "The documents could not be verified. Please make sure to upload a clear selfie and a valid government ID.");
-        setStep(2); // Go back to files upload step
+        setStep(4); // Go back to files upload step
         return;
       }
 
@@ -587,27 +587,15 @@ export default function Onboarding() {
         setTimeout(() => {
           setVerificationStep(3); // Verifying age alignment
           setTimeout(() => {
-            setVerificationStep(4); // Completed
-            setStep(6); // Proceed to AI Interview
+            setVerificationStep(4); // Completed - user clicks proceed button to continue
           }, 1800);
         }, 1800);
       }, 1800);
 
     } catch (error) {
       console.error("AI verification failed:", error);
-      // Fallback
-      setStep(5);
-      setVerificationStep(1);
-      setTimeout(() => {
-        setVerificationStep(2);
-        setTimeout(() => {
-          setVerificationStep(3);
-          setTimeout(() => {
-            setVerificationStep(4);
-            setStep(6);
-          }, 1800);
-        }, 1800);
-      }, 1800);
+      alert("Verification failed due to a network or server error. Please try again.");
+      setStep(4);
     }
   };
 
@@ -1078,7 +1066,7 @@ export default function Onboarding() {
                   }}
                   className="text-xs text-gray-500 hover:text-white transition-colors underline"
                 >
-                  Skip for now
+                  Skip for Now & Do This Later
                 </button>
                 <p className="text-white text-xs mt-3">
                   Warning: Your profile remains private until a picture is uploaded.
@@ -1162,7 +1150,7 @@ export default function Onboarding() {
                   }}
                   className="text-xs text-gray-500 hover:text-white transition-colors underline"
                 >
-                  Skip for now
+                  Skip for Now & Do This Later
                 </button>
                 <p className="text-white text-xs mt-3">
                   Warning: Your profile remains private until verification is done.
@@ -1328,6 +1316,16 @@ export default function Onboarding() {
               </div>
             </div>
 
+            {/* Proceed button when real-time scan completes */}
+            {verificationStep >= 4 && (
+              <button 
+                onClick={() => setStep(6)}
+                className="w-full py-4 rounded-xl text-sm font-black bg-[#10B981] text-white flex items-center justify-center gap-2 hover:bg-[#059669] transition"
+              >
+                Identity Verified — Continue to AI Interview <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+
             {/* Scanning styles */}
             <style jsx>{`
               @keyframes scan {
@@ -1341,15 +1339,25 @@ export default function Onboarding() {
         {/* Step 5: Cinematic AI Relationship Certificate Reveal */}
         {step === 7 && (
           <div className="space-y-8 animate-fade-in">
-            <div className="glass-card rounded-[36px] p-6 sm:p-8 border border-[#D4AF37]/30 shadow-2xl shadow-[#D4AF37]/5 relative overflow-hidden max-w-md mx-auto">
+            <div className={`glass-card rounded-[36px] p-6 sm:p-8 border ${verificationSkipped ? "border-[#E27D8D]/50" : "border-[#D4AF37]/30"} shadow-2xl relative overflow-hidden max-w-md mx-auto`}>
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4AF37]/10 to-transparent rounded-bl-full pointer-events-none" />
               
               <div className="text-center space-y-4 mb-6">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full trust-badge text-[10px] font-black tracking-widest uppercase">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Verified Registry Certificate
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                  verificationSkipped ? "bg-[#E27D8D]/20 text-[#E27D8D] border border-[#E27D8D]/40" : "trust-badge"
+                }`}>
+                  {verificationSkipped ? <AlertCircle className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                  {verificationSkipped ? "UNVERIFIED REGISTRY PROFILE" : "VERIFIED REGISTRY CERTIFICATE"}
                 </div>
                 <h3 className="text-2xl font-serif font-black text-white">{firstName} {lastName}</h3>
-                <p className="text-xs text-gray-400">{residenceCity || "Lagos"}, {residenceCountry || "Nigeria"} • Active Member</p>
+                <p className="text-xs text-gray-400">{residenceCity || "Lagos"}, {residenceCountry || "Nigeria"} • {verificationSkipped ? "Unverified Member (Private Profile)" : "Active Verified Member"}</p>
+                
+                {verificationSkipped && (
+                  <div className="p-3 bg-[#E27D8D]/10 border border-[#E27D8D]/30 rounded-xl text-center">
+                    <p className="text-xs font-bold text-[#E27D8D]">⚠️ Profile Unverified & Hidden</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Your profile remains private and hidden from matches until verification is complete.</p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4 pt-4 border-t border-white/5">
