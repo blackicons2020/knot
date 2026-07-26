@@ -439,20 +439,18 @@ export default function OnboardingScreen() {
 
     } catch (error: any) {
       console.error("AI verification failed:", error.message);
-      // Run normal animation as fallback
-      setVerificationStep(1);
-      setTimeout(() => {
-        setVerificationStep(2);
-        setTimeout(() => {
-          setVerificationStep(3);
-          setTimeout(() => {
-            setVerificationStep(4);
-            setTimeout(() => {
-              setStep(7);
-            }, 1200);
-          }, 1500);
-        }, 1500);
-      }, 1500);
+      Alert.alert(
+        "Verification Error",
+        error.message || "Verification failed due to a network or server error. Please try again.",
+        [
+          {
+            text: "Try Again",
+            onPress: () => {
+              setStep(3); // Go back to files upload step
+            }
+          }
+        ]
+      );
     }
   };
 

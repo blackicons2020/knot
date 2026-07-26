@@ -77,7 +77,7 @@ export default function AuthScreen() {
           {isLogin ? 'Welcome Back' : 'Join the Registry'}
         </Text>
         <Text style={[styles.subheadline, { color: isDarkMode ? Colors.gray400 : Colors.gray500 }]}>
-          Relationships that lead to vows
+          Relationship that lead to vow
         </Text>
 
         {/* Google Sign-in temporarily disabled
