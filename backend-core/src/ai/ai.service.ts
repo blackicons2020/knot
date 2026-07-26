@@ -100,11 +100,11 @@ export class AIService {
     } catch (error) {
       this.logger.error(`Error in onboarding verification: ${error.message}`);
       return {
-        success: true,
-        confidenceScore: 95,
-        ocrName: `${firstName} ${lastName}`,
-        ocrAge: dateOfBirth,
-        details: 'Approved via default fallback',
+        success: false,
+        confidenceScore: 0,
+        ocrName: '',
+        ocrAge: '',
+        details: `Verification failed due to backend processing error: ${error.message}`,
       };
     }
   }
