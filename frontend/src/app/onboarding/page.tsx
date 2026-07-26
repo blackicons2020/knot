@@ -234,29 +234,28 @@ export default function Onboarding() {
   useEffect(() => {
     if (isIdScanModalOpen && isCameraActive) {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
           .then(stream => {
             if (idVideoRef.current) {
               idVideoRef.current.srcObject = stream;
             }
             idStreamRef.current = stream;
-        idStreamRef.current = stream;
-      })
-      .catch(err => {
-        console.warn("Back camera access failed (using simulation wireframe):", err);
+          })
+          .catch(err => {
+            console.warn("Camera access failed (using simulation wireframe):", err);
+            setIsCameraActive(false);
+          });
+      } else {
+        console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
         setIsCameraActive(false);
-      });
+      }
     } else {
-      console.warn("navigator.mediaDevices is undefined (likely non-HTTPS or unsupported)");
-      setIsCameraActive(false);
+      if (idStreamRef.current) {
+        idStreamRef.current.getTracks().forEach(track => track.stop());
+        idStreamRef.current = null;
+      }
     }
-  } else {
-    if (idStreamRef.current) {
-      idStreamRef.current.getTracks().forEach(track => track.stop());
-      idStreamRef.current = null;
-    }
-  }
-}, [isIdScanModalOpen, isCameraActive]);
+  }, [isIdScanModalOpen, isCameraActive]);
 
   // Add ref for face-api requestAnimationFrame
   const requestRef = useRef<number | null>(null);
@@ -929,9 +928,9 @@ export default function Onboarding() {
                     <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block mb-1">Future Partners Children Status</label>
                     <select value={childrenStatus} onChange={e => setChildrenStatus(e.target.value)} className="w-full bg-[#121721] border border-white/10 rounded-2xl py-3.5 px-4 text-sm text-white focus:outline-none focus:border-[#D4AF37]/50">
                       <option value="">Select status</option>
-                      <option value="without kids">without kids</option>
-                      <option value="With Children">With Children</option>
-                      <option value="with or without kids">with or without kids</option>
+                      <option value="No Kid(s)">No Kid(s)</option>
+                      <option value="With Kid(s)">With Kid(s)</option>
+                      <option value="With or Without Kid(s)">With or Without Kid(s)</option>
                     </select>
                   </div>
                   <div>
