@@ -367,7 +367,7 @@ export default function OnboardingScreen() {
   };
 
   const handleProcessAIVerification = async () => {
-    setStep(7);
+    setStep(5); // Show AI Biometric Scanner UI
     setVerificationStep(0); // Analyzing and extracting details
 
     try {
@@ -414,7 +414,7 @@ export default function OnboardingScreen() {
             { 
               text: "Try Again", 
               onPress: () => {
-                setStep(3); // Go back to files upload step
+                setStep(4); // Go back to Identity Upload step
               } 
             }
           ]
@@ -431,7 +431,7 @@ export default function OnboardingScreen() {
           setTimeout(() => {
             setVerificationStep(4); // Approval
             setTimeout(() => {
-              setStep(7); // Go to Interview next!
+              setStep(6); // Go to Interview next!
             }, 1200);
           }, 1500);
         }, 1500);
@@ -446,7 +446,7 @@ export default function OnboardingScreen() {
           {
             text: "Try Again",
             onPress: () => {
-              setStep(3); // Go back to files upload step
+              setStep(4); // Go back to Identity Upload step
             }
           }
         ]
