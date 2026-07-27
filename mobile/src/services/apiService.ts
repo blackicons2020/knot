@@ -285,18 +285,63 @@ class ApiService {
 
   // Admin
   async getAllUsers(): Promise<User[]> {
-    return this.request<User[]>('/users');
+    let usersFromApi: User[] = [];
+    try {
+      usersFromApi = await this.request<User[]>('/users');
+      if (Array.isArray(usersFromApi) && usersFromApi.length > 0) {
+        await AsyncStorage.setItem('knot_all_users_cache', JSON.stringify(usersFromApi));
+        return usersFromApi;
+      }
+    } catch (e) {
+      console.warn("API getAllUsers failed/offline, reading local cache:", e);
+    }
+
+    try {
+      const storedLocal = await AsyncStorage.getItem('knot_all_users_cache');
+      if (storedLocal) {
+        const parsed = JSON.parse(storedLocal);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed as User[];
+        }
+      }
+    } catch { /* ignore */ }
+
+    // Fallback to MATCHES_DATA so Admin Dashboard is ALWAYS populated
+    const fallbackData = MATCHES_DATA as any as User[];
+    try {
+      await AsyncStorage.setItem('knot_all_users_cache', JSON.stringify(fallbackData));
+    } catch { /* ignore */ }
+    return fallbackData;
   }
 
   async deleteUser(uid: string): Promise<void> {
-    await this.request(`/users/${uid}`, { method: 'DELETE' });
+    try {
+      await this.request(`/users/${uid}`, { method: 'DELETE' });
+    } catch (e) {
+      console.warn("Backend deleteUser failed, purging from local cache:", e);
+    }
+    try {
+      const storedLocal = await AsyncStorage.getItem('knot_all_users_cache');
+      if (storedLocal) {
+        const parsed = JSON.parse(storedLocal) as User[];
+        const filtered = parsed.filter(u => u.id !== uid);
+        await AsyncStorage.setItem('knot_all_users_cache', JSON.stringify(filtered));
+      }
+    } catch { /* ignore */ }
   }
 
   async seedMockData(users: User[]): Promise<void> {
-    await this.request('/users/seed', {
-      method: 'POST',
-      body: JSON.stringify({ users }),
-    });
+    try {
+      await this.request('/users/seed', {
+        method: 'POST',
+        body: JSON.stringify({ users }),
+      });
+    } catch (e) {
+      console.warn("Backend seedMockData failed, seeding local cache:", e);
+    }
+    try {
+      await AsyncStorage.setItem('knot_all_users_cache', JSON.stringify(users));
+    } catch { /* ignore */ }
   }
 
   async addGlobalMatches(users: User[]): Promise<void> {

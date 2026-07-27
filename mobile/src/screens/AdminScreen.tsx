@@ -33,7 +33,22 @@ export default function AdminScreen() {
 
   const load = async () => {
     setLoading(true);
-    const data = await db.getAllUsers();
+    let data = await db.getAllUsers();
+    
+    // Also include current logged in user if available so they see themselves in Admin
+    try {
+      const currentUserStr = await AsyncStorage.getItem('knot_user_profile');
+      if (currentUserStr) {
+        const currentUser = JSON.parse(currentUserStr);
+        if (currentUser && currentUser.name) {
+          const exists = data.some((m) => m.email?.toLowerCase() === currentUser.email?.toLowerCase() || m.id === currentUser.id);
+          if (!exists) {
+            data = [currentUser, ...data];
+          }
+        }
+      }
+    } catch { /* ignore */ }
+
     setMembers(data);
     setLoading(false);
   };
