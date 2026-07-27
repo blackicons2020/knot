@@ -1198,10 +1198,7 @@ export default function OnboardingScreen() {
             </TouchableOpacity>
             
             <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <TouchableOpacity onPress={() => { setVerificationSkipped(true); setStep(6); }}>
-                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for Now & Do This Later</Text>
-              </TouchableOpacity>
-              <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until verification is done.</Text>
+              <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>🔒 Identity Verification is Compulsory for Registry Safety</Text>
             </View>
           </View>
         )}

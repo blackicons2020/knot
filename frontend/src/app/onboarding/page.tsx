@@ -1143,17 +1143,8 @@ export default function Onboarding() {
               </button>
               
               <div className="text-center">
-                <button 
-                  onClick={() => {
-                    setVerificationSkipped(true);
-                    setStep(6);
-                  }}
-                  className="text-xs text-gray-500 hover:text-white transition-colors underline"
-                >
-                  Skip for Now & Do This Later
-                </button>
-                <p className="text-white text-xs mt-3">
-                  Warning: Your profile remains private until verification is done.
+                <p className="text-[#D4AF37] text-xs font-bold mt-2">
+                  🔒 Identity Verification is Compulsory for Registry Safety
                 </p>
               </div>
             </div>
