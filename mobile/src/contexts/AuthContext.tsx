@@ -41,20 +41,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const restore = async () => {
       try {
         await api.init();
-        let user = await api.getMe();
-        
-        if (user) {
-          await AsyncStorage.setItem('knot_user_profile', JSON.stringify(user));
-        } else {
-          // Fallback to local storage if backend is unreachable during demo
-          const localUser = await AsyncStorage.getItem('knot_user_profile');
-          if (localUser) {
-            user = JSON.parse(localUser);
+
+        // If user is not logged in (no token), immediately finish loading and open AuthScreen!
+        if (!api.hasToken()) {
+          setUserProfile(null);
+          setLoading(false);
+          return;
+        }
+
+        // Check for cached local user profile for instant launch
+        const localUserStr = await AsyncStorage.getItem('knot_user_profile');
+        if (localUserStr) {
+          try {
+            const localUser = JSON.parse(localUserStr);
+            setUserProfile(localUser);
+            setLoading(false); // Instantly open main app!
+          } catch (e) {
+            console.warn('Failed to parse cached user profile:', e);
           }
         }
-        
-        setUserProfile(user);
-      } catch {
+
+        // Fetch fresh profile from backend in background
+        try {
+          const user = await api.getMe();
+          if (user) {
+            await AsyncStorage.setItem('knot_user_profile', JSON.stringify(user));
+            setUserProfile(user);
+          }
+        } catch (e) {
+          console.warn('Backend profile fetch failed or timed out:', e);
+        }
+      } catch (err) {
         setUserProfile(null);
       } finally {
         setLoading(false);

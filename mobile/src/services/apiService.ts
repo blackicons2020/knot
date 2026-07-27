@@ -14,6 +14,10 @@ class ApiService {
     this.token = await AsyncStorage.getItem('knot_token');
   }
 
+  hasToken(): boolean {
+    return !!this.token;
+  }
+
   setToken(token: string | null) {
     this.token = token;
     if (token) {
