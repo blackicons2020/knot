@@ -168,42 +168,6 @@ export default function VerificationScreen() {
     }
   };
 
-      setIsProcessing(false);
-
-      if (!res.success) {
-        setVerificationStep(0);
-        Alert.alert(
-          'Verification Failed',
-          res.details || 'Your document or selfie could not be verified by our AI system. Please make sure your face is clearly visible and your ID is a valid government document.',
-          [
-            {
-              text: 'Try Again',
-              onPress: () => setStep('capture'),
-            },
-          ]
-        );
-        return;
-      }
-
-      // Successful verification!
-      setVerificationStep(4); // All checkpoints green ✔ Approved
-
-    } catch (error: any) {
-      setIsProcessing(false);
-      setVerificationStep(0);
-      Alert.alert(
-        'Verification Failed',
-        error.message || 'Verification failed. Please ensure your selfie and ID are clear and legible.',
-        [
-          {
-            text: 'Try Again',
-            onPress: () => setStep('capture'),
-          },
-        ]
-      );
-    }
-  };
-
   const handleFinishVerification = async () => {
     const updatedUser = { ...user, isVerified: true };
     try {
