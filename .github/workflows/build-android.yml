@@ -50,6 +50,7 @@ jobs:
 
       - name: Build Release APK
         env:
+          EXPO_PUBLIC_API_URL: https://knot-backend-core.onrender.com
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -58,6 +59,7 @@ jobs:
 
       - name: Build Release AAB
         env:
+          EXPO_PUBLIC_API_URL: https://knot-backend-core.onrender.com
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
