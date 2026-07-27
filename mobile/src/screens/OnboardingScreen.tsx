@@ -367,24 +367,25 @@ export default function OnboardingScreen() {
       const finalTraits = form.idealPartnerTraits?.map(t => t === 'Other' && traitCustom ? traitCustom : t) || [];
       setForm(p => ({ ...p, languagesSpoken: finalLanguages, idealPartnerTraits: finalTraits }));
 
-      let res: { success: boolean; details?: string } = { success: true };
-      try {
-        res = await db.verifyOnboarding(
-          selfieUrl,
-          idUrl,
-          form.firstName || '',
-          form.lastName || '',
-          form.dateOfBirth || ''
-        );
-      } catch (e) {
-        console.warn("Backend verifyOnboarding failed or timed out, assuming local verification success for demo:", e);
-        res = { success: true };
-      }
+      // Sequential progress steps
+      setVerificationStep(1); // 1. Scanning ID text & details... Match
+      await new Promise(r => setTimeout(r, 800));
+
+      setVerificationStep(2); // 2. Extracting face keypoints... Extracted
+      await new Promise(r => setTimeout(r, 800));
+
+      setVerificationStep(3); // 3. Biometric comparison... 98.7% Confirmed / Age & Name: Verifying...
+
+      // Call REAL backend AI verification
+      const res = await db.verifyOnboarding(
+        selfieUrl,
+        idUrl,
+        form.firstName || '',
+        form.lastName || '',
+        form.dateOfBirth || ''
+      );
 
       if (!res.success) {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
         setVerificationStep(0);
         Alert.alert(
           "Verification Failed",
@@ -401,14 +402,24 @@ export default function OnboardingScreen() {
         return;
       }
 
-      // Complete all checkpoints and show proceed button
-      setTimeout(() => {
-        setVerificationStep(4);
-      }, 4500);
+      // Complete all 4 checkpoints to show green "Approved" and reveal proceed button!
+      setVerificationStep(4);
 
     } catch (error: any) {
       console.error("AI verification error:", error);
-      setTimeout(() => setVerificationStep(4), 3000);
+      setVerificationStep(0);
+      Alert.alert(
+        "Verification Error",
+        error.message || "Verification failed due to a network or server error. Please try again.",
+        [
+          {
+            text: "Try Again",
+            onPress: () => {
+              setStep(4); // Go back to Identity Upload step
+            }
+          }
+        ]
+      );
     }
   };
 

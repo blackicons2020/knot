@@ -137,11 +137,11 @@ export default function ProfileScreen() {
                   </View>
                 ) : (
                   <TouchableOpacity 
-                    style={[st.verifiedBadge, { backgroundColor: '#E27D8D20', borderColor: '#E27D8D', borderWidth: 1 }]}
+                    style={[st.verifiedBadge, { backgroundColor: 'rgba(212,175,55,0.12)', borderColor: 'rgba(212,175,55,0.4)', borderWidth: 1 }]}
                     onPress={() => navigation.navigate('Verification', { user: userProfile })}
                   >
-                    <Ionicons name="alert-circle" size={12} color="#E27D8D" style={{ marginRight: 4 }} />
-                    <Text style={[st.verifiedBadgeText, { color: '#E27D8D' }]}>Not Verified (Profile Private)</Text>
+                    <Ionicons name="shield-outline" size={12} color="#D4AF37" style={{ marginRight: 4 }} />
+                    <Text style={[st.verifiedBadgeText, { color: '#D4AF37' }]}>Unverified Profile (Private)</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -150,30 +150,30 @@ export default function ProfileScreen() {
             {!userProfile.isVerified && (
               <TouchableOpacity 
                 style={{
-                  backgroundColor: 'rgba(226, 125, 141, 0.15)',
-                  borderColor: 'rgba(226, 125, 141, 0.4)',
+                  backgroundColor: '#161B26',
+                  borderColor: 'rgba(212, 175, 55, 0.35)',
                   borderWidth: 1,
-                  borderRadius: 12,
-                  padding: 12,
-                  marginTop: 12,
+                  borderRadius: 16,
+                  padding: 16,
+                  marginTop: 14,
                   marginBottom: 4,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
                 }}
                 onPress={() => navigation.navigate('Verification', { user: userProfile })}
               >
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                    <Ionicons name="shield-outline" size={14} color="#E27D8D" />
-                    <Text style={{ color: '#E27D8D', fontWeight: 'bold', fontSize: 12 }}>Profile Not Verified</Text>
+                <View style={{ flex: 1, marginRight: 12 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Ionicons name="shield-checkmark" size={16} color="#D4AF37" />
+                    <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 13 }}>Verify Your Identity</Text>
                   </View>
-                  <Text style={{ color: Colors.gray300, fontSize: 10, lineHeight: 14 }}>
-                    Your profile is hidden from matches. Verify now to become visible to the community.
+                  <Text style={{ color: Colors.gray400, fontSize: 11, lineHeight: 16 }}>
+                    Your profile is private. Complete identity verification to unlock full registry access & visibility.
                   </Text>
                 </View>
-                <View style={{ backgroundColor: '#E27D8D', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}>
-                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 10 }}>Verify Now</Text>
+                <View style={{ backgroundColor: '#D4AF37', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12 }}>
+                  <Text style={{ color: '#000000', fontWeight: '900', fontSize: 11 }}>Verify Now</Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -217,12 +217,13 @@ export default function ProfileScreen() {
                   <Text style={st.verifLabel}>Liveness Selfie Match</Text>
                   <Text style={[st.verifStatus, { color: '#f59e0b' }]}>Pending</Text>
                 </View>
-                <Text style={{color: '#9ca3af', fontSize: 12, marginTop: 8, marginBottom: 12}}>Your profile remains private until identity verification is completed.</Text>
+                <Text style={{color: '#9ca3af', fontSize: 11, marginTop: 8, marginBottom: 12, lineHeight: 16}}>Your profile remains private until identity verification is completed.</Text>
                 <TouchableOpacity 
-                  style={[st.editBtn, { backgroundColor: '#10B981', borderTopWidth: 0 }]}
-                  onPress={() => navigation.navigate('Onboarding' as never)}
+                  style={[st.editBtn, { backgroundColor: '#D4AF37', borderTopWidth: 0, marginTop: 4, borderRadius: 12, justifyContent: 'center' }]}
+                  onPress={() => navigation.navigate('Verification', { user: userProfile })}
                 >
-                  <Text style={[st.editBtnText, { color: '#fff' }]}>Complete Verification</Text>
+                  <Ionicons name="shield-checkmark" size={16} color="#000000" style={{ marginRight: 6 }} />
+                  <Text style={[st.editBtnText, { color: '#000000', fontWeight: '900' }]}>Complete Verification</Text>
                 </TouchableOpacity>
               </>
             )}
