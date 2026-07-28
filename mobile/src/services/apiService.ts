@@ -37,8 +37,8 @@ class ApiService {
     }
 
     const controller = new AbortController();
-    // 10 second timeout for fast user experience
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    // 45 second timeout for image analysis and cold starts
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await fetch(`${API_URL}${path}`, { 
@@ -373,12 +373,30 @@ class ApiService {
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
-    // Don't set Content-Type — let fetch set it with the boundary
-    const res = await fetch(`${API_URL}/upload`, { method: 'POST', headers, body: formData });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed');
-    // Return full URL (e.g. http://localhost:5000/uploads/abc123.jpg)
-    return `${BASE_URL}${data.url}`;
+    
+    // Add a 45-second timeout to prevent infinite hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    
+    try {
+      const res = await fetch(`${API_URL}/upload`, { 
+        method: 'POST', 
+        headers, 
+        body: formData,
+        signal: controller.signal 
+      });
+      clearTimeout(timeoutId);
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      return `${BASE_URL}${data.url}`;
+    } catch (e: any) {
+      clearTimeout(timeoutId);
+      if (e.name === 'AbortError') {
+        throw new Error('Upload timed out. Please check your connection.');
+      }
+      throw e;
+    }
   }
 }
 
