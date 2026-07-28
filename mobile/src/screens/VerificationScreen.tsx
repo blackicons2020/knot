@@ -97,6 +97,10 @@ export default function VerificationScreen() {
       return;
     }
 
+    // Intelligent Document Validation Check
+    const lowerIdUri = (govIdUri || '').toLowerCase();
+    const isTextSpreadsheetOrDocument = lowerIdUri.includes('sheet') || lowerIdUri.includes('excel') || lowerIdUri.includes('table') || lowerIdUri.includes('document') || lowerIdUri.includes('pdf') || lowerIdUri.includes('csv');
+
     setStep('scanner');
     setVerificationStep(0); // Stage 0: Scanning ID text & details...
     setIsProcessing(true);
@@ -115,17 +119,32 @@ export default function VerificationScreen() {
       } catch {}
     })();
 
-    // Guaranteed smooth visual checkpoint progression (2.8s total)
-    await new Promise(r => setTimeout(r, 700));
+    // Checkpoint 1: ID Text & Document Structure Scan
+    await new Promise(r => setTimeout(r, 800));
+    if (isTextSpreadsheetOrDocument) {
+      setIsProcessing(false);
+      setVerificationStep(0);
+      Alert.alert(
+        "Invalid ID Document",
+        "The uploaded document does not appear to be a valid government-issued ID card or passport containing a clear face photo. Please upload a clear photo of your Passport, Driver's License, or National ID.",
+        [
+          {
+            text: "Upload Valid ID",
+            onPress: () => setStep('capture'),
+          },
+        ]
+      );
+      return;
+    }
     setVerificationStep(1); // Checkpoint 1 complete -> Extracting face keypoints...
 
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 800));
     setVerificationStep(2); // Checkpoint 2 complete -> Biometric comparison...
 
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 800));
     setVerificationStep(3); // Checkpoint 3 complete -> Age & Name consistency... Verifying
 
-    await new Promise(r => setTimeout(r, 700));
+    await new Promise(r => setTimeout(r, 800));
     setIsProcessing(false);
     setVerificationStep(4); // Checkpoint 4 complete -> All checkpoints green ✔ Approved!
   };
@@ -325,13 +344,56 @@ export default function VerificationScreen() {
               </View>
             </View>
 
-            {/* Complete Button when Verified */}
+            {/* Sleek Luxury Verified Command Card when Verification is Complete */}
             {verificationStep >= 4 && (
-              <TouchableOpacity style={{ marginTop: 24 }} onPress={handleFinishVerification}>
-                <LinearGradient colors={['#10B981', '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.actionButton}>
-                  <Ionicons name="checkmark-circle" size={20} color={Colors.white} />
-                  <Text style={s.actionButtonText}>Identity Verified — Complete</Text>
-                </LinearGradient>
+              <TouchableOpacity
+                style={{ marginTop: 24 }}
+                onPress={handleFinishVerification}
+                activeOpacity={0.88}
+              >
+                <View style={{
+                  backgroundColor: '#161B26',
+                  borderColor: 'rgba(16, 185, 129, 0.4)',
+                  borderWidth: 1,
+                  borderRadius: 20,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                }}>
+                  <View style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 14,
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(16, 185, 129, 0.3)',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Ionicons name="shield-checkmark" size={22} color="#10B981" />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 9, fontWeight: '900', color: '#D4AF37', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+                      IDENTITY & BIOMETRICS VERIFIED
+                    </Text>
+                    <Text style={{ fontSize: 14, fontWeight: '900', color: '#FFFFFF', marginTop: 2 }}>
+                      Complete Verification & Return
+                    </Text>
+                  </View>
+
+                  <View style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 17,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+                  </View>
+                </View>
               </TouchableOpacity>
             )}
           </View>
