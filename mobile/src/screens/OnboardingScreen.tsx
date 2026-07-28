@@ -1197,6 +1197,7 @@ export default function OnboardingScreen() {
               <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>🔒 Identity Verification is Compulsory for Registry Safety</Text>
             </View>
           </View>
+        )}
          {/* Step 4: Conversational AI Interview */}
         {step === 6 && (
           <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
