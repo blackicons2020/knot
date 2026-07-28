@@ -1362,56 +1362,34 @@ export default function OnboardingScreen() {
               </View>
             </View>
 
-            {/* Sleek Luxury Verified Command Card when Verification is Complete */}
+            {/* Proceed Button styled exactly as requested in screenshot */}
             {verificationStep >= 4 && (
               <TouchableOpacity
-                style={{ marginTop: 20 }}
+                style={{ marginTop: 24 }}
                 onPress={() => setStep(6)}
                 activeOpacity={0.88}
               >
-                <View style={{
-                  backgroundColor: '#161B26',
-                  borderColor: 'rgba(16, 185, 129, 0.4)',
-                  borderWidth: 1,
-                  borderRadius: 20,
-                  padding: 16,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 12,
-                }}>
-                  <View style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 14,
-                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                    borderWidth: 1,
-                    borderColor: 'rgba(16, 185, 129, 0.3)',
+                <LinearGradient
+                  colors={['#E27D8D', '#2D1B4E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    paddingVertical: 18,
+                    paddingHorizontal: 24,
+                    borderRadius: 24,
                     alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Ionicons name="shield-checkmark" size={22} color="#10B981" />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 9, fontWeight: '900', color: '#D4AF37', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-                      BIOMETRICS & ID MATCHED
-                    </Text>
-                    <Text style={{ fontSize: 14, fontWeight: '900', color: '#FFFFFF', marginTop: 2 }}>
-                      Proceed to AI Interview
-                    </Text>
-                  </View>
-
-                  <View style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 17,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    alignItems: 'center',
-                    justify: 'center'
-                  }}>
-                    <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
-                  </View>
-                </View>
+                    justifyContent: 'center',
+                    shadowColor: '#E27D8D',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: '#FFFFFF', letterSpacing: 0.3 }}>
+                    View Verification Certificate
+                  </Text>
+                </LinearGradient>
               </TouchableOpacity>
             )}
           </View>
