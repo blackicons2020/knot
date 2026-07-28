@@ -114,9 +114,9 @@ export default function VerificationScreen() {
       if (finalIdUrl.startsWith('file:') || finalIdUrl.startsWith('content:')) {
         finalIdUrl = await db.uploadPhoto(finalIdUrl);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn("Error uploading photos for verification:", e);
-      Alert.alert("Upload Failed", "Failed to upload images for verification. Please check your network and try again.");
+      Alert.alert("Upload Failed", `Failed to upload images for verification. Please check your network and try again.\n\nDetails: ${e.message}`);
       setIsProcessing(false);
       return;
     }

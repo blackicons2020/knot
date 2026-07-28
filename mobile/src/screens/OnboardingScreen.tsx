@@ -371,9 +371,9 @@ export default function OnboardingScreen() {
       if (profileUrl.startsWith('file:') || profileUrl.startsWith('content:')) {
         db.uploadPhoto(profileUrl).catch(() => {});
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn("Error uploading photos for verification:", e);
-      Alert.alert("Upload Failed", "Failed to upload images for verification. Please check your network and try again.");
+      Alert.alert("Upload Failed", `Failed to upload images for verification. Please check your network and try again.\n\nDetails: ${e.message}`);
       return;
     }
 

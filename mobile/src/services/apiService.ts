@@ -37,8 +37,8 @@ class ApiService {
     }
 
     const controller = new AbortController();
-    // 45 second timeout for image analysis and cold starts
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    // 60 second timeout for image analysis and cold starts
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       const res = await fetch(`${API_URL}${path}`, { 
@@ -363,7 +363,10 @@ class ApiService {
       formData.append('photo', blob, 'photo.jpg');
     } else {
       // On native, use the file URI directly
-      const filename = uri.split('/').pop() || 'photo.jpg';
+      let filename = uri.split('/').pop() || 'photo.jpg';
+      if (!filename.includes('.')) {
+        filename += '.jpg';
+      }
       const ext = filename.split('.').pop()?.toLowerCase() || 'jpg';
       const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
       formData.append('photo', { uri, name: filename, type: mimeType } as any);
@@ -374,9 +377,9 @@ class ApiService {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
     
-    // Add a 45-second timeout to prevent infinite hanging
+    // Add a 60-second timeout to prevent infinite hanging
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     
     try {
       const res = await fetch(`${API_URL}/upload`, { 
