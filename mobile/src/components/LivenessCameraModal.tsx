@@ -29,27 +29,32 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   }, []);
 
   // Shared values for worklet state
-  const step = useSharedValue(0); // 0: align, 1: eyes open/close, 2: wait, 3: mouth open/close, 4: complete
+  const step = useSharedValue(0); // 0: align, 1: wait for eyes, 2: check eyes, 3: wait for mouth, 4: check mouth, 5: complete
   
   const handleStepChangeJS = Worklets.createRunOnJS((newStep: number) => {
     if (newStep === 1) {
-      setLivenessState('eyes');
-      setPrompt('1. Close and open your eyes');
-    } else if (newStep === 2) {
-      setLivenessState('wait');
-      setPrompt('Please wait...');
-      // Wait for brief seconds then move to step 3
+      setLivenessState('align');
+      setPrompt('Face detected. Get ready...');
       setTimeout(() => {
-        step.value = 3;
-        handleStepChangeJS(3);
-      }, 2500);
+        setLivenessState('eyes');
+        setPrompt('1. Close and open your eyes');
+        step.value = 2; // proceed to check blink
+      }, 2000);
     } else if (newStep === 3) {
-      setLivenessState('mouth');
-      setPrompt('2. Open and close your mouth');
-    } else if (newStep === 4) {
+      setLivenessState('wait');
+      setPrompt('Good! Now wait...');
+      setTimeout(() => {
+        setLivenessState('mouth');
+        setPrompt('2. Open and close your mouth');
+        step.value = 4; // proceed to check smile
+      }, 2500);
+    } else if (newStep === 5) {
       setLivenessState('complete');
-      setPrompt('Liveness Confirmed! Biometric face scan complete.');
-      takePhoto();
+      setPrompt('Great! Completing scan...');
+      setTimeout(() => {
+        setPrompt('Liveness Confirmed! Biometric face scan complete.');
+        takePhoto();
+      }, 1500);
     }
   });
 
@@ -72,8 +77,8 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
 
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet';
-    if (step.value === 4) return;
-    if (step.value === 2) return; // Wait state
+    // Ignore wait and complete states
+    if (step.value === 1 || step.value === 3 || step.value === 5) return;
     
     const faces = detectFaces(frame);
     if (faces && faces.length === 1) {
@@ -85,20 +90,20 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
           step.value = 1;
           handleStepChangeJS(1);
         }
-      } else if (step.value === 1) {
+      } else if (step.value === 2) {
         // Eyes close and open
         // A low probability means eye is closed
         if ((face.leftEyeOpenProbability !== undefined && face.leftEyeOpenProbability < 0.2) || 
             (face.rightEyeOpenProbability !== undefined && face.rightEyeOpenProbability < 0.2)) {
-          step.value = 2;
-          handleStepChangeJS(2);
+          step.value = 3;
+          handleStepChangeJS(3);
         }
-      } else if (step.value === 3) {
+      } else if (step.value === 4) {
         // Mouth open (usually detected as a smile or low smiling probability but distinct feature, or we can use smiling as proxy for mouth movement)
         // Since MLKit doesn't have an explicit "mouth open" we use smilingProbability as a proxy for facial movement
         if (face.smilingProbability && face.smilingProbability > 0.7) {
-          step.value = 4;
-          handleStepChangeJS(4);
+          step.value = 5;
+          handleStepChangeJS(5);
         }
       }
     }
