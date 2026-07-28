@@ -383,22 +383,27 @@ def verify_onboarding_documents(request: VerifyRequest):
         
         prompt = f"""
         You are KNOT's High-Trust AI Identity & Fraud Prevention Officer.
+        Your primary directive is to PREVENT fraud. You must be extremely strict and skeptical.
         Your task is to analyze the provided image (which contains BOTH the Selfie on the left and the Government ID on the right, side-by-side) to verify the user's identity.
 
         User's Claimed Name: {request.first_name} {request.last_name}
         User's Claimed Date of Birth: {request.date_of_birth}
 
-        Check the following conditions strictly:
-        1. ID Validity: Is the Government ID image a valid government-issued identification document (e.g., Passport, ID Card, Driver's License, Voter's Card)?
-           - If it is an ordinary paper document, a handwritten note, blank paper, a notebook, or a screenshot of text, it is INVALID. Reject it.
-        2. Selfie Validity: Is the Selfie image a clear, real picture of a human face looking at the camera?
-        3. Face Match: Compare the face in the Selfie with the photo in the Government ID. Do they belong to the same person?
-        4. Name & DOB Consistency: Does the name printed on the ID document perfectly match or closely align (allowing for minor OCR typos or case differences) with the user's claimed name "{request.first_name} {request.last_name}"? Does the date of birth on the ID align with the claimed DOB {request.date_of_birth}?
-        5. Age check: Verify the age implied by the DOB on the ID matches the claimed DOB.
+        Evaluate the following conditions. If ANY condition fails, the overall success MUST be false:
+        1. Government ID Presence & Validity: Does the right side of the image clearly show a legitimate government-issued ID (Passport, Driver's License, National ID)?
+           - CRITICAL: If the ID is missing, fake, a handwritten note, a piece of paper, a random object, a blank image, or a screenshot of text, FAIL this check.
+        2. Selfie Validity: Does the left side of the image show a clear, real picture of a human face looking at the camera?
+           - CRITICAL: If the selfie is missing, a cartoon, an inanimate object, or completely blank, FAIL this check.
+        3. Face Match: Does the face in the selfie (left) match the face photo on the ID (right)?
+           - CRITICAL: If they do not match, or if either face is missing, FAIL this check.
+        4. Name Match: Does the name printed on the ID explicitly match the claimed name "{request.first_name} {request.last_name}" (ignoring case)?
+           - CRITICAL: If the name is missing from the ID or doesn't match, FAIL this check.
+        5. DOB Match: Does the date of birth on the ID explicitly match the claimed DOB {request.date_of_birth}?
+           - CRITICAL: If the DOB is missing from the ID or doesn't match, FAIL this check.
 
         Return ONLY a raw JSON block with EXACTLY these keys:
         {{
-            "success": boolean (true if ALL checks pass: valid ID, valid selfie, face matches, name matches, and DOB matches. false if ANY check fails),
+            "success": boolean (MUST be false if ANY of the 5 checks above fail. True ONLY if all checks pass),
             "confidenceScore": integer (0 to 100, estimate the face match confidence),
             "ocrName": "The exact name extracted from the ID document",
             "ocrAge": "The exact age or DOB extracted from the ID document",
