@@ -125,67 +125,53 @@ export default function PaymentScreen() {
     // Assuming you set up packages corresponding to tiers in RevenueCat.
     const pkgToBuy = rcPackages.find(p => p.identifier.toLowerCase().includes(selectedTier.id.toLowerCase()));
 
-    Alert.alert(
-      'Confirm Subscription',
-      `Are you sure you want to subscribe to ${selectedTier.title} for ${getTierPriceDisplay(selectedTier.id as string)}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Subscribe',
-          onPress: async () => {
-            setProcessing(true);
-            try {
-              if (pkgToBuy) {
-                const { customerInfo } = await Purchases.purchasePackage(pkgToBuy);
-                
-                // If purchase successful, verify the entitlement is active
-                const isPremiumActive = 
-                  customerInfo.entitlements.active['Premium'] !== undefined ||
-                  customerInfo.entitlements.active['Elite'] !== undefined ||
-                  customerInfo.entitlements.active['Executive'] !== undefined ||
-                  customerInfo.entitlements.active['premium_tier'] !== undefined;
-                  
-                if (isPremiumActive) {
-                  // Make backend call in real production, for now just update local state
-                  setUserProfile({
-                    ...user,
-                    subscriptionTier: selectedTier.id as SubscriptionTier,
-                    subscriptionAmount: tierUsdVal,
-                    subscriptionPeriod: isYearly ? 'annual' : 'monthly',
-                    subscriptionDate: new Date().toISOString(),
-                    isPremium: true,
-                  });
-                  addToast(`Welcome to ${selectedTier.title}!`, 'success');
-                  navigation.goBack();
-                } else {
-                  addToast('Purchase completed but entitlement not unlocked.', 'error');
-                }
-              } else {
-                // MOCK SUCCESS FOR NOW since RevenueCat keys aren't real yet!
-                setTimeout(() => {
-                  setUserProfile({
-                    ...user,
-                    subscriptionTier: selectedTier.id as SubscriptionTier,
-                    subscriptionAmount: tierUsdVal,
-                    subscriptionPeriod: isYearly ? 'yearly' : 'monthly',
-                    subscriptionDate: new Date().toISOString(),
-                    isPremium: true,
-                  });
-                  addToast(`Welcome to ${selectedTier.title} (Mocked)!`, 'success');
-                  navigation.goBack();
-                }, 1500);
-              }
-            } catch (error: any) {
-              if (!error.userCancelled) {
-                addToast(error.message || 'Payment failed.', 'error');
-              }
-            } finally {
-              setProcessing(false);
-            }
-          }
+    setProcessing(true);
+    try {
+      if (pkgToBuy) {
+        const { customerInfo } = await Purchases.purchasePackage(pkgToBuy);
+        
+        // If purchase successful, verify the entitlement is active
+        const isPremiumActive = 
+          customerInfo.entitlements.active['Premium'] !== undefined ||
+          customerInfo.entitlements.active['Elite'] !== undefined ||
+          customerInfo.entitlements.active['Executive'] !== undefined ||
+          customerInfo.entitlements.active['premium_tier'] !== undefined;
+          
+        if (isPremiumActive) {
+          // Make backend call in real production, for now just update local state
+          setUserProfile({
+            ...user,
+            subscriptionTier: selectedTier.id as SubscriptionTier,
+            subscriptionAmount: tierUsdVal,
+            subscriptionPeriod: isYearly ? 'annual' : 'monthly',
+            subscriptionDate: new Date().toISOString(),
+            isPremium: true,
+          });
+          addToast(`Welcome to ${selectedTier.title}!`, 'success');
+          navigation.goBack();
+        } else {
+          addToast('Purchase completed, but premium access not active.', 'error');
         }
-      ]
-    );
+      } else {
+        // Fallback for development if no packages exist
+        setUserProfile({
+          ...user,
+          subscriptionTier: selectedTier.id as SubscriptionTier,
+          subscriptionAmount: tierUsdVal,
+          subscriptionPeriod: isYearly ? 'annual' : 'monthly',
+          subscriptionDate: new Date().toISOString(),
+          isPremium: true,
+        });
+        addToast(`Welcome to ${selectedTier.title}!`, 'success');
+        navigation.goBack();
+      }
+    } catch (e: any) {
+      if (!e.userCancelled) {
+        Alert.alert('Error', e.message || 'Failed to complete subscription');
+      }
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (

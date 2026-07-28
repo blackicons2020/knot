@@ -265,10 +265,6 @@ export default function VerificationScreen() {
                 <Ionicons name="arrow-forward" size={18} color={Colors.white} />
               </LinearGradient>
             </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 16, alignItems: 'center' }}>
-              <Text style={s.skipText}>Skip for Now & Do This Later</Text>
-            </TouchableOpacity>
           </View>
         )}
 

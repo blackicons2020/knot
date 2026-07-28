@@ -1053,7 +1053,15 @@ export default function OnboardingScreen() {
                     multiline
                   />
                 </View>
-                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (form.idealPartnerTraits?.length === 0) ? 0.5 : 1 }]} onPress={() => {
+                <TouchableOpacity style={[styles.actionButton, { marginTop: 32, opacity: (form.idealPartnerTraits?.length === 0 || !form.marriageExpectations?.trim() || !form.preferredPartnerAgeRange?.[0] || !form.preferredPartnerAgeRange?.[1]) ? 0.5 : 1 }]} onPress={() => {
+                  if (!form.marriageExpectations?.trim()) {
+                    Alert.alert("Missing Expectations", "Please enter your expectations for marriage.");
+                    return;
+                  }
+                  if (!form.preferredPartnerAgeRange || !form.preferredPartnerAgeRange[0] || !form.preferredPartnerAgeRange[1]) {
+                    Alert.alert("Missing Age Range", "Please enter both minimum and maximum age preferences.");
+                    return;
+                  }
                   if (form.preferredPartnerAgeRange) {
                     const minAge = form.preferredPartnerAgeRange[0] || 0;
                     const maxAge = form.preferredPartnerAgeRange[1] || 0;
@@ -1071,7 +1079,7 @@ export default function OnboardingScreen() {
                     }
                   }
                   setStep(3);
-                }} disabled={form.idealPartnerTraits?.length === 0}>
+                }} disabled={form.idealPartnerTraits?.length === 0 || !form.marriageExpectations?.trim() || !form.preferredPartnerAgeRange?.[0] || !form.preferredPartnerAgeRange?.[1]}>
                   <LinearGradient colors={['#E27D8D', '#2D1B4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: BorderRadius.lg }]} />
                   <Text style={styles.actionButtonText}>Next</Text>
                   <Ionicons name="checkmark-circle" size={18} color={Colors.white} />
@@ -1127,10 +1135,6 @@ export default function OnboardingScreen() {
             </TouchableOpacity>
             
             <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <TouchableOpacity onPress={() => { setProfilePictureSkipped(true); setStep(4); }}>
-                <Text style={{ color: Colors.gray400, textDecorationLine: 'underline' }}>Skip for Now & Do This Later</Text>
-              </TouchableOpacity>
-              <Text style={{ color: '#ffffff', fontSize: 10, marginTop: 8 }}>Warning: Your profile remains private until a picture is uploaded.</Text>
             </View>
           </View>
         )}
