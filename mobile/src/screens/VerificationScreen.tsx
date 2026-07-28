@@ -128,37 +128,32 @@ export default function VerificationScreen() {
 
     setVerificationStep(3); // Checkpoint 3 complete -> Age & Name consistency... Verifying
 
-    // Call real backend AI verification engine (Gemini AI Vision) with 6s race
+    // Call real backend AI verification engine (Gemini AI Vision) without the fake timeout bypass
     let aiRes: { success: boolean; confidenceScore?: number; details?: string } = { success: true };
     try {
-      const timeoutPromise = new Promise<{ success: boolean; details?: string }>((resolve) => {
-        setTimeout(() => resolve({ success: true, details: 'Verified via local biometric scan' }), 6000);
-      });
-      const apiPromise = db.verifyOnboarding(
+      aiRes = await db.verifyOnboarding(
         selfieUri,
         govIdUri,
         user?.firstName || '',
         user?.lastName || '',
         user?.dateOfBirth || ''
       );
-      aiRes = await Promise.race([apiPromise, timeoutPromise]);
     } catch (e) {
       console.warn("Backend verifyOnboarding error:", e);
+      aiRes = { success: false, details: 'Network error or server timeout communicating with AI.' };
     }
 
-    if (!aiRes.success || isTextSpreadsheetOrDocument) {
+    if (!aiRes.success) {
       setIsProcessing(false);
-      setVerificationStep(0);
       Alert.alert(
         "Verification Failed",
-        aiRes.details || "Document Verification Failed: The uploaded document is a spreadsheet/text table and not a valid government-issued ID card or passport containing a face photo. Please upload a clear photo of your International Passport, Driver's License, or National ID.",
+        aiRes.details || "Document Verification Failed: Identity mismatch or invalid document.",
         [
-          {
-            text: "Upload Valid ID",
-            onPress: () => setStep('capture'),
-          },
+          { text: "Cancel", style: 'cancel', onPress: () => setStep('capture') },
+          { text: "Retake", style: 'default', onPress: () => setStep('capture') },
         ]
       );
+      setVerificationStep(0); // Reset for retry
       return;
     }
 

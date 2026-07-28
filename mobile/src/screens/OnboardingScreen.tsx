@@ -386,40 +386,32 @@ export default function OnboardingScreen() {
     let selfieUrl = livenessUri || '';
     let idUrl = govIdUri || '';
 
-    // Call real backend AI verification engine (Gemini AI Vision) with 6s race
+    // Call real backend AI verification engine (Gemini AI Vision) without the fake timeout bypass
     let aiRes: { success: boolean; confidenceScore?: number; details?: string } = { success: true };
     try {
-      const timeoutPromise = new Promise<{ success: boolean; details?: string }>((resolve) => {
-        setTimeout(() => resolve({ success: true, details: 'Verified via local biometric scan' }), 6000);
-      });
-      const apiPromise = db.verifyOnboarding(
+      aiRes = await db.verifyOnboarding(
         selfieUrl,
         idUrl,
         form.firstName || '',
         form.lastName || '',
         form.dateOfBirth || ''
       );
-      aiRes = await Promise.race([apiPromise, timeoutPromise]);
     } catch (e) {
       console.warn("Backend verifyOnboarding error:", e);
+      aiRes = { success: false, details: 'Network error or server timeout communicating with AI.' };
     }
 
-    // Intelligent local document heuristic check
-    const lowerId = (govIdUri || '').toLowerCase();
-    const isTextTableOrSpreadsheet = lowerId.includes('sheet') || lowerId.includes('excel') || lowerId.includes('table') || lowerId.includes('document') || lowerId.includes('pdf') || lowerId.includes('csv');
-
-    if (!aiRes.success || isTextTableOrSpreadsheet) {
-      setVerificationStep(0);
+    if (!aiRes.success) {
+      // Keep verification step at 3 but set a failure state if possible, or we can just Alert it, but user wants reasons given with a retake or cancel button inline.
       Alert.alert(
         "Verification Failed",
-        aiRes.details || "Document Verification Failed: The uploaded image is a text document or spreadsheet and not a valid government-issued ID card or passport containing a face photo. Please upload a clear photo of your International Passport, Driver's License, or National ID.",
+        aiRes.details || "Document Verification Failed: Identity mismatch or invalid document.",
         [
-          {
-            text: "Upload Valid Government ID",
-            onPress: () => setStep(4),
-          },
+          { text: "Cancel", style: 'cancel', onPress: () => setStep(4) },
+          { text: "Retake", style: 'default', onPress: () => setStep(4) },
         ]
       );
+      setVerificationStep(0); // Reset for retry
       return;
     }
 
@@ -1205,9 +1197,7 @@ export default function OnboardingScreen() {
               <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>🔒 Identity Verification is Compulsory for Registry Safety</Text>
             </View>
           </View>
-        )}
-
-{/* Step 4: Conversational AI Interview */}
+         {/* Step 4: Conversational AI Interview */}
         {step === 6 && (
           <View style={[styles.chatBox, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
             <View style={[styles.chatHeader, { borderBottomColor: isDarkMode ? Colors.darkBorder : Colors.gray100 }]}>
@@ -1256,8 +1246,8 @@ export default function OnboardingScreen() {
                 placeholderTextColor={Colors.gray400}
               />
               {interviewQuestionIndex >= interviewPrompts.length && currentInput === '' ? (
-                <TouchableOpacity style={styles.analyzeBtn} onPress={() => setStep(7)}>
-                  <Text style={styles.analyzeBtnText}>Generate Registry</Text>
+                <TouchableOpacity style={styles.analyzeBtn} onPress={complete}>
+                  <Text style={styles.analyzeBtnText}>Activate Dashboard</Text>
                   <Ionicons name="sparkles" size={14} color={Colors.white} />
                 </TouchableOpacity>
               ) : (
@@ -1336,11 +1326,11 @@ export default function OnboardingScreen() {
               <View style={styles.checkpointRow}>
                 <Text style={styles.checkpointText}>3. Biometric comparison...</Text>
                 {verificationStep >= 3 ? (
-                  <Text style={styles.matchText}>✔ 98.7% Confirmed</Text>
+                  <Text style={styles.matchText}>✔ Confirmed</Text>
                 ) : verificationStep === 2 ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <ActivityIndicator size="small" color={Colors.accent} />
-                    <Text style={styles.scanningText}>Matching</Text>
+                    <Text style={styles.scanningText}>Verifying</Text>
                   </View>
                 ) : (
                   <Text style={styles.pendingText}>Pending</Text>
@@ -1366,7 +1356,7 @@ export default function OnboardingScreen() {
             {verificationStep >= 4 && (
               <TouchableOpacity
                 style={{ marginTop: 24 }}
-                onPress={() => setStep(6)}
+                onPress={() => setStep(7)}
                 activeOpacity={0.88}
               >
                 <LinearGradient
@@ -1455,12 +1445,12 @@ export default function OnboardingScreen() {
 
             </View>
 
-            <TouchableOpacity style={{ marginTop: 24 }} onPress={complete}>
+            <TouchableOpacity style={{ marginTop: 24 }} onPress={() => setStep(6)}>
               <LinearGradient
                 colors={['#E27D8D', '#2D1B4E']}
                 style={styles.actionButton}
               >
-                <Text style={styles.actionButtonText}>Activate Dashboard</Text>
+                <Text style={styles.actionButtonText}>Proceed to Interview</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>

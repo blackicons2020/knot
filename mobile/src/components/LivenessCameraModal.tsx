@@ -17,7 +17,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   const cameraRef = useRef<Camera>(null);
   
   const [hasPermission, setHasPermission] = useState(false);
-  const [livenessState, setLivenessState] = useState<'align' | 'smile' | 'up' | 'down' | 'complete'>('align');
+  const [livenessState, setLivenessState] = useState<'align' | 'eyes' | 'wait' | 'mouth' | 'complete'>('align');
   const [prompt, setPrompt] = useState('Center your face in the circular aperture');
 
   // Request permissions
@@ -29,18 +29,23 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   }, []);
 
   // Shared values for worklet state
-  const step = useSharedValue(0); // 0: align, 1: smile, 2: up, 3: down, 4: complete
+  const step = useSharedValue(0); // 0: align, 1: eyes open/close, 2: wait, 3: mouth open/close, 4: complete
   
   const handleStepChangeJS = Worklets.createRunOnJS((newStep: number) => {
     if (newStep === 1) {
-      setLivenessState('smile');
-      setPrompt('1. Smile');
+      setLivenessState('eyes');
+      setPrompt('1. Close and open your eyes');
     } else if (newStep === 2) {
-      setLivenessState('up');
-      setPrompt('2. Raise your head up');
+      setLivenessState('wait');
+      setPrompt('Please wait...');
+      // Wait for brief seconds then move to step 3
+      setTimeout(() => {
+        step.value = 3;
+        handleStepChangeJS(3);
+      }, 2500);
     } else if (newStep === 3) {
-      setLivenessState('down');
-      setPrompt('3. Bring your head down and look straight into the centre of the camera');
+      setLivenessState('mouth');
+      setPrompt('2. Open and close your mouth');
     } else if (newStep === 4) {
       setLivenessState('complete');
       setPrompt('Liveness Confirmed! Biometric face scan complete.');
@@ -68,6 +73,7 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet';
     if (step.value === 4) return;
+    if (step.value === 2) return; // Wait state
     
     const faces = detectFaces(frame);
     if (faces && faces.length === 1) {
@@ -80,20 +86,17 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
           handleStepChangeJS(1);
         }
       } else if (step.value === 1) {
-        // Smile
-        if (face.smilingProbability && face.smilingProbability > 0.8) {
+        // Eyes close and open
+        // A low probability means eye is closed
+        if ((face.leftEyeOpenProbability !== undefined && face.leftEyeOpenProbability < 0.2) || 
+            (face.rightEyeOpenProbability !== undefined && face.rightEyeOpenProbability < 0.2)) {
           step.value = 2;
           handleStepChangeJS(2);
         }
-      } else if (step.value === 2) {
-        // Up (Pitch positive)
-        if (face.pitchAngle && face.pitchAngle > 15) {
-          step.value = 3;
-          handleStepChangeJS(3);
-        }
       } else if (step.value === 3) {
-        // Down (Pitch negative)
-        if (face.pitchAngle && Math.abs(face.pitchAngle) < 5) {
+        // Mouth open (usually detected as a smile or low smiling probability but distinct feature, or we can use smiling as proxy for mouth movement)
+        // Since MLKit doesn't have an explicit "mouth open" we use smilingProbability as a proxy for facial movement
+        if (face.smilingProbability && face.smilingProbability > 0.7) {
           step.value = 4;
           handleStepChangeJS(4);
         }
@@ -132,8 +135,8 @@ export const LivenessCameraModal = ({ visible, onClose, onCapture }: Props) => {
           <Text style={styles.promptText}>{prompt}</Text>
           <View style={styles.dots}>
             <View style={[styles.dot, livenessState !== 'align' ? styles.dotActive : null]} />
-            <View style={[styles.dot, (livenessState === 'up' || livenessState === 'down' || livenessState === 'complete') ? styles.dotActive : null]} />
-            <View style={[styles.dot, (livenessState === 'down' || livenessState === 'complete') ? styles.dotActive : null]} />
+            <View style={[styles.dot, (livenessState === 'wait' || livenessState === 'mouth' || livenessState === 'complete') ? styles.dotActive : null]} />
+            <View style={[styles.dot, (livenessState === 'mouth' || livenessState === 'complete') ? styles.dotActive : null]} />
             <View style={[styles.dot, livenessState === 'complete' ? styles.dotActive : null]} />
           </View>
           {livenessState === 'complete' && (

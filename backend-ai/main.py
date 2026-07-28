@@ -393,15 +393,16 @@ def verify_onboarding_documents(request: VerifyRequest):
            - If it is an ordinary paper document, a handwritten note, blank paper, a notebook, or a screenshot of text, it is INVALID. Reject it.
         2. Selfie Validity: Is the Selfie image a clear, real picture of a human face looking at the camera?
         3. Face Match: Compare the face in the Selfie with the photo in the Government ID. Do they belong to the same person?
-        4. Name & DOB Consistency: Does the name printed on the ID document match or closely align with the user's claimed name "{request.first_name} {request.last_name}"? Does the date of birth on the ID align with the claimed DOB {request.date_of_birth}?
+        4. Name & DOB Consistency: Does the name printed on the ID document perfectly match or closely align (allowing for minor OCR typos or case differences) with the user's claimed name "{request.first_name} {request.last_name}"? Does the date of birth on the ID align with the claimed DOB {request.date_of_birth}?
+        5. Age check: Verify the age implied by the DOB on the ID matches the claimed DOB.
 
-        Return ONLY a raw JSON block:
+        Return ONLY a raw JSON block with EXACTLY these keys:
         {{
-            "success": boolean (true if all checks pass: valid ID, valid selfie, face matches, and name matches claimed name. false if any check fails),
+            "success": boolean (true if ALL checks pass: valid ID, valid selfie, face matches, name matches, and DOB matches. false if ANY check fails),
             "confidenceScore": integer (0 to 100, estimate the face match confidence),
-            "ocrName": "The name extracted from the ID document, or empty if cannot read",
-            "ocrAge": "The age or DOB extracted from the ID document, or empty if cannot read",
-            "details": "A detailed, professional explanation of the result (e.g., 'ID and Selfie verified successfully. Face match confidence 95%.' or 'Verification failed: The uploaded document is an ordinary piece of paper and not a valid government ID. Please upload a valid Passport or Driver's License.')"
+            "ocrName": "The exact name extracted from the ID document",
+            "ocrAge": "The exact age or DOB extracted from the ID document",
+            "details": "A detailed, professional explanation of the result. If failed, specify exactly why (e.g., 'Verification failed: The DOB on the ID does not match the claimed DOB.' or 'Verification failed: Face match confidence is too low.')"
         }}
         Do not include markdown tags like ```json.
         """
