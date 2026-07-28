@@ -373,7 +373,11 @@ export default function OnboardingScreen() {
       }
     } catch (e: any) {
       console.warn("Error uploading photos for verification:", e);
-      Alert.alert("Upload Failed", `Failed to upload images for verification. Please check your network and try again.\n\nDetails: ${e.message}`);
+      Alert.alert(
+        "Upload Failed", 
+        `Failed to upload images for verification. Please check your network and try again.\n\nDetails: ${e.message}`,
+        [{ text: "Try Again", style: 'default', onPress: () => setStep(4) }]
+      );
       return;
     }
 

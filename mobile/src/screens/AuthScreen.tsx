@@ -41,6 +41,15 @@ export default function AuthScreen() {
       addToast('Please enter email and password', 'error');
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      addToast('Please enter a valid email address', 'error');
+      return;
+    }
+    if (password.length < 6) {
+      addToast('Password must be at least 6 characters', 'error');
+      return;
+    }
     setIsProcessing(true);
     try {
       if (isLogin) {
