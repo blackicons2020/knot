@@ -105,19 +105,21 @@ export default function VerificationScreen() {
     setVerificationStep(0); // Stage 0: Scanning ID text & details...
     setIsProcessing(true);
 
-    // Non-blocking background photo upload
-    (async () => {
-      try {
-        let uploadedSelfie = selfieUri;
-        let uploadedId = govIdUri;
-        if (selfieUri.startsWith('file:') || selfieUri.startsWith('content:')) {
-          try { await db.uploadPhoto(selfieUri); } catch {}
-        }
-        if (govIdUri.startsWith('file:') || govIdUri.startsWith('content:')) {
-          try { await db.uploadPhoto(govIdUri); } catch {}
-        }
-      } catch {}
-    })();
+    let finalSelfieUrl = selfieUri;
+    let finalIdUrl = govIdUri;
+    try {
+      if (finalSelfieUrl.startsWith('file:') || finalSelfieUrl.startsWith('content:')) {
+        finalSelfieUrl = await db.uploadPhoto(finalSelfieUrl);
+      }
+      if (finalIdUrl.startsWith('file:') || finalIdUrl.startsWith('content:')) {
+        finalIdUrl = await db.uploadPhoto(finalIdUrl);
+      }
+    } catch (e) {
+      console.warn("Error uploading photos for verification:", e);
+      Alert.alert("Upload Failed", "Failed to upload images for verification. Please check your network and try again.");
+      setIsProcessing(false);
+      return;
+    }
 
     // Checkpoint 1: ID Text & Document Structure Scan
     await new Promise(r => setTimeout(r, 600));
@@ -128,12 +130,12 @@ export default function VerificationScreen() {
 
     setVerificationStep(3); // Checkpoint 3 complete -> Age & Name consistency... Verifying
 
-    // Call real backend AI verification engine (Gemini AI Vision) without the fake timeout bypass
+    // Call real backend AI verification engine (Gemini AI Vision)
     let aiRes: { success: boolean; confidenceScore?: number; details?: string } = { success: true };
     try {
       aiRes = await db.verifyOnboarding(
-        selfieUri,
-        govIdUri,
+        finalSelfieUrl,
+        finalIdUrl,
         user?.firstName || '',
         user?.lastName || '',
         user?.dateOfBirth || ''
@@ -435,8 +437,8 @@ const s = StyleSheet.create({
   splitFeeds: { flexDirection: 'row', gap: 16, marginVertical: 8 },
   feedColumn: { flex: 1, alignItems: 'center', gap: 6 },
   feedLabel: { fontSize: 9, fontWeight: '900', color: Colors.gray400, letterSpacing: 1 },
-  feedFrame: { width: '100%', height: 110, borderRadius: 16, backgroundColor: '#121721', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative' },
-  feedImage: { width: '100%', height: '100%', resizeMode: 'cover' },
+  feedFrame: { width: '100%', height: 160, borderRadius: 16, backgroundColor: '#121721', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', overflow: 'hidden', position: 'relative' },
+  feedImage: { width: '100%', height: '100%', resizeMode: 'contain' },
   laserBar: { position: 'absolute', left: 0, right: 0, height: 2, shadowColor: Colors.accent, shadowRadius: 6, shadowOpacity: 0.8 },
   checkpointsWrapper: { backgroundColor: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 16, gap: 10 },
   checkpointRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

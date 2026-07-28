@@ -353,24 +353,29 @@ export default function OnboardingScreen() {
     const finalTraits = form.idealPartnerTraits?.map(t => t === 'Other' && traitCustom ? traitCustom : t) || [];
     setForm(p => ({ ...p, languagesSpoken: finalLanguages, idealPartnerTraits: finalTraits }));
 
-    // Non-blocking background photo uploads
-    (async () => {
-      try {
-        let selfieUrl = livenessUri || '';
-        let idUrl = govIdUri || '';
-        let profileUrl = form.profileImageUrls?.[0] || '';
-
-        if (selfieUrl.startsWith('file:') || selfieUrl.startsWith('content:')) {
-          try { await db.uploadPhoto(selfieUrl); } catch {}
-        }
-        if (profileUrl.startsWith('file:') || profileUrl.startsWith('content:')) {
-          try { await db.uploadPhoto(profileUrl); } catch {}
-        }
-        if (idUrl.startsWith('file:') || idUrl.startsWith('content:')) {
-          try { await db.uploadPhoto(idUrl); } catch {}
-        }
-      } catch {}
-    })();
+    // Wait for photos to upload to get remote URLs
+    let finalSelfieUrl = livenessUri || '';
+    let finalIdUrl = govIdUri || '';
+    
+    // We must await uploads so the backend can actually download the images!
+    try {
+      if (finalSelfieUrl.startsWith('file:') || finalSelfieUrl.startsWith('content:')) {
+        finalSelfieUrl = await db.uploadPhoto(finalSelfieUrl);
+      }
+      if (finalIdUrl.startsWith('file:') || finalIdUrl.startsWith('content:')) {
+        finalIdUrl = await db.uploadPhoto(finalIdUrl);
+      }
+      
+      // Also upload profile photo silently in background if needed
+      let profileUrl = form.profileImageUrls?.[0] || '';
+      if (profileUrl.startsWith('file:') || profileUrl.startsWith('content:')) {
+        db.uploadPhoto(profileUrl).catch(() => {});
+      }
+    } catch (e) {
+      console.warn("Error uploading photos for verification:", e);
+      Alert.alert("Upload Failed", "Failed to upload images for verification. Please check your network and try again.");
+      return;
+    }
 
     // Checkpoint 1: ID Text & Document Structure Scan
     await new Promise(r => setTimeout(r, 600));
@@ -383,15 +388,12 @@ export default function OnboardingScreen() {
     // Checkpoint 3: Biometric Facial Comparison & Name/Age Verification
     setVerificationStep(3); // 3. Biometric comparison... Age & Name: Verifying...
 
-    let selfieUrl = livenessUri || '';
-    let idUrl = govIdUri || '';
-
-    // Call real backend AI verification engine (Gemini AI Vision) without the fake timeout bypass
+    // Call real backend AI verification engine (Gemini AI Vision)
     let aiRes: { success: boolean; confidenceScore?: number; details?: string } = { success: true };
     try {
       aiRes = await db.verifyOnboarding(
-        selfieUrl,
-        idUrl,
+        finalSelfieUrl,
+        finalIdUrl,
         form.firstName || '',
         form.lastName || '',
         form.dateOfBirth || ''
@@ -1936,7 +1938,7 @@ const styles = StyleSheet.create({
   },
   feedImageContainer: {
     width: '100%',
-    aspectRatio: 1,
+    aspectRatio: 3/4,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
     overflow: 'hidden',
@@ -1947,6 +1949,7 @@ const styles = StyleSheet.create({
   feedImage: {
     width: '100%',
     height: '100%',
+    resizeMode: 'contain',
   },
   laserScanBar: {
     position: 'absolute',
