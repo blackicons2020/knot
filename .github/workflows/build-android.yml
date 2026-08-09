@@ -48,21 +48,14 @@ jobs:
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload.keystore
         working-directory: mobile
 
-      - name: Build Release AAB and APK
+      - name: Build Release APK
         env:
           EXPO_PUBLIC_API_URL: http://16.192.76.171:8080
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease assembleRelease --max-workers=2 -PreactNativeArchitectures=arm64-v8a -PMYAPP_UPLOAD_STORE_FILE=upload.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=$KEYSTORE_PASSWORD -PMYAPP_UPLOAD_KEY_ALIAS=$KEY_ALIAS -PMYAPP_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD --no-daemon
+        run: ./gradlew assembleRelease --max-workers=2 -PreactNativeArchitectures=arm64-v8a -PMYAPP_UPLOAD_STORE_FILE=upload.keystore -PMYAPP_UPLOAD_STORE_PASSWORD=$KEYSTORE_PASSWORD -PMYAPP_UPLOAD_KEY_ALIAS=$KEY_ALIAS -PMYAPP_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD --no-daemon
         working-directory: mobile/android
-
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: knot-release-aab
-          path: mobile/android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
