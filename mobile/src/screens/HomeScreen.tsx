@@ -12,7 +12,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
 import { Colors, BorderRadius, Spacing } from '../theme/colors';
 import { RootStackParamList, Match, SubscriptionTier } from '../types';
-import { MATCHES_DATA } from '../constants';
 import { db } from '../services/apiService';
 import AppHeader from '../components/AppHeader';
 
@@ -31,19 +30,29 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [isFallbackMode, setIsFallbackMode] = useState(false);
 
   useEffect(() => {
     if (!userProfile) return;
     (async () => {
       setLoading(true);
       try {
-        // Strictly enforce opposite-sex matchmaking
+        const allUsers = await db.getAllUsers();
+        const otherUsers = allUsers.filter(u => u.id !== userProfile.id);
+        
         const userGender = (userProfile.gender || '').toLowerCase().trim();
-        console.log('[HomeScreen] userProfile.gender raw:', JSON.stringify(userProfile.gender), '=> normalized:', userGender);
         const targetGender = userGender === 'female' ? 'male' : 'female';
         
-        const filtered = MATCHES_DATA.filter((m) => m.gender?.toLowerCase() === targetGender);
-        setMatches(filtered);
+        let filtered = otherUsers.filter((m) => (m.gender || '').toLowerCase() === targetGender);
+        
+        if (filtered.length === 0 && otherUsers.length > 0) {
+          filtered = otherUsers;
+          setIsFallbackMode(true);
+        } else {
+          setIsFallbackMode(false);
+        }
+        
+        setMatches(filtered as Match[]);
       } catch (err) {
         console.error('Failed to load matches:', err);
         addToast('Failed to sync latest curated matches.', 'error');
@@ -172,6 +181,13 @@ export default function HomeScreen() {
   return (
     <View style={[st.root, { backgroundColor: isDarkMode ? Colors.dark : Colors.gray50 }]}>
       <AppHeader onFilter={() => navigation.navigate('EditProfile', { user: userProfile! })} />
+      {isFallbackMode && (
+        <View style={{ backgroundColor: Colors.accent, padding: 12, marginHorizontal: 16, marginTop: 16, borderRadius: BorderRadius.md }}>
+          <Text style={{ color: Colors.dark, fontSize: 12, fontWeight: '700', textAlign: 'center' }}>
+            You have no exact matches for now. These are the available ones, but as soon as there is a match, the matches screen will be updated accordingly.
+          </Text>
+        </View>
+      )}
       <ScrollView contentContainerStyle={st.scrollContent}>
         {/* Curated Match Hero Card */}
         <View style={[st.heroCard, { backgroundColor: isDarkMode ? Colors.darkCard : Colors.white, borderColor: isDarkMode ? Colors.darkBorder : Colors.gray200 }]}>

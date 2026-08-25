@@ -95,20 +95,8 @@ class ApiService {
       this.setToken(data.token);
       return data;
     } catch (error: any) {
-      console.warn("Backend register failed/timed out, continuing with local session:", error.message);
-      const mockToken = `local_token_${Date.now()}`;
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        email,
-        role: 'USER',
-        firstName: '',
-        lastName: '',
-        dateOfBirth: '',
-        profileImageUrls: [],
-        isVerified: false,
-      };
-      this.setToken(mockToken);
-      return { token: mockToken, user: mockUser };
+      console.error("Backend register failed:", error.message);
+      throw error;
     }
   }
 
@@ -128,20 +116,8 @@ class ApiService {
       this.setToken(data.token);
       return data;
     } catch (error: any) {
-      console.warn("Backend login failed/timed out, continuing with local session:", error.message);
-      const mockToken = `local_token_${Date.now()}`;
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        email,
-        role: 'USER',
-        firstName: email.split('@')[0],
-        lastName: '',
-        dateOfBirth: '',
-        profileImageUrls: [],
-        isVerified: false,
-      };
-      this.setToken(mockToken);
-      return { token: mockToken, user: mockUser };
+      console.error("Backend login failed:", error.message);
+      throw error;
     }
   }
 
@@ -306,12 +282,7 @@ class ApiService {
       }
     } catch { /* ignore */ }
 
-    // Fallback to MATCHES_DATA so Admin Dashboard is ALWAYS populated
-    const fallbackData = MATCHES_DATA as any as User[];
-    try {
-      await AsyncStorage.setItem('knot_all_users_cache', JSON.stringify(fallbackData));
-    } catch { /* ignore */ }
-    return fallbackData;
+    return [];
   }
 
   async deleteUser(uid: string): Promise<void> {
